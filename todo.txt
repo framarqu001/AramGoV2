@@ -1,0 +1,8 @@
+Install debugger
+create models
+create scripts to populate db with data from riot api
+test/play info
+create home.html
+switch to mysql
+create base html
+create match history using templates
