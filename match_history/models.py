@@ -46,6 +46,12 @@ class Summoner(models.Model):
     summoner_level = models.IntegerField()
     profile_icon = models.ForeignKey(ProfileIcon, on_delete=models.SET_NULL, null=True)
 
+    # Get all matches in which a summoner was a participant in.
+    def get_matches(self):
+        participants = self.participants.select_related('match').all()
+        matches = [participant.match for participant in participants]
+        return matches
+
     def __str__(self):
         return f"{self.gameName}: {self.tagLine}"
 
@@ -57,6 +63,10 @@ class Match(models.Model):
     game_mode = models.CharField(max_length=50)
     game_version = models.CharField(max_length=50)
 
+    def get_minutes(self):
+        SECONDS = 60
+        return self.game_duration // SECONDS
+
     def get_participants(self):
         return self.participants.all()
 
@@ -65,6 +75,8 @@ class Match(models.Model):
 
 
 class Participant(models.Model):
+    # A match has many participants. Participants belong to one match.
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='participants')
-    summoner = models.ForeignKey(Summoner, on_delete=models.CASCADE)
-    champion = models.ForeignKey(Champion, on_delete=models.SET_NULL, null=True, related_name='participants')
+    # A Summoner can be a participant in multiple matches.
+    summoner = models.ForeignKey(Summoner, on_delete=models.CASCADE, related_name='participants')
+    champion = models.ForeignKey(Champion, on_delete=models.CASCADE, related_name='participants')
