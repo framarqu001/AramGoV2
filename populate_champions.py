@@ -6,7 +6,7 @@ import requests
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 
-from match_history.models import Champion
+from match_history.models import Champion, Items
 
 RIOT_API_KEY = "RGAPI-54e80c8c-87b4-4e6e-a32a-749aa093116c"
 
@@ -24,6 +24,11 @@ def get_champion_data(patch):
     response = response.json()
     return response["data"]
 
+def get_item_data(patch):
+    url = f"https://ddragon.leagueoflegends.com/cdn/{patch}/data/en_US/item.json"
+    response = requests.get(url)
+    response = response.json()
+    return response["data"]
 
 def populate_champions(champion_data: dict):
     print("Populating champions")
@@ -46,7 +51,29 @@ def populate_champions(champion_data: dict):
             print(f"Updated {champion_name} in the database.")
 
 
+def populate_items(item_data: dict):
+    print("Populating champions")
+    for id, info in item_data.items():
+        item_id = id
+        name = info["name"]
+        image = info["image"]["full"]
+        _, created = Items.objects.update_or_create(
+            item_id=id,
+            defaults={
+                "item_id": item_id,
+                "name": name,
+                "image_path": image
+            }
+        )
+        if created:
+            print(f"Added {name} to the database.")
+        else:
+            print(f"Updated {name} in the database.")
+
+
 if __name__ == "__main__":
     patch = get_patch()
     champion_data = get_champion_data(patch)
     populate_champions(champion_data)
+    item_data = get_item_data(patch)
+    populate_items(item_data)
