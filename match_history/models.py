@@ -1,6 +1,5 @@
 from django.db import models
 import datetime
-import pytz
 
 
 class Champion(models.Model):
@@ -41,8 +40,8 @@ class ProfileIcon(models.Model):
 
 class Summoner(models.Model):
     puid = models.CharField(max_length=100, primary_key=True)
-    gameName = models.CharField(max_length=50)
-    tagLine = models.CharField(max_length=10)
+    game_name = models.CharField(max_length=50)
+    tag_line = models.CharField(max_length=10)
     summoner_level = models.IntegerField()
     profile_icon = models.ForeignKey(ProfileIcon, on_delete=models.SET_NULL, null=True)
 
@@ -53,12 +52,12 @@ class Summoner(models.Model):
         return matches
 
     def __str__(self):
-        return f"{self.gameName}: {self.tagLine}"
+        return f"{self.game_name}: {self.tag_line}"
 
 
 class Match(models.Model):
     match_id = models.CharField(primary_key=True, max_length=30)
-    game_creation = models.DateTimeField()
+    game_start = models.DateTimeField()
     game_duration = models.IntegerField()
     game_mode = models.CharField(max_length=50)
     game_version = models.CharField(max_length=50)
