@@ -1,7 +1,6 @@
 import os
 
 import django
-import requests
 from datetime import datetime as dt
 import pytz
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
@@ -17,7 +16,7 @@ COUNT = 100
 
 
 class SummonerManager():
-    def __init__(self, platform, region):
+    def __init__(self, platform=None, region=None):
         self._lolWatcher = LolWatcher(RIOT_API_KEY)
         self._riotWatcher = RiotWatcher(RIOT_API_KEY)
         self._platform = platform
@@ -60,6 +59,24 @@ class SummonerManager():
             print(f"{summoner} already exists")
         return summoner
 
+    def create_summoner_match(self, info_dict):
+        icon_id = info_dict["iconId"]
+        icon = ProfileIcon.objects.get(profile_id=icon_id)
+        summoner, created = Summoner.objects.update_or_create(
+            puuid=info_dict["puuid"],
+            defaults={
+                'game_name': info_dict["game_name"],
+                'tag_line': info_dict["tag"],
+                'summoner_level': info_dict["level"],
+                'profile_icon': icon
+            }
+        )
+        if created:
+            print(f"{summoner} created")
+        else:
+            print(f"{summoner} already exists")
+        return summoner
+
 
 class MatchManager():
     def __init__(self, platform, region, summoner: Summoner):
@@ -71,7 +88,8 @@ class MatchManager():
 
     def _get_matches(self):
         try:
-            match_list = self._watcher.match.matchlist_by_puuid(self._region, self._summoner.puuid, queue=QUEUE, count=COUNT, start=100)
+            match_list = self._watcher.match.matchlist_by_puuid(self._region, self._summoner.puuid, queue=QUEUE,
+                                                                count=COUNT)
             return match_list
         except ApiError as err:
             print(f"API Error: {err}")
@@ -79,14 +97,14 @@ class MatchManager():
     def _get_match_info(self, match_id):
         try:
             match_details = self._watcher.match.by_id(self._region, match_id)
-            return match_details['info']
+            return match_details
         except ApiError as err:
             print(f"Error fetching match info for match ID {match_id}: {err}")
 
-    def _create_match(self, match_id):
-        match_info = self._get_match_info(match_id)
+    def _create_match(self, match_id: str, match_info: dict) -> Match:
+        SECONDS = 60
         game_start = self._convert_stamp(match_info["gameStartTimestamp"])
-        game_duration = match_info["gameDuration"] // 60
+        game_duration = match_info["gameDuration"] // SECONDS
         game_mode = match_info["gameMode"]
         game_version = match_info["gameVersion"]
         match = Match(
@@ -98,15 +116,30 @@ class MatchManager():
         )
         return match
 
+    def _create_participants(self, match_id: str, match_info: dict, participant_list):
+        participants_puid = match_info["metadata"]["participants"]
+
+        summonerManager = SummonerManager()
+
+        for i in range(len(participants_puid)):
+            participant_data = match_info["info"]["participants"][i]
+            summoner_info = {"puuid": participants_puid[i], "game_name": participant_data.get("riotIdGameName", ""),
+                             "tag": participant_data.get("riotIdTagline" ""),
+                             "level": participant_data["summonerLevel"], "iconId": participant_data["profileIcon"]}
+            summonerManager.create_summoner_match(summoner_info)
+
     def process_matches(self):
         created_matches = []
+        created_participants = []
+
         for i in range(len(self._matches)):
-            created_matches.append(self._create_match(self._matches[i]))
+            match_info = self._get_match_info(self._matches[i])
+            created_matches.append(self._create_match(self._matches[i], match_info["info"]))
+            created_participants.append(self._create_participants(self._matches[i], match_info, created_participants))
             print(f"{i} matches created");
 
         Match.objects.bulk_create(created_matches, ignore_conflicts=True)
         print("Bulk insertion complete")
-
 
     def _convert_stamp(self, unix_timestamp):
         unix_timestamp = unix_timestamp / 1000

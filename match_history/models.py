@@ -40,8 +40,8 @@ class ProfileIcon(models.Model):
 
 class Summoner(models.Model):
     puuid = models.CharField(max_length=100, primary_key=True)
-    game_name = models.CharField(max_length=50)
-    tag_line = models.CharField(max_length=10)
+    game_name = models.CharField(max_length=50, blank=True, null=True)
+    tag_line = models.CharField(max_length=10, blank=True, null=True)
     summoner_level = models.IntegerField()
     profile_icon = models.ForeignKey(ProfileIcon, on_delete=models.SET_NULL, null=True)
 
@@ -79,3 +79,7 @@ class Participant(models.Model):
     # A Summoner can be a participant in multiple matches.
     summoner = models.ForeignKey(Summoner, on_delete=models.CASCADE, related_name='participants')
     champion = models.ForeignKey(Champion, on_delete=models.CASCADE, related_name='participants')
+    kills = models.IntegerField()
+    deaths = models.IntegerField()
+    assists = models.IntegerField()
+    creep_score = models.IntegerField()
