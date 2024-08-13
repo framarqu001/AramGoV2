@@ -39,7 +39,7 @@ class ProfileIcon(models.Model):
 
 
 class Summoner(models.Model):
-    puid = models.CharField(max_length=100, primary_key=True)
+    puuid = models.CharField(max_length=100, primary_key=True)
     game_name = models.CharField(max_length=50)
     tag_line = models.CharField(max_length=10)
     summoner_level = models.IntegerField()

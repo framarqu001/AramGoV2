@@ -4,6 +4,7 @@ import django
 import requests
 from datetime import datetime as dt
 import pytz
+from riotwatcher import LolWatcher, RiotWatcher, ApiError
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
@@ -12,41 +13,43 @@ from match_history.models import *
 
 RIOT_API_KEY = "RGAPI-24fe64cd-443a-41eb-a46a-b25faa1b3b98"
 QUEUE = 450
-COUNT = 80
+COUNT = 100
 
 
 class SummonerManager():
     def __init__(self, platform, region):
-        self._api_key = RIOT_API_KEY
+        self._lolWatcher = LolWatcher(RIOT_API_KEY)
+        self._riotWatcher = RiotWatcher(RIOT_API_KEY)
         self._platform = platform
         self._region = region
         self._base_url = f"https://{platform}.api.riotgames.com"
 
     def _get_puid(self, summoner_name, tag):
-        puid_url = f"/riot/account/v1/accounts/by-riot-id/{summoner_name}/{tag}?api_key={self._api_key}"
-        url = self._base_url + puid_url
-        response = requests.get(url)
-        response = response.json()
-        return response["puuid"]
+        try:
+            account_info = self._riotWatcher.account.by_riot_id(self._platform, summoner_name, tag)
+            return account_info['puuid']
+        except ApiError as err:
+            print(f"Error fetching PUUID for {summoner_name}#{tag}: {err}")
 
     def _get_account_info(self, puid):
-        account_info_url = f"/lol/summoner/v4/summoners/by-puuid/{puid}?api_key={self._api_key}"
-        temp_url = f"https://{self._region}.api.riotgames.com/"
-        url = temp_url + account_info_url
-        response = requests.get(url)
-        response = response.json()
-        return response
+        try:
+            # RiotWatcher provides the `by_puuid` method to get account information by PUUID
+            account_info = self._lolWatcher.summoner.by_puuid(self._region, puid)
+            return account_info
+        except ApiError as err:
+            print(f"Error fetching account info for PUUID {puid}: {err}")
 
     def create_summoner(self, summoner_name, tag):
-        puid = self._get_puid(summoner_name, tag)
-        account_info = self._get_account_info(puid)
+        puuid = self._get_puid(summoner_name, tag)
+        account_info = self._get_account_info(puuid)
         level = account_info["summonerLevel"]
         icon_id = account_info["profileIconId"]
         icon = ProfileIcon.objects.get(profile_id=icon_id)
         summoner, created = Summoner.objects.update_or_create(
+            puuid=puuid,
             defaults={
-                'gameName': summoner_name,
-                'tagLine': tag,
+                'game_name': summoner_name,
+                'tag_line': tag,
                 'summoner_level': level,
                 'profile_icon': icon
             }
@@ -60,26 +63,25 @@ class SummonerManager():
 
 class MatchManager():
     def __init__(self, platform, region, summoner: Summoner):
-        self._api_key = RIOT_API_KEY
+        self._watcher = LolWatcher(RIOT_API_KEY)
         self._platform = platform
         self._region = region
-        self._base_url = f"https://{platform}.api.riotgames.com"
         self._summoner = summoner
         self._matches = self._get_matches()
 
     def _get_matches(self):
-        matches_url = f"/lol/match/v5/matches/by-puuid/{self._summoner.puid}/ids?queue={QUEUE}&start=0&count={COUNT}&api_key={self._api_key}"
-        url = self._base_url + matches_url
-        response = requests.get(url)
-        response = response.json()
-        return response
+        try:
+            match_list = self._watcher.match.matchlist_by_puuid(self._region, self._summoner.puuid, queue=QUEUE, count=COUNT, start=100)
+            return match_list
+        except ApiError as err:
+            print(f"API Error: {err}")
 
     def _get_match_info(self, match_id):
-        match_info_url = f"/lol/match/v5/matches/{match_id}?api_key={self._api_key}"
-        url = self._base_url + match_info_url
-        response = requests.get(url)
-        response = response.json()
-        return response['info']
+        try:
+            match_details = self._watcher.match.by_id(self._region, match_id)
+            return match_details['info']
+        except ApiError as err:
+            print(f"Error fetching match info for match ID {match_id}: {err}")
 
     def _create_match(self, match_id):
         match_info = self._get_match_info(match_id)
