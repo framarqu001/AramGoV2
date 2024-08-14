@@ -189,7 +189,7 @@ if __name__ == "__main__":
     matchBuilder = MatchManager("americas", "na1", summoner)
     matchBuilder.process_matches()
     summoners = Summoner.objects.all()
-    for i in range(20):
+    for i in range(3):
         matchMaker = MatchManager("americas", "na1", summoners[i])
         matchMaker.process_matches()
         print("hey")

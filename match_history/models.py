@@ -54,7 +54,7 @@ class Summoner(models.Model):
         return matches
 
     def __str__(self):
-        return f"{self.game_name}: {self.tag_line}"
+        return f"{self.game_name}#{self.tag_line}"
 
 
 class Match(models.Model):
