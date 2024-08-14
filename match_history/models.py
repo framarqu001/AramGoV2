@@ -1,5 +1,6 @@
 from django.db import models
 import datetime
+from django.db import connection
 
 
 class Champion(models.Model):
@@ -40,7 +41,8 @@ class ProfileIcon(models.Model):
 
 class Summoner(models.Model):
     puuid = models.CharField(max_length=100, primary_key=True)
-    game_name = models.CharField(max_length=50, blank=True, null=True)
+    game_name = models.CharField(max_length=50, blank=True, default="")
+    summoner_name = models.CharField(max_length=50, blank=True, default="")
     tag_line = models.CharField(max_length=10, blank=True, null=True)
     summoner_level = models.IntegerField()
     profile_icon = models.ForeignKey(ProfileIcon, on_delete=models.SET_NULL, null=True)
@@ -67,7 +69,7 @@ class Match(models.Model):
         return self.game_duration // SECONDS
 
     def get_participants(self):
-        return self.participants.all()
+        return self.participants.select_related("match").all()
 
     def __str__(self):
         return self.match_id
@@ -83,3 +85,6 @@ class Participant(models.Model):
     deaths = models.IntegerField()
     assists = models.IntegerField()
     creep_score = models.IntegerField()
+
+    def __str__(self):
+        return self.summoner.summoner_name

@@ -3,6 +3,7 @@ import os
 import django
 from datetime import datetime as dt
 import pytz
+from django.core.exceptions import ObjectDoesNotExist
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
@@ -10,9 +11,9 @@ django.setup()
 
 from match_history.models import *
 
-RIOT_API_KEY = "RGAPI-24fe64cd-443a-41eb-a46a-b25faa1b3b98"
-QUEUE = 450
-COUNT = 100
+RIOT_API_KEY = "RGAPI-11a760cc-9ba9-4e07-996b-d6f7cc4505a3"
+QUEUE = 450 # Aram
+COUNT = 20
 
 
 class SummonerManager():
@@ -66,6 +67,7 @@ class SummonerManager():
             puuid=info_dict["puuid"],
             defaults={
                 'game_name': info_dict["game_name"],
+                'summoner_name': info_dict["summoner_name"],
                 'tag_line': info_dict["tag"],
                 'summoner_level': info_dict["level"],
                 'profile_icon': icon
@@ -102,6 +104,8 @@ class MatchManager():
             print(f"Error fetching match info for match ID {match_id}: {err}")
 
     def _create_match(self, match_id: str, match_info: dict) -> Match:
+        if match_id == "NA1_5066747340":
+            print("omg")
         SECONDS = 60
         game_start = self._convert_stamp(match_info["gameStartTimestamp"])
         game_duration = match_info["gameDuration"] // SECONDS
@@ -116,17 +120,39 @@ class MatchManager():
         )
         return match
 
-    def _create_participants(self, match_id: str, match_info: dict, participant_list):
+    def _create_participants(self, match_id: str, match_info: dict, participant_list, match: Match):
         participants_puid = match_info["metadata"]["participants"]
 
-        summonerManager = SummonerManager()
+        summonermanager = SummonerManager()
 
         for i in range(len(participants_puid)):
+            # Create a summoner for each participant in match
             participant_data = match_info["info"]["participants"][i]
             summoner_info = {"puuid": participants_puid[i], "game_name": participant_data.get("riotIdGameName", ""),
                              "tag": participant_data.get("riotIdTagline" ""),
-                             "level": participant_data["summonerLevel"], "iconId": participant_data["profileIcon"]}
-            summonerManager.create_summoner_match(summoner_info)
+                             "level": participant_data["summonerLevel"], "iconId": participant_data["profileIcon"],
+                             "summoner_name": participant_data["summonerName"]}
+            summoner: Summoner = summonermanager.create_summoner_match(summoner_info)
+            # Create participant/stats for each participant in match
+
+            ## Change this later, add a #id to champions
+            champion: Champion = Champion.objects.get(champion_id__iexact=participant_data["championName"])
+
+            kills = participant_data["kills"]
+            deaths = participant_data["deaths"]
+            assists = participant_data["assists"]
+            creep_score = participant_data["totalMinionsKilled"]
+            participant: Participant = Participant(
+                match=match,
+                summoner=summoner,
+                champion=champion,
+                kills=kills,
+                deaths=deaths,
+                assists=assists,
+                creep_score=creep_score
+            )
+            participant_list.append(participant)
+        return participant_list
 
     def process_matches(self):
         created_matches = []
@@ -135,11 +161,14 @@ class MatchManager():
         for i in range(len(self._matches)):
             match_info = self._get_match_info(self._matches[i])
             created_matches.append(self._create_match(self._matches[i], match_info["info"]))
-            created_participants.append(self._create_participants(self._matches[i], match_info, created_participants))
-            print(f"{i} matches created");
+            ##FIX THIS TOMORROW
+            self._create_participants(self._matches[i], match_info, created_participants, created_matches[-1])
+            print(f"{i} matches created")
 
         Match.objects.bulk_create(created_matches, ignore_conflicts=True)
-        print("Bulk insertion complete")
+        print("Bulk match insertion complete")
+        Participant.objects.bulk_create(created_participants, ignore_conflicts=True)
+        print("Bulk participant insertion complete")
 
     def _convert_stamp(self, unix_timestamp):
         unix_timestamp = unix_timestamp / 1000
@@ -148,9 +177,15 @@ class MatchManager():
         est_datetime = utc_datetime.replace(tzinfo=pytz.utc).astimezone(est_timezone)
         return est_datetime
 
+    def set_summoner(self, summoner: Summoner):
+        self._summoner = summoner
+        self._matches = self._get_matches()
 
 if __name__ == "__main__":
     summonerBuilder = SummonerManager("americas", "na1")
     summoner = summonerBuilder.create_summoner("highkeysavage", "na1")
     matchBuilder = MatchManager("americas", "na1", summoner)
     matchBuilder.process_matches()
+    summoners = Summoner.objects.all()
+    for i in range(3):
+        matchMaker = MatchManager("americas", "na1", summoners[i])
