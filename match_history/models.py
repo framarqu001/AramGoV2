@@ -87,4 +87,4 @@ class Participant(models.Model):
     creep_score = models.IntegerField()
 
     def __str__(self):
-        return self.summoner.summoner_name
+        return f"{self.summoner} playing {self.champion} in match {self.match}"

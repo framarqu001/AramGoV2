@@ -1,18 +1,14 @@
 import os
-
 import django
 from datetime import datetime as dt
 import pytz
-from django.core.exceptions import ObjectDoesNotExist
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
-
 from match_history.models import *
 
 RIOT_API_KEY = "RGAPI-11a760cc-9ba9-4e07-996b-d6f7cc4505a3"
-QUEUE = 450 # Aram
+QUEUE = 450  # Aram
 COUNT = 20
 
 
@@ -103,7 +99,7 @@ class MatchManager():
         except ApiError as err:
             print(f"Error fetching match info for match ID {match_id}: {err}")
 
-    def _create_match(self, match_id: str, match_info: dict) -> Match:
+    def _create_match(self, match_id: str, match_info: dict):
         if match_id == "NA1_5066747340":
             print("omg")
         SECONDS = 60
@@ -111,16 +107,22 @@ class MatchManager():
         game_duration = match_info["gameDuration"] // SECONDS
         game_mode = match_info["gameMode"]
         game_version = match_info["gameVersion"]
-        match = Match(
+        match, created = Match.objects.update_or_create(
             match_id=match_id,
-            game_start=game_start,
-            game_duration=game_duration,
-            game_mode=game_mode,
-            game_version=game_version
+            defaults={
+                "game_start": game_start,
+                "game_duration": game_duration,
+                "game_mode": game_mode,
+                "game_version": game_version
+            }
         )
-        return match
+        if created:
+            print(f"{match} created")
+        else:
+            print(f"{match} already exists")
+        return match, created
 
-    def _create_participants(self, match_id: str, match_info: dict, participant_list, match: Match):
+    def _create_participants(self, match_info: dict, match: Match):
         participants_puid = match_info["metadata"]["participants"]
 
         summonermanager = SummonerManager()
@@ -142,33 +144,32 @@ class MatchManager():
             deaths = participant_data["deaths"]
             assists = participant_data["assists"]
             creep_score = participant_data["totalMinionsKilled"]
-            participant: Participant = Participant(
+            participant, created = Participant.objects.update_or_create(
                 match=match,
                 summoner=summoner,
                 champion=champion,
-                kills=kills,
-                deaths=deaths,
-                assists=assists,
-                creep_score=creep_score
+                defaults={
+                    "kills": kills,
+                    "deaths": deaths,
+                    "assists": assists,
+                    "creep_score": creep_score
+                }
             )
-            participant_list.append(participant)
-        return participant_list
+            if created:
+                print(f"{participant} added to match {match}")
+            else:
+                print(f"{participant} already exists ERORR!!!!")
+        return
 
     def process_matches(self):
-        created_matches = []
-        created_participants = []
-
-        for i in range(len(self._matches)):
-            match_info = self._get_match_info(self._matches[i])
-            created_matches.append(self._create_match(self._matches[i], match_info["info"]))
-            ##FIX THIS TOMORROW
-            self._create_participants(self._matches[i], match_info, created_participants, created_matches[-1])
-            print(f"{i} matches created")
-
-        Match.objects.bulk_create(created_matches, ignore_conflicts=True)
-        print("Bulk match insertion complete")
-        Participant.objects.bulk_create(created_participants, ignore_conflicts=True)
-        print("Bulk participant insertion complete")
+        count = 0
+        for match in self._matches:
+            match_info = self._get_match_info(match)
+            match_model, created = self._create_match(match, match_info["info"])
+            if created:
+                self._create_participants(match_info, match_model)
+            count += 1
+            print(f"{count} matches processed")
 
     def _convert_stamp(self, unix_timestamp):
         unix_timestamp = unix_timestamp / 1000
@@ -181,11 +182,14 @@ class MatchManager():
         self._summoner = summoner
         self._matches = self._get_matches()
 
+
 if __name__ == "__main__":
     summonerBuilder = SummonerManager("americas", "na1")
     summoner = summonerBuilder.create_summoner("highkeysavage", "na1")
     matchBuilder = MatchManager("americas", "na1", summoner)
     matchBuilder.process_matches()
     summoners = Summoner.objects.all()
-    for i in range(3):
+    for i in range(20):
         matchMaker = MatchManager("americas", "na1", summoners[i])
+        matchMaker.process_matches()
+        print("hey")
