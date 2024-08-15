@@ -7,7 +7,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
 
-RIOT_API_KEY = "RGAPI-11a760cc-9ba9-4e07-996b-d6f7cc4505a3"
+RIOT_API_KEY = "RGAPI-00f5bc2b-4c2e-4c5b-8daf-4bf82d17e709"
 QUEUE = 450  # Aram
 COUNT = 20
 
@@ -100,8 +100,6 @@ class MatchManager():
             print(f"Error fetching match info for match ID {match_id}: {err}")
 
     def _create_match(self, match_id: str, match_info: dict):
-        if match_id == "NA1_5066747340":
-            print("omg")
         SECONDS = 60
         game_start = self._convert_stamp(match_info["gameStartTimestamp"])
         game_duration = match_info["gameDuration"] // SECONDS
@@ -159,15 +157,27 @@ class MatchManager():
                 print(f"{participant} added to match {match}")
             else:
                 print(f"{participant} already exists ERORR!!!!")
+
+            item_set = []
+            for i in range(7):
+                item_id = participant_data[f"item{i}"]
+                print(item_id)
+                if item_id != 0:
+                    item = Item.objects.get(pk=participant_data[f"item{i}"])
+                    item_set.append(item)
+            participant.items.set(item_set)
+            print("Added items")
         return
 
     def process_matches(self):
         count = 0
         for match in self._matches:
-            match_info = self._get_match_info(match)
-            match_model, created = self._create_match(match, match_info["info"])
-            if created:
+            if not Match.objects.filter(match_id=match).exists():
+                match_info = self._get_match_info(match)
+                match_model, created = self._create_match(match, match_info["info"])
                 self._create_participants(match_info, match_model)
+            else:
+                print(f"{match} already exists")
             count += 1
             print(f"{count} matches processed")
 
@@ -185,11 +195,11 @@ class MatchManager():
 
 if __name__ == "__main__":
     summonerBuilder = SummonerManager("americas", "na1")
-    summoner = summonerBuilder.create_summoner("highkeysavage", "na1")
+    summoner = summonerBuilder.create_summoner("ElDanderson", "na1")
     matchBuilder = MatchManager("americas", "na1", summoner)
     matchBuilder.process_matches()
     summoners = Summoner.objects.all()
-    for i in range(3):
+    for i in range(20):
         matchMaker = MatchManager("americas", "na1", summoners[i])
         matchMaker.process_matches()
         print("hey")

@@ -5,5 +5,5 @@ from . import views
 app_name = "match_history"
 
 urlpatterns = [
-    path("", views.index, name="home")
+    path("", views.home, name="home")
 ]

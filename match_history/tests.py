@@ -65,3 +65,8 @@ class MatchParticipantTest(TestCase):
     def test_cascade_delete_with_champion(self):
         self.champion.delete()
         self.assertFalse(Participant.objects.filter(pk=self.participant.pk).exists())
+
+
+    ##Test if user changes there name
+    ## test all items are retriavable
+

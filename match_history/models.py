@@ -85,6 +85,7 @@ class Participant(models.Model):
     deaths = models.IntegerField()
     assists = models.IntegerField()
     creep_score = models.IntegerField()
+    items = models.ManyToManyField(Item)
 
     def __str__(self):
         return f"{self.summoner} playing {self.champion} in match {self.match}"
