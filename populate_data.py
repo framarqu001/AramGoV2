@@ -195,11 +195,11 @@ class MatchManager():
 
 if __name__ == "__main__":
     summonerBuilder = SummonerManager("americas", "na1")
-    summoner = summonerBuilder.create_summoner("ElDanderson", "na1")
+    summoner = summonerBuilder.create_summoner("tree frog", "100")
     matchBuilder = MatchManager("americas", "na1", summoner)
     matchBuilder.process_matches()
     summoners = Summoner.objects.all()
-    for i in range(20):
+    for i in range(35):
         matchMaker = MatchManager("americas", "na1", summoners[i])
         matchMaker.process_matches()
         print("hey")

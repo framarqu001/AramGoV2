@@ -6,3 +6,4 @@ create home.html
 switch to mysql
 create base html
 create match history using templates
+create debugging logs and error catchin on failed creation of models
