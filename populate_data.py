@@ -3,6 +3,7 @@ import django
 from datetime import datetime as dt
 import pytz
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
@@ -105,13 +106,17 @@ class MatchManager():
         game_duration = match_info["gameDuration"] // SECONDS
         game_mode = match_info["gameMode"]
         game_version = match_info["gameVersion"]
+        blue = match_info["teams"][0]["win"]
+        winner = 100 if blue is True else 200
+
         match, created = Match.objects.update_or_create(
             match_id=match_id,
             defaults={
                 "game_start": game_start,
                 "game_duration": game_duration,
                 "game_mode": game_mode,
-                "game_version": game_version
+                "game_version": game_version,
+                "winner": winner
             }
         )
         if created:
@@ -142,6 +147,8 @@ class MatchManager():
             deaths = participant_data["deaths"]
             assists = participant_data["assists"]
             creep_score = participant_data["totalMinionsKilled"]
+            team_id = participant_data["teamId"]
+            win = True if participant_data["win"] is True else False
             participant, created = Participant.objects.update_or_create(
                 match=match,
                 summoner=summoner,
@@ -150,7 +157,9 @@ class MatchManager():
                     "kills": kills,
                     "deaths": deaths,
                     "assists": assists,
-                    "creep_score": creep_score
+                    "creep_score": creep_score,
+                    "team": team_id,
+                    "win": win
                 }
             )
             if created:
@@ -195,7 +204,7 @@ class MatchManager():
 
 if __name__ == "__main__":
     summonerBuilder = SummonerManager("americas", "na1")
-    summoner = summonerBuilder.create_summoner("tree frog", "100")
+    summoner = summonerBuilder.create_summoner("MINTY", "017")
     matchBuilder = MatchManager("americas", "na1", summoner)
     matchBuilder.process_matches()
     summoners = Summoner.objects.all()

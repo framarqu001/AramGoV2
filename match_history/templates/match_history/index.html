@@ -7,16 +7,12 @@
 </head>
 <body>
     <h1>Aram GO v2!</h1>
-    <div class="div">Test</div>
-    <ol>
-        <li>This</li>
-        <li>is</li>
-        <li>The</li>
-        <li>Best!</li>
-        <li>Server here</li>
-        <li>Hey there</li>
-        <li>Is this working</li>
-        <li>Its working already</li>
-    </ol>
+    <form action="{% url 'match_history:summoner' %}" method="post">
+        {% csrf_token %}
+        <label for="game_name">Enter your Summoner Name followed by tag:</label>
+        <input type="text" id="game_name" name="full_name" required>
+        <button type="submit">Check Match History</button>
+    </form>
+    
 </body>
 </html>
