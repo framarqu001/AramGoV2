@@ -16,16 +16,21 @@ def home(request):
 
 def details(request, game_name, tag):
     # Use get_object_or_404 to automatically handle cases where the summoner does not exist
-    summoner_manager = SummonerManager("americas", "na1")
-    try:
-        puuid = summoner_manager._get_puid(game_name, tag)
-    except ApiError:
-        raise Http404
 
-    summoner = get_object_or_404(Summoner, puuid=puuid)
+    summoner = Summoner.objects.filter(game_name__iexact=game_name, tag_line__iexact=tag)[0]
+    if not summoner:
+        # If not found, use SummonerManager to fetch from external API
+        try:
+            summoner_manager = SummonerManager("americas", "na1")
+            puuid = summoner_manager._get_puid(game_name, tag)
+            # Assuming we might need to create or update the Summoner entry in our DB
+            Summoner.objects.update_or_create(
+                game_name=game_name, tag=tag, defaults={'puuid': puuid}
+            )
+        except ApiError:
+            # If API call fails, raise Http404
+            raise Http404(f"Summoner with game name {game_name} and tag {tag} could not be found and API call failed.")
 
-
-    # Prefetch related participants, and their related champions and items to reduce query count
     matches = summoner.get_matches_queryset().prefetch_related(
         'participants',
         'participants__champion',
@@ -50,7 +55,7 @@ def summoner(request):
 
     try:
         print(f"Trying to retrieve {full_name} from db")
-        Summoner.objects.get(game_name=summoner_name, tag_line=tag)
+        Summoner.objects.get(game_name__iexact=summoner_name, tag_line__iexact=tag)
     except Summoner.DoesNotExist:
         print(f"Summoner not found, trying Riot servers for {full_name}")
         summonerBuilder = SummonerManager("americas", "na1")

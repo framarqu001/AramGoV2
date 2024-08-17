@@ -109,8 +109,24 @@ class MatchManager():
             print(f"{match} already exists")
         return match, created
 
-    def create_summoner_match(self, puuid):
-        summoner, created = Summoner.objects.update_or_create(puuid=puuid)
+    def create_summoner_match(self, info_dict, game_creation):
+        icon_id = info_dict["iconId"]
+        icon = ProfileIcon.objects.get(profile_id=icon_id)
+        summoner_exist = Summoner.objects.filter(puuid=info_dict["puuid"])
+        if summoner_exist and summoner_exist[0].last_updated and game_creation < summoner_exist[0].last_updated:
+            print(f"Do not need to update {summoner_exist}")
+            return summoner_exist[0]
+        summoner, created = Summoner.objects.update_or_create(
+            puuid=info_dict["puuid"],
+            defaults={
+                'game_name': info_dict["game_name"],
+                'summoner_name': info_dict["summoner_name"],
+                'tag_line': info_dict["tag"],
+                'summoner_level': info_dict["level"],
+                'profile_icon': icon,
+                'last_updated': game_creation,
+            }
+        )
         if created:
             print(f"{summoner} created")
         else:
@@ -123,11 +139,14 @@ class MatchManager():
 
 
         for i in range(len(participants_puid)):
-            # Create a summoner for each participant in match
+            # Create a summoner for each participant in matc
             participant_data = match_info["info"]["participants"][i]
-            puuid = participants_puid[i]
+            summoner_info = {"puuid": participants_puid[i], "game_name": participant_data.get("riotIdGameName", ""),
+                             "tag": participant_data.get("riotIdTagline" ""),
+                             "level": participant_data["summonerLevel"], "iconId": participant_data["profileIcon"],
+                             "summoner_name": participant_data["summonerName"]}
+            summoner: Summoner = self.create_summoner_match(summoner_info, match.game_start)
 
-            summoner: Summoner = self.create_summoner_match(puuid)
             # Create participant/stats for each participant in match
 
             ## Change this later, add a #id to champions
@@ -193,7 +212,7 @@ class MatchManager():
 
 if __name__ == "__main__":
     summonerBuilder = SummonerManager("americas", "na1")
-    summoner = summonerBuilder.create_summoner("Tabula Rasa", "adc")
+    summoner = summonerBuilder.create_summoner("highkeysavage", "na1")
     matchBuilder = MatchManager("americas", "na1", summoner)
     matchBuilder.process_matches()
     summoners = Summoner.objects.all()

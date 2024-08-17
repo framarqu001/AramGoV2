@@ -46,6 +46,7 @@ class Summoner(models.Model):
     tag_line = models.CharField(max_length=10, blank=True, default="")
     summoner_level = models.IntegerField(blank=True, null=True)
     profile_icon = models.ForeignKey(ProfileIcon, on_delete=models.SET_NULL, null=True)
+    last_updated = models.DateTimeField(null=True, blank=True)
 
     # Get all matches in which a summoner was a participant in.
     def get_matches_queryset(self):
