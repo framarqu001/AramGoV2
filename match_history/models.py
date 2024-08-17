@@ -53,7 +53,7 @@ class Summoner(models.Model):
     tag_line = models.CharField(max_length=10, blank=True, default="")
     normalized_tag_line = models.CharField(max_length=50, blank=True, default="")
     summoner_level = models.IntegerField(blank=True, null=True)
-    profile_icon = models.ForeignKey(ProfileIcon, on_delete=models.SET_NULL, null=True)
+    profile_icon = models.ForeignKey(ProfileIcon, on_delete=models.SET_NULL,blank=True, null=True)
     last_updated = models.DateTimeField(null=True, blank=True)
 
     # Get all matches in which a summoner was a participant in.
@@ -114,7 +114,7 @@ class Participant(models.Model):
     deaths = models.IntegerField()
     assists = models.IntegerField()
     creep_score = models.IntegerField()
-    items = models.ManyToManyField(Item)
+    items = models.ManyToManyField(Item, blank=True)
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
     game_name = models.CharField(max_length=50)

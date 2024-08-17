@@ -113,10 +113,14 @@ class MatchManager():
 
     def create_summoner_match(self, info_dict, game_creation):
         icon_id = info_dict["iconId"]
-        icon = ProfileIcon.objects.get(profile_id=icon_id)
+        try:
+            icon = ProfileIcon.objects.get(profile_id=icon_id)
+        except ProfileIcon.DoesNotExist:
+            print("Profile icon {icon_id} does not exist")
+            icon = None
         summoner_exist = Summoner.objects.filter(puuid=info_dict["puuid"])
         if summoner_exist and summoner_exist[0].last_updated and game_creation < summoner_exist[0].last_updated:
-            print(f"Do not need to update {summoner_exist}")
+            print(f"Do not need to update {summoner_exist[0]}")
             return summoner_exist[0]
         summoner, created = Summoner.objects.update_or_create(
             puuid=info_dict["puuid"],
@@ -185,8 +189,11 @@ class MatchManager():
             for i in range(7):
                 item_id = participant_data[f"item{i}"]
                 if item_id != 0:
-                    item = Item.objects.get(pk=participant_data[f"item{i}"])
-                    item_set.append(item)
+                    try:
+                        item = Item.objects.get(pk=participant_data[f"item{i}"])
+                        item_set.append(item)
+                    except Item.DoesNotExist:
+                        print(f"Item with ID {item_id} does not exist.")
             participant.items.set(item_set)
         return
 
@@ -220,7 +227,7 @@ if __name__ == "__main__":
     matchBuilder = MatchManager("americas", "na1", summoner)
     matchBuilder.process_matches()
     summoners = Summoner.objects.all()
-    # for i in range(35):
-    #     matchMaker = MatchManager("americas", "na1", summoners[i])
-    #     matchMaker.process_matches()
-    #     print("hey")
+    for i in range(35):
+        matchMaker = MatchManager("americas", "na1", summoners[i])
+        matchMaker.process_matches()
+        print("hey")
