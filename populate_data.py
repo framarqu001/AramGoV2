@@ -8,9 +8,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
 
-RIOT_API_KEY = "RGAPI-00f5bc2b-4c2e-4c5b-8daf-4bf82d17e709"
+RIOT_API_KEY = "RGAPI-694e1a5c-5426-4aa6-8f9a-8e9e3502fb47"
 QUEUE = 450  # Aram
-COUNT = 20
+COUNT = 10
 
 
 class SummonerManager():
@@ -26,19 +26,21 @@ class SummonerManager():
             account_info = self._riotWatcher.account.by_riot_id(self._platform, summoner_name, tag)
             return account_info['puuid']
         except ApiError as err:
-            print(f"Error fetching PUUID for {summoner_name}#{tag}: {err}")
+            raise ApiError(f"Error fetching PUUID for {summoner_name}#{tag}: {err}")
 
     def _get_account_info(self, puid):
         try:
-            # RiotWatcher provides the `by_puuid` method to get account information by PUUID
             account_info = self._lolWatcher.summoner.by_puuid(self._region, puid)
             return account_info
         except ApiError as err:
-            print(f"Error fetching account info for PUUID {puid}: {err}")
+            raise ApiError(f"Failed to fetch account info for PUUID {puid}: {err}")
 
     def create_summoner(self, summoner_name, tag):
-        puuid = self._get_puid(summoner_name, tag)
-        account_info = self._get_account_info(puuid)
+        try:
+            puuid = self._get_puid(summoner_name, tag)
+            account_info = self._get_account_info(puuid)
+        except ApiError as err:
+            raise ApiError(f"Error during summoner creation for {summoner_name}#{tag}: {err}") from err
         level = account_info["summonerLevel"]
         icon_id = account_info["profileIconId"]
         icon = ProfileIcon.objects.get(profile_id=icon_id)
@@ -57,24 +59,6 @@ class SummonerManager():
             print(f"{summoner} already exists")
         return summoner
 
-    def create_summoner_match(self, info_dict):
-        icon_id = info_dict["iconId"]
-        icon = ProfileIcon.objects.get(profile_id=icon_id)
-        summoner, created = Summoner.objects.update_or_create(
-            puuid=info_dict["puuid"],
-            defaults={
-                'game_name': info_dict["game_name"],
-                'summoner_name': info_dict["summoner_name"],
-                'tag_line': info_dict["tag"],
-                'summoner_level': info_dict["level"],
-                'profile_icon': icon
-            }
-        )
-        if created:
-            print(f"{summoner} created")
-        else:
-            print(f"{summoner} already exists")
-        return summoner
 
 
 class MatchManager():
@@ -125,19 +109,25 @@ class MatchManager():
             print(f"{match} already exists")
         return match, created
 
+    def create_summoner_match(self, puuid):
+        summoner, created = Summoner.objects.update_or_create(puuid=puuid)
+        if created:
+            print(f"{summoner} created")
+        else:
+            print(f"{summoner} already exists")
+        return summoner
+
     def _create_participants(self, match_info: dict, match: Match):
         participants_puid = match_info["metadata"]["participants"]
 
-        summonermanager = SummonerManager()
+
 
         for i in range(len(participants_puid)):
             # Create a summoner for each participant in match
             participant_data = match_info["info"]["participants"][i]
-            summoner_info = {"puuid": participants_puid[i], "game_name": participant_data.get("riotIdGameName", ""),
-                             "tag": participant_data.get("riotIdTagline" ""),
-                             "level": participant_data["summonerLevel"], "iconId": participant_data["profileIcon"],
-                             "summoner_name": participant_data["summonerName"]}
-            summoner: Summoner = summonermanager.create_summoner_match(summoner_info)
+            puuid = participants_puid[i]
+
+            summoner: Summoner = self.create_summoner_match(puuid)
             # Create participant/stats for each participant in match
 
             ## Change this later, add a #id to champions
@@ -159,7 +149,8 @@ class MatchManager():
                     "assists": assists,
                     "creep_score": creep_score,
                     "team": team_id,
-                    "win": win
+                    "win": win,
+                    "game_name": participant_data.get("riotIdGameName", participant_data["summonerName"])
                 }
             )
             if created:
@@ -170,12 +161,10 @@ class MatchManager():
             item_set = []
             for i in range(7):
                 item_id = participant_data[f"item{i}"]
-                print(item_id)
                 if item_id != 0:
                     item = Item.objects.get(pk=participant_data[f"item{i}"])
                     item_set.append(item)
             participant.items.set(item_set)
-            print("Added items")
         return
 
     def process_matches(self):
@@ -204,11 +193,11 @@ class MatchManager():
 
 if __name__ == "__main__":
     summonerBuilder = SummonerManager("americas", "na1")
-    summoner = summonerBuilder.create_summoner("MINTY", "017")
+    summoner = summonerBuilder.create_summoner("Tabula Rasa", "adc")
     matchBuilder = MatchManager("americas", "na1", summoner)
     matchBuilder.process_matches()
     summoners = Summoner.objects.all()
-    for i in range(35):
-        matchMaker = MatchManager("americas", "na1", summoners[i])
-        matchMaker.process_matches()
-        print("hey")
+    # for i in range(35):
+    #     matchMaker = MatchManager("americas", "na1", summoners[i])
+    #     matchMaker.process_matches()
+    #     print("hey")

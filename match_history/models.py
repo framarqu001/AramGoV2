@@ -43,8 +43,8 @@ class Summoner(models.Model):
     puuid = models.CharField(max_length=100, primary_key=True)
     game_name = models.CharField(max_length=50, blank=True, default="")
     summoner_name = models.CharField(max_length=50, blank=True, default="")
-    tag_line = models.CharField(max_length=10, blank=True, null=True)
-    summoner_level = models.IntegerField()
+    tag_line = models.CharField(max_length=10, blank=True, default="")
+    summoner_level = models.IntegerField(blank=True, null=True)
     profile_icon = models.ForeignKey(ProfileIcon, on_delete=models.SET_NULL, null=True)
 
     # Get all matches in which a summoner was a participant in.
@@ -53,7 +53,7 @@ class Summoner(models.Model):
         return Match.objects.filter(participants__summoner=self)
 
     def __str__(self):
-        return f"{self.game_name}#{self.tag_line}"
+        return f"Summoner:{self.game_name} {self.puuid}"
 
 
 class Match(models.Model):
@@ -103,6 +103,7 @@ class Participant(models.Model):
     items = models.ManyToManyField(Item)
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
+    game_name = models.CharField(max_length=50)
 
     def __str__(self):
-        return f"{self.summoner} playing {self.champion} in match {self.match}"
+        return f"{self.game_name} playing {self.champion} in match {self.match}"
