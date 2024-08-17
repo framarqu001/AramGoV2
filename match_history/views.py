@@ -34,7 +34,8 @@ def details(request, game_name, tag):
     matches = summoner.get_matches_queryset().prefetch_related(
         'participants',
         'participants__champion',
-        'participants__items'
+        'participants__items',
+        'participants__summoner'
     )
 
     context = {

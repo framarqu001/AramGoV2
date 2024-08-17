@@ -1,6 +1,8 @@
 from django.db import models
 import datetime
 from django.db import connection
+from django.urls import reverse
+from django import template
 
 
 class Champion(models.Model):
@@ -39,6 +41,10 @@ class ProfileIcon(models.Model):
         return self.profile_id
 
 
+register = template.Library()
+
+
+
 class Summoner(models.Model):
     puuid = models.CharField(max_length=100, primary_key=True)
     game_name = models.CharField(max_length=50, blank=True, default="")
@@ -53,6 +59,11 @@ class Summoner(models.Model):
         # Returning a QuerySet instead of a list
         return Match.objects.filter(participants__summoner=self)
 
+
+    def get_match_history_url(self):
+        if self.game_name and self.tag_line:
+            return reverse('match_history:details', args=[self.game_name, self.tag_line])
+        return None
     def __str__(self):
         return f"Summoner:{self.game_name} {self.puuid}"
 
