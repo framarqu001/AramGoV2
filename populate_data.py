@@ -8,7 +8,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
 
-RIOT_API_KEY = "RGAPI-694e1a5c-5426-4aa6-8f9a-8e9e3502fb47"
+RIOT_API_KEY = "RGAPI-15e6a106-a9ae-44de-85e1-ce7298d1035b"
 QUEUE = 450  # Aram
 COUNT = 10
 
@@ -24,7 +24,7 @@ class SummonerManager():
     def _get_puid(self, summoner_name, tag):
         try:
             account_info = self._riotWatcher.account.by_riot_id(self._platform, summoner_name, tag)
-            return account_info['puuid']
+            return account_info
         except ApiError as err:
             raise ApiError(f"Error fetching PUUID for {summoner_name}#{tag}: {err}")
 
@@ -37,18 +37,20 @@ class SummonerManager():
 
     def create_summoner(self, summoner_name, tag):
         try:
-            puuid = self._get_puid(summoner_name, tag)
-            account_info = self._get_account_info(puuid)
+            account_names = self._get_puid(summoner_name, tag)
+            account_info = self._get_account_info(account_names["puuid"])
         except ApiError as err:
             raise ApiError(f"Error during summoner creation for {summoner_name}#{tag}: {err}") from err
         level = account_info["summonerLevel"]
         icon_id = account_info["profileIconId"]
         icon = ProfileIcon.objects.get(profile_id=icon_id)
         summoner, created = Summoner.objects.update_or_create(
-            puuid=puuid,
+            puuid=account_info["puuid"],
             defaults={
-                'game_name': summoner_name,
-                'tag_line': tag,
+                'game_name': account_names["gameName"],
+                'normalized_game_name': account_names["gameName"].replace(" ", "").lower(),
+                'tag_line': account_names["tagLine"],
+                'normalized_tag_line': account_names["tagLine"].replace(" ", "").lower(),
                 'summoner_level': level,
                 'profile_icon': icon
             }
@@ -120,8 +122,10 @@ class MatchManager():
             puuid=info_dict["puuid"],
             defaults={
                 'game_name': info_dict["game_name"],
+                'normalized_game_name': info_dict["game_name"].replace(" ", "").lower(),
                 'summoner_name': info_dict["summoner_name"],
                 'tag_line': info_dict["tag"],
+                'normalized_tag_line': info_dict["tag"].replace(" ", "").lower(),
                 'summoner_level': info_dict["level"],
                 'profile_icon': icon,
                 'last_updated': game_creation,

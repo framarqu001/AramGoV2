@@ -14,18 +14,18 @@ def home(request):
     return render(request, 'match_history/index.html')
 
 
-def details(request, game_name, tag):
+def details(request, game_name: str, tag: str):
     # Use get_object_or_404 to automatically handle cases where the summoner does not exist
-
-    summoner = Summoner.objects.filter(game_name__iexact=game_name, tag_line__iexact=tag)[0]
-    if not summoner:
-        # If not found, use SummonerManager to fetch from external API
+    game_name, tag = game_name.replace(" ", "").lower(), tag.lower().replace(" ", "").lower()
+    try:
+        summoner = get_object_or_404(Summoner, normalized_game_name=game_name, normalized_tag_line=tag)
+    except Http404:
         try:
             summoner_manager = SummonerManager("americas", "na1")
             puuid = summoner_manager._get_puid(game_name, tag)
             # Assuming we might need to create or update the Summoner entry in our DB
             Summoner.objects.update_or_create(
-                game_name=game_name, tag=tag, defaults={'puuid': puuid}
+                game_name=game_name, tag_line=tag, defaults={'puuid': puuid}
             )
         except ApiError:
             # If API call fails, raise Http404
@@ -52,11 +52,12 @@ def summoner(request):
         return HttpResponseNotAllowed(['POST'])
 
     full_name = request.POST.get('full_name')
+    full_name = full_name.replace(" ", "").lower()
     summoner_name, tag = full_name.split("#")
 
     try:
         print(f"Trying to retrieve {full_name} from db")
-        Summoner.objects.get(game_name__iexact=summoner_name, tag_line__iexact=tag)
+        Summoner.objects.get(normalized_game_name=summoner_name, normalized_tag_line=tag)
     except Summoner.DoesNotExist:
         print(f"Summoner not found, trying Riot servers for {full_name}")
         summonerBuilder = SummonerManager("americas", "na1")
@@ -68,7 +69,7 @@ def summoner(request):
             print(f"Summoner {summoner_name} saved to database.")
 
             # Verify that the summoner exists in the database after saving
-            if Summoner.objects.filter(game_name=summoner_name, tag_line=tag).exists():
+            if Summoner.objects.filter(normalized_game_name=summoner_name, normalized_tag_line=tag).exists():
                 print(f"Confirmed: Summoner {summoner_name} exists in database.")
             else:
                 print(f"ERROR: Summoner {summoner_name} not found in database after save.")
