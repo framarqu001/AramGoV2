@@ -1,24 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    {{ summoner }}
 
-    {% for match in matches%}
-    <p>{{match}} win: {{ match.get_winner_display }}</p>
-    <ul>
-        {% for participant in match.participants.all %}
-            {% if participant.summoner.get_match_history_url %}
-                <li><a href="{{ participant.summoner.get_match_history_url }}">{{ participant.game_name }}</a></li>
-            {% else %}
-                <li>{{ participant.game_name }}</li>
-            {% endif %}
-        {% endfor %}
-    </ul>
+{% extends "match_history/base.html" %}
+
+{% block content %}
+{{ summoner }}
+{% for match in matches%}
+<p>{{match}} win: {{ match.get_winner_display }}</p>
+<ul>
+    {% for participant in match.participants.all %}
+        {% if participant.summoner.get_match_history_url %}
+            <li><a href="{{ participant.summoner.get_match_history_url }}">{{ participant.game_name }}</a></li>
+        {% else %}
+            <li>{{ participant.game_name }}</li>
+        {% endif %}
     {% endfor %}
-</body>
-</html>
+</ul>
+{% endfor %}
+{% endblock content %}

@@ -1,18 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>Aram GO v2!</h1>
-    <form action="{% url 'match_history:summoner' %}" method="post">
-        {% csrf_token %}
-        <label for="game_name">Enter your Summoner Name followed by tag:</label>
-        <input type="text" id="game_name" name="full_name" required>
-        <button type="submit">Check Match History</button>
-    </form>
-    
-</body>
-</html>
+{% extends "match_history/base.html" %}
+{% load static  %}
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'match_history/css/index.css' %}">
+{% endblock %}
+{% block content %}
+<h1>Aram GO v2!</h1>
+<form action="{% url 'match_history:summoner' %}" method="post">
+    {% csrf_token %}
+    <label for="game_name">Enter your Summoner Name followed by tag:</label>
+    <input type="text" id="game_name" name="full_name" required>
+    <button type="submit">Check Match History</button>
+</form>
+{% endblock %}
