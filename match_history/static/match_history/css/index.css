@@ -1,0 +1,13 @@
+.content {
+    border: 2px solid red;
+    color: white;
+    position: relative;
+    top: 33%
+}
+
+.content-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+}
