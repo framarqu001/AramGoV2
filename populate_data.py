@@ -10,7 +10,7 @@ from match_history.models import *
 
 RIOT_API_KEY = "RGAPI-15e6a106-a9ae-44de-85e1-ce7298d1035b"
 QUEUE = 450  # Aram
-COUNT = 50
+COUNT = 10
 
 
 class SummonerManager():

@@ -9,6 +9,7 @@
   */
   * {
     margin: 0;
+    padding: 0;
   }
   /*
     Typographic tweaks!
@@ -18,7 +19,6 @@
   body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    background-color: #0d0d28;
   }
   /*
     5. Improve media defaults
@@ -45,20 +45,56 @@
   #root, #__next {
     isolation: isolate;
   }
+  :root {
+    --primary-color: #10131a;
+    --max-width: 1080px;
+  }
+
+  .nav-list {
+    list-style: None;
+    display: flex;
+    gap: 1rem;
+  }
 
   .wrapper {
     min-height: 100vh;
     display: grid;
     grid-template-rows: 4rem auto;
+    background-color: var(--primary-color);
   }
 
   .content-wrapper {
     height: 100%;
   }
-
-  .header {
-    background-color: yellow;
+  .content {
+    height: 100%
   }
+
+  a {
+    text-decoration: none;
+    color: white
+  }
+  .header {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 2rem;
+    justify-content: space-between;
+    color: white
+  }
+  #nav-search {
+    width: 300px;
+    padding: .3rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid lightgray;
+    font-size: .8rem;
+  }
+  input[type="search"]:focus {
+    outline: none; /* Removes the default outline */
+    /* Optional: you can add custom styles for the focus state if needed */
+    border: 1px solid #ccc; /* Example: change border color to something subtle */
+    box-shadow: none; /* Removes any default box-shadow if present */
+}
 
   #djDebug {
     grid-area: auto / auto / auto / auto;

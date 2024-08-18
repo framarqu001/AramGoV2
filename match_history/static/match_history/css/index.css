@@ -1,13 +1,31 @@
-.content {
-    border: 2px solid red;
-    color: white;
+.search-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: relative;
     top: 33%
 }
+h1 {
+    color: white;
+    font-size: 50px;
+}
+#nav-search {
+    display: none;
+}
+#main-search {
+    width: 500px;
+    padding: .5rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid lightgray;
+}
 
-.content-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+input[type="search"]:focus {
+    outline: none; /* Removes the default outline */
+    /* Optional: you can add custom styles for the focus state if needed */
+    border: 1px solid #ccc; /* Example: change border color to something subtle */
+    box-shadow: none; /* Removes any default box-shadow if present */
+}
 
+button {
+    display: block;
 }

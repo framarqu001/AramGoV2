@@ -1,5 +1,9 @@
 
 {% extends "match_history/base.html" %}
+{% load static  %}
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'match_history/css/details.css' %}">
+{% endblock %}
 
 {% block content %}
 {{ summoner }}
