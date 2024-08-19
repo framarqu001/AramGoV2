@@ -1,0 +1,55 @@
+.content {
+    background-color: lightgray;
+}
+.icon {
+    width: 100px;
+    border-radius: 20%;
+}
+.large-text {
+    font-size: 3rem;
+}
+#tag {
+    font-weight: 1000;
+    color: gray;
+}
+#update {
+    padding: .2rem 1rem;
+}
+.summoner-header{
+    background-color: lightblue;
+    margin: auto;
+    width: var(--max-width);
+    height: 12.5rem;
+    display: flex;
+    align-items: center;
+}
+.summoner-card {
+    display: flex;
+    gap: 1rem
+}
+
+.main-info {
+    padding-top: 1rem;
+    display: grid;
+    background-color: salmon;
+    min-height: 1400px;
+    margin: auto;
+    width: var(--max-width);
+    display: grid;
+    grid-template-columns: 330px 1fr;
+    gap: 1rem
+}
+.sidebar {
+    background-color: lightgreen;
+}
+.match-history {
+    background-color: darkred;
+}
+
+.section {
+    border-radius: 5px;
+}
+
+button {
+    display: block;
+}

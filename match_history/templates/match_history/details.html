@@ -6,17 +6,22 @@
 {% endblock %}
 
 {% block content %}
-{{ summoner }}
-{% for match in matches%}
-<p>{{match}} win: {{ match.get_winner_display }}</p>
-<ul>
-    {% for participant in match.participants.all %}
-        {% if participant.summoner.get_match_history_url %}
-            <li><a href="{{ participant.summoner.get_match_history_url }}">{{ participant.game_name }}</a></li>
-        {% else %}
-            <li>{{ participant.game_name }}</li>
-        {% endif %}
-    {% endfor %}
-</ul>
-{% endfor %}
+<div class="summoner-header">
+    <div class="summoner-card">
+        <img class="icon" src="{{summoner.profile_icon.get_full_url}}" alt="" >
+        <div class="summoner-name">
+            <p class="large-text">{{summoner.game_name}} <span id="tag">#{{summoner.tag_line}}</span></p>
+            <button id = "update">Update</button>
+        </div>
+    </div>
+</div>
+<div class="main-info">
+    <div class="sidebar section">
+
+    </div>
+    <div class="match-history section">
+        Match History
+    </div>
+</div>
+
 {% endblock content %}

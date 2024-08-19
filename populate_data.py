@@ -8,7 +8,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
 
-RIOT_API_KEY = "RGAPI-15e6a106-a9ae-44de-85e1-ce7298d1035b"
+RIOT_API_KEY = "RGAPI-d5b99d98-824c-4459-83c1-6f68edfff7e7"
 QUEUE = 450  # Aram
 COUNT = 10
 

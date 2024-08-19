@@ -8,7 +8,7 @@ django.setup()
 
 from match_history.models import Champion, Item, ProfileIcon
 
-RIOT_API_KEY = "RGAPI-694e1a5c-5426-4aa6-8f9a-8e9e3502fb47"
+RIOT_API_KEY = "RGAPI-d5b99d98-824c-4459-83c1-6f68edfff7e7"
 
 
 def populate_champions(champion_data: dict):

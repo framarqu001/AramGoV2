@@ -61,6 +61,7 @@
     display: grid;
     grid-template-rows: 4rem auto;
     background-color: var(--primary-color);
+    color: white
   }
 
   .content-wrapper {
@@ -72,7 +73,9 @@
 
   a {
     text-decoration: none;
-    color: white
+  }
+  a:visited {
+    color: inherit
   }
   .header {
     height: 100%;
@@ -80,7 +83,6 @@
     align-items: center;
     padding: 2rem;
     justify-content: space-between;
-    color: white
   }
   #nav-search {
     width: 300px;

@@ -4,7 +4,7 @@ from django.db import connection
 from django.urls import reverse
 from django import template
 
-
+patch = "14.16.1"
 class Champion(models.Model):
     champion_id = models.CharField(primary_key=True, max_length=30)
     name = models.CharField(max_length=30)
@@ -34,7 +34,7 @@ class ProfileIcon(models.Model):
     profile_id = models.CharField(primary_key=True, max_length=30)
     image_path = models.CharField(max_length=100)
 
-    def get_full_url(self, patch):
+    def get_full_url(self):
         return f"https://ddragon.leagueoflegends.com/cdn/{patch}/img/profileicon/{self.image_path}"
 
     def __str__(self):
@@ -68,6 +68,7 @@ class Summoner(models.Model):
         return None
     def __str__(self):
         return f"Summoner:{self.game_name} {self.puuid}"
+    
 
 
 class Match(models.Model):
