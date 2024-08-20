@@ -40,12 +40,27 @@
     gap: 1rem
 }
 .sidebar {
-    background-color: lightgreen;
+    background-color: aqua;
 }
 .match-history {
-    background-color: darkred;
+    background-color: rgb(235, 250, 135);
+}
+.matches-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
+.match {
+    height: 100px;
+}
+.match.match-win {
+    background-color: red;
+}
+
+.match.match-lose {
+    background-color: blue;
+}
 .section {
     border-radius: 5px;
 }

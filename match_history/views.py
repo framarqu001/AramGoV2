@@ -37,6 +37,15 @@ def details(request, game_name: str, tag: str):
         'participants__items',
         'participants__summoner'
     )
+    
+    match_data = []
+    for match in matches:
+        main_participant = match.participants.filter(summoner=summoner).first()
+        match_data.append({
+            "match_data": match,
+            "main_participant": main_participant
+        })
+    matches = match_data
 
     context = {
         "summoner": summoner,

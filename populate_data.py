@@ -8,7 +8,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
 
-RIOT_API_KEY = "RGAPI-d5b99d98-824c-4459-83c1-6f68edfff7e7"
+RIOT_API_KEY = "RGAPI-19f2b3ea-44b3-4d0b-b969-6e602d1d031f"
 QUEUE = 450  # Aram
 COUNT = 10
 
@@ -166,6 +166,8 @@ class MatchManager():
             creep_score = participant_data["totalMinionsKilled"]
             team_id = participant_data["teamId"]
             win = True if participant_data["win"] is True else False
+            spell1 = SummonerSpell.objects.get(spell_id=participant_data["summoner1Id"])
+            spell2 = SummonerSpell.objects.get(spell_id=participant_data["summoner2Id"])
             participant, created = Participant.objects.update_or_create(
                 match=match,
                 summoner=summoner,
@@ -177,7 +179,9 @@ class MatchManager():
                     "creep_score": creep_score,
                     "team": team_id,
                     "win": win,
-                    "game_name": participant_data.get("riotIdGameName", participant_data["summonerName"])
+                    "game_name": participant_data.get("riotIdGameName", participant_data["summonerName"]),
+                    "spell1": spell1,
+                    "spell2": spell2
                 }
             )
             if created:
@@ -185,16 +189,16 @@ class MatchManager():
             else:
                 print(f"{participant} already exists ERORR!!!!")
 
-            item_set = []
-            for i in range(7):
-                item_id = participant_data[f"item{i}"]
+            for j in range(6):
+                item_id = participant_data[f"item{j}"]
                 if item_id != 0:
                     try:
-                        item = Item.objects.get(pk=participant_data[f"item{i}"])
-                        item_set.append(item)
+                        item = Item.objects.get(pk=participant_data[f"item{j}"])
+                        setattr(participant, f"item{j}", item)
+                        participant.save()
                     except Item.DoesNotExist:
                         print(f"Item with ID {item_id} does not exist.")
-            participant.items.set(item_set)
+
         return
 
     def process_matches(self):

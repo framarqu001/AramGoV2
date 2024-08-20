@@ -1,5 +1,5 @@
 from django.db import models
-import datetime
+from django.utils import timezone
 from django.db import connection
 from django.urls import reverse
 from django import template
@@ -19,7 +19,7 @@ class Champion(models.Model):
 
 
 class Item(models.Model):
-    item_id = models.CharField(primary_key=True, max_length=30)
+    item_id = models.CharField(max_length=30,primary_key=True)
     name = models.CharField(max_length=30)
     image_path = models.CharField(max_length=100)
 
@@ -40,10 +40,16 @@ class ProfileIcon(models.Model):
     def __str__(self):
         return self.profile_id
 
+class SummonerSpell(models.Model):
+    spell_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=30)
+    image_path = models.CharField(max_length=100)
 
-register = template.Library()
+    def get_full_url(self):
+        return f"https://ddragon.leagueoflegends.com/cdn/{patch}/img/spell/{self.image_path}"
 
-
+    def __str__(self):
+        return f"{self.name} {self.spell_id}"
 
 class Summoner(models.Model):
     puuid = models.CharField(max_length=100, primary_key=True)
@@ -94,6 +100,23 @@ class Match(models.Model):
     def get_participants(self):
         return self.participants.select_related("match").all()
 
+    def get_time_diff(self):
+        now = timezone.now()
+        difference = now - self.game_start
+        seconds = difference.total_seconds()
+        minutes = seconds // 60
+        hours = seconds // 3600
+        days = seconds // 86400
+
+        if minutes < 60:
+            return f"{int(minutes)} minutes ago"
+        elif hours < 24:
+            return f"{int(hours)} hours ago"
+        elif days < 30:
+            return f"{int(days)} days ago"
+        else:
+            return self.game_start.strftime('%Y-%m-%d %H:%M:%S')
+
     def __str__(self):
         return self.match_id
 
@@ -114,11 +137,23 @@ class Participant(models.Model):
     kills = models.IntegerField()
     deaths = models.IntegerField()
     assists = models.IntegerField()
+    spell1 = models.ForeignKey(SummonerSpell, on_delete=models.CASCADE, related_name='participants_spell1')
+    spell2 = models.ForeignKey(SummonerSpell, on_delete=models.CASCADE, related_name='participants_spell2')
     creep_score = models.IntegerField()
-    items = models.ManyToManyField(Item, blank=True)
+    item1 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item1")
+    item2 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item2")
+    item3 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item3")
+    item4 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item4")
+    item5 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item5")
+    item6 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item6")
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
     game_name = models.CharField(max_length=50)
+
+    def match_result(self):
+        if self.win:
+            return "Victory"
+        return "Defeat"
 
     def __str__(self):
         return f"{self.game_name} playing {self.champion} in match {self.match}"

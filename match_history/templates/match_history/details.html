@@ -21,6 +21,16 @@
     </div>
     <div class="match-history section">
         Match History
+        <div class="matches-container">
+            {% for match in matches%}
+            <div class="match {% if match.main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                {{match.match_data.match_id}}
+                {% for participant in match.match_data.participants.all  %}
+                {{participant.game_name}}                
+                {% endfor %}
+            </div>
+           {% endfor %}
+        </div>
     </div>
 </div>
 
