@@ -22,7 +22,7 @@
     <div class="match-history section">
         Match History
         <div class="matches-container">
-            {% for match, main_participant, blue_team, red_team in matches%}
+            {% for match, main_participant, blue_team, red_team, main_stats in matches%}
 
             <div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                 
@@ -36,12 +36,46 @@
                         </div>
                     </div>
                     <div class="build-seciton">
-
-                    </div>
-                    <div class="stat-section">
                         <div class="champion-icon">
                             <img class="champ-img" src="{{main_participant.champion.get_url}}" alt="" >
                         </div>
+                        <div class="items">
+                            <div class="item1 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                                {% if main_participant.item1  %}
+                                    <img class="item-img" src="{{main_participant.item1.get_url}}" alt="">
+                                {% endif %}
+                            </div>
+                            <div class="item2 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                                {% if main_participant.item2 %}
+                                    <img class="item-img" src="{{main_participant.item2.get_url}}" alt="">
+                                {% endif %}
+                            </div>
+                            <div class="item3 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                                {% if main_participant.item3 %}
+                                    <img class="item-img" src="{{main_participant.item3.get_url}}" alt="">
+                                {% endif %}
+                            </div>
+                            <div class="item4 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                                {% if main_participant.item4 %}
+                                    <img class="item-img" src="{{main_participant.item4.get_url}}" alt="">
+                                {% endif %}
+                            </div>
+                            <div class="item5 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                                {% if main_participant.item5 %}
+                                    <img class="item-img" src="{{main_participant.item5.get_url}}" alt="">
+                                {% endif %}
+                            </div>  
+                            <div class="item6 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                                {% if main_participant.item6 %}
+                                    <img class="item-img" src="{{main_participant.item6.get_url}}" alt="">
+                                {% endif %}
+                            </div>
+                            <div class="item7"></div>
+                        </div>
+                    </div>
+                    <div class="stat-section">
+                        {{main_stats.kda}}
+                        {{main_stats.cs_min}}
                     </div>
                     <div class="participant-section">
                         

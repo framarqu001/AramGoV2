@@ -1,3 +1,13 @@
+
+@font-face {
+  font-family: 'cotham_sansregular';
+  src: url('../fonts/cothamsans-webfont.woff2') format('woff2'),
+  url('../fonts/cothamsans-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+
+}
+
 /*
   1. Use a more-intuitive box-sizing model.
 */
@@ -62,9 +72,14 @@
     grid-template-rows: 4rem auto;
     background-color: var(--primary-color);
     color: white;
-    min-width: var(--max-width)
+    min-width: var(--max-width);
+    font-family: "franklin-gothic-urw", sans-serif;
+    
   }
-
+  .test {
+    margin: auto;
+    width: 60ch;
+  }
   .content-wrapper {
     height: 100%;
   }
@@ -74,8 +89,7 @@
 
   a {
     text-decoration: none;
-    text-decoration-color: black;
-    color: black;
+    color: #e6e6e6;
   }
   a:visited {
     color: inherit

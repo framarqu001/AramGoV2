@@ -3,12 +3,18 @@
 }
 .icon {
     width: 100px;
-    border-radius: 20%;
+    border-radius: 50%;
+    border: 2px solid white
 }
+
 .champion-icon {
     width: 48px;
     overflow: hidden;
 }
+.item-img{
+    width: 22px;
+}
+
 .champ-icon-small {
     width: 15px;
     border-radius: 50%;
@@ -29,7 +35,7 @@
     padding: .2rem 1rem;
 }
 .summoner-header{
-    background-color: lightblue;
+    /*background-color: #222534;*/
     margin: auto;
     width: var(--max-width);
     height: 12.5rem;
@@ -53,12 +59,13 @@
     gap: 1rem
 }
 .sidebar {
-    background-color: aqua;
+    background-color: #222433;
 }
 .match-history {
-    background-color: rgb(235, 250, 135);
+    /*background-color: rgb(235, 252, 135);*/
 }
 .matches-container {
+
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -72,13 +79,19 @@
     font-weight: 1000;
     border-radius: 5px;
 }
+
 .match-card.match-win {
-    background-color: pink;
-    color: red;
+    background-color: rgba(145,166,179,.3);
 }
 .match-card.match-lose {
-    background-color: lightBlue;
-    color: blue;
+    background-color: rgba(213,123,101,.3);
+    opacity: .9;
+}
+.match-win:hover {
+    background-color: rgba(145,166,179,.1);
+}
+.match-lose:hover {
+    background-color: rgba(213,123,101,.1);
 }
 
 .match-section-container {
@@ -92,14 +105,25 @@
 .build-section {
 
 }
-
+.items {
+    display: grid;
+    grid-template-columns: repeat(6,1fr);
+    gap:2px;
+    background-color: rgba(145,166,179,.2)
+}
+.items .match-win {
+    background-color: rgba(145,166,179,.2)
+}
+.items .match-lose {
+    background-color: rgba(213,123,101,.2);
+}
 .stat-section {
 
 }
 .participant-section {
     font-size: 11px;
     display: flex;
-    color: black;
+    color: #e6e6e6;
     gap: 5px;
 }
 .participant-entry {
@@ -112,6 +136,7 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    font-weight: 500;
     
 }
 .highlight{
@@ -125,11 +150,13 @@
 }
 
 .section {
-    border-radius: 5px;
+    border-radius: 12px;
+    /* background-color:#222433 ; */
+    padding: 20px
 }
 .sub-text {
     font-size: .8rem;
-    color: gray
+    color: #595a5b
 }
 button {
     display: block;

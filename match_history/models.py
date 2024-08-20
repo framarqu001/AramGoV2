@@ -23,7 +23,7 @@ class Item(models.Model):
     name = models.CharField(max_length=30)
     image_path = models.CharField(max_length=100)
 
-    def get_url(self, patch):
+    def get_url(self):
         return f"https://ddragon.leagueoflegends.com/cdn/{patch}/img/item/{self.image_path}"
 
     def __str__(self):
@@ -98,6 +98,8 @@ class Match(models.Model):
         seconds = self.game_duration % 60
         return f"{minutes}:{seconds}"
 
+    def get_minutes(self):
+        return self.game_duration // 60
     def get_participants(self):
         return self.participants.select_related("match").all()
 

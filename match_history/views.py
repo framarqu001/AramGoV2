@@ -1,6 +1,7 @@
+from django.db.models import Prefetch
 from django.http import HttpResponse, HttpResponseNotAllowed, Http404
 from django.shortcuts import render, get_object_or_404
-from match_history.models import Summoner
+from match_history.models import Summoner, Participant
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from populate_data import SummonerManager, MatchManager
@@ -31,26 +32,28 @@ def details(request, game_name: str, tag: str):
             # If API call fails, raise Http404
             raise Http404(f"Summoner with game name {game_name} and tag {tag} could not be found and API call failed.")
 
+
+    main_participant_prefetch = Prefetch('participants', queryset=Participant.objects.filter(summoner=summoner), to_attr='main_participant_list')
+    blue_team_prefetch = Prefetch('participants', queryset=Participant.objects.filter(team=100), to_attr='blue_team_list')
+    red_team_prefetch = Prefetch('participants', queryset=Participant.objects.filter(team=200), to_attr='red_team_list')
     matches = summoner.get_matches_queryset().prefetch_related(
-        'participants',
-        'participants__champion',
-        'participants__item1',
-        'participants__item2',
-        'participants__item3',
-        'participants__item4',
-        'participants__item5',
-        'participants__item6',
-        'participants__summoner',
-        'participants__spell1',
-        'participants__spell2',
+        main_participant_prefetch,
+        blue_team_prefetch,
+        red_team_prefetch,
     )
-    
+
     match_data = []
     for match in matches:
-        main_participant = match.participants.filter(summoner=summoner).first()
-        blue_team = match.participants.filter(team=100)
-        red_team = match.participants.filter(team=200)
-        match_data.append((match, main_participant, blue_team, red_team))
+        main_participant = match.main_participant_list[0] if match.main_participant_list else None
+        blue_team = match.blue_team_list
+        red_team = match.red_team_list
+        kda = (main_participant.kills + main_participant.assists) / main_participant.deaths
+        cs_min = main_participant.creep_score / (match.game_duration / 60)
+        main_stats = {
+            "kda": f"{kda:.2f}",
+            "cs_min": f"{cs_min:.2f}"
+        }
+        match_data.append((match, main_participant, blue_team, red_team, main_stats))
     matches = match_data
 
     context = {
@@ -58,7 +61,6 @@ def details(request, game_name: str, tag: str):
         "matches": matches, # Pass matches to the context for use in the template
         "main_participant": main_participant
     }
-    print(context)
     return render(request, 'match_history/details.html', context)
 
 
