@@ -89,7 +89,7 @@ class MatchManager():
     def _create_match(self, match_id: str, match_info: dict):
         SECONDS = 60
         game_start = self._convert_stamp(match_info["gameStartTimestamp"])
-        game_duration = match_info["gameDuration"] // SECONDS
+        game_duration = match_info["gameDuration"] 
         game_mode = match_info["gameMode"]
         game_version = match_info["gameVersion"]
         blue = match_info["teams"][0]["win"]

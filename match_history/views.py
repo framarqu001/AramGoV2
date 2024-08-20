@@ -34,22 +34,29 @@ def details(request, game_name: str, tag: str):
     matches = summoner.get_matches_queryset().prefetch_related(
         'participants',
         'participants__champion',
-        'participants__items',
-        'participants__summoner'
+        'participants__item1',
+        'participants__item2',
+        'participants__item3',
+        'participants__item4',
+        'participants__item5',
+        'participants__item6',
+        'participants__summoner',
+        'participants__spell1',
+        'participants__spell2',
     )
     
     match_data = []
     for match in matches:
         main_participant = match.participants.filter(summoner=summoner).first()
-        match_data.append({
-            "match_data": match,
-            "main_participant": main_participant
-        })
+        blue_team = match.participants.filter(team=100)
+        red_team = match.participants.filter(team=200)
+        match_data.append((match, main_participant, blue_team, red_team))
     matches = match_data
 
     context = {
         "summoner": summoner,
-        "matches": matches  # Pass matches to the context for use in the template
+        "matches": matches, # Pass matches to the context for use in the template
+        "main_participant": main_participant
     }
     print(context)
     return render(request, 'match_history/details.html', context)

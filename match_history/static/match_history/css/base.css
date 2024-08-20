@@ -61,7 +61,8 @@
     display: grid;
     grid-template-rows: 4rem auto;
     background-color: var(--primary-color);
-    color: white
+    color: white;
+    min-width: var(--max-width)
   }
 
   .content-wrapper {
@@ -73,6 +74,8 @@
 
   a {
     text-decoration: none;
+    text-decoration-color: black;
+    color: black;
   }
   a:visited {
     color: inherit
@@ -83,6 +86,7 @@
     align-items: center;
     padding: 2rem;
     justify-content: space-between;
+    min-width: var(--max-width)
   }
   #nav-search {
     width: 300px;

@@ -8,7 +8,7 @@
 {% block content %}
 <div class="summoner-header">
     <div class="summoner-card">
-        <img class="icon" src="{{summoner.profile_icon.get_full_url}}" alt="" >
+        <img class="icon" src="{{summoner.profile_icon.get_url}}" alt="" >
         <div class="summoner-name">
             <p class="large-text">{{summoner.game_name}} <span id="tag">#{{summoner.tag_line}}</span></p>
             <button id = "update">Update</button>
@@ -22,12 +22,58 @@
     <div class="match-history section">
         Match History
         <div class="matches-container">
-            {% for match in matches%}
-            <div class="match {% if match.main_participant.win%}match-win{% else %}match-lose{% endif %}">
-                {{match.match_data.match_id}}
-                {% for participant in match.match_data.participants.all  %}
-                {{participant.game_name}}                
-                {% endfor %}
+            {% for match, main_participant, blue_team, red_team in matches%}
+
+            <div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                
+                <div class="match-section-container">
+                    <div class="result-section">
+                        <div class="match-info">
+                            <div class="queue {% if main_participant.win%}match-win{% else %}match-lose{% endif %}"> ARAM </div>
+                            <div class="sub-text from-now">{{match.get_time_diff}}</div>
+                            <div class="match-result sub-text">{{main_participant.match_result}}</div>
+                            <div class="match-length sub-text">{{match.get_duration}}</div>
+                        </div>
+                    </div>
+                    <div class="build-seciton">
+
+                    </div>
+                    <div class="stat-section">
+                        <div class="champion-icon">
+                            <img class="champ-img" src="{{main_participant.champion.get_url}}" alt="" >
+                        </div>
+                    </div>
+                    <div class="participant-section">
+                        
+                        <div class="team-blue">
+                            {% for participant in blue_team %}
+                            <div class="participant-entry">
+                                <div class="champ-icon-small">
+                                    <img class = "champ-img" src="{{participant.champion.get_url}}" alt="">
+                                </div>
+                                <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
+                                    <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
+                                </div>
+    
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="team-red">
+                            {% for participant in red_team %}
+                                <div class="participant-entry">
+                                    <div class="champ-icon-small">
+                                        <img class = "champ-img" src="{{participant.champion.get_url}}" alt="">
+                                    </div>
+                                    <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
+                                        <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
+                                    </div>
+        
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
             </div>
            {% endfor %}
         </div>

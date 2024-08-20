@@ -11,7 +11,7 @@ class Champion(models.Model):
     title = models.CharField(max_length=200)
     image_path = models.CharField(max_length=100)
 
-    def get_full_url(self, patch):
+    def get_url(self):
         return f"https://ddragon.leagueoflegends.com/cdn/{patch}/img/champion/{self.image_path}"
 
     def __str__(self):
@@ -23,7 +23,7 @@ class Item(models.Model):
     name = models.CharField(max_length=30)
     image_path = models.CharField(max_length=100)
 
-    def get_full_url(self, patch):
+    def get_url(self, patch):
         return f"https://ddragon.leagueoflegends.com/cdn/{patch}/img/item/{self.image_path}"
 
     def __str__(self):
@@ -34,7 +34,7 @@ class ProfileIcon(models.Model):
     profile_id = models.CharField(primary_key=True, max_length=30)
     image_path = models.CharField(max_length=100)
 
-    def get_full_url(self):
+    def get_url(self):
         return f"https://ddragon.leagueoflegends.com/cdn/{patch}/img/profileicon/{self.image_path}"
 
     def __str__(self):
@@ -45,7 +45,7 @@ class SummonerSpell(models.Model):
     name = models.CharField(max_length=30)
     image_path = models.CharField(max_length=100)
 
-    def get_full_url(self):
+    def get_url(self):
         return f"https://ddragon.leagueoflegends.com/cdn/{patch}/img/spell/{self.image_path}"
 
     def __str__(self):
@@ -68,7 +68,7 @@ class Summoner(models.Model):
         return Match.objects.filter(participants__summoner=self)
 
 
-    def get_match_history_url(self):
+    def get_url(self):
         if self.game_name and self.tag_line:
             return reverse('match_history:details', args=[self.game_name, self.tag_line])
         return None
@@ -93,9 +93,10 @@ class Match(models.Model):
     game_version = models.CharField(max_length=50)
     winner = models.IntegerField(choices=WINNER_CHOICES)
 
-    def get_minutes(self):
-        SECONDS = 60
-        return self.game_duration // SECONDS
+    def get_duration(self):
+        minutes = self.game_duration // 60
+        seconds = self.game_duration % 60
+        return f"{minutes}:{seconds}"
 
     def get_participants(self):
         return self.participants.select_related("match").all()
@@ -115,7 +116,7 @@ class Match(models.Model):
         elif days < 30:
             return f"{int(days)} days ago"
         else:
-            return self.game_start.strftime('%Y-%m-%d %H:%M:%S')
+            return self.game_start.strftime('%m-%d-%Y')
 
     def __str__(self):
         return self.match_id

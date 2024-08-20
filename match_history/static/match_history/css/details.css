@@ -1,10 +1,23 @@
 .content {
-    background-color: lightgray;
+    /* background-color: lightgray; */
 }
 .icon {
     width: 100px;
     border-radius: 20%;
 }
+.champion-icon {
+    width: 48px;
+    overflow: hidden;
+}
+.champ-icon-small {
+    width: 15px;
+    border-radius: 50%;
+    overflow: hidden
+}
+.champ-img {
+    transform: scale(1.15);
+}
+
 .large-text {
     font-size: 3rem;
 }
@@ -31,7 +44,7 @@
 .main-info {
     padding-top: 1rem;
     display: grid;
-    background-color: salmon;
+    /* background-color: salmon; */
     min-height: 1400px;
     margin: auto;
     width: var(--max-width);
@@ -51,20 +64,73 @@
     gap: 10px;
 }
 
-.match {
+.match-card {
+    /* height: 100px; */
+    padding: .2rem;
     height: 100px;
+    display: flex;
+    font-weight: 1000;
+    border-radius: 5px;
 }
-.match.match-win {
-    background-color: red;
+.match-card.match-win {
+    background-color: pink;
+    color: red;
+}
+.match-card.match-lose {
+    background-color: lightBlue;
+    color: blue;
 }
 
-.match.match-lose {
-    background-color: blue;
+.match-section-container {
+    display: flex;
+    gap: 20px
 }
+.result-seciton {
+
+}
+
+.build-section {
+
+}
+
+.stat-section {
+
+}
+.participant-section {
+    font-size: 11px;
+    display: flex;
+    color: black;
+    gap: 5px;
+}
+.participant-entry {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+.game-name {
+    max-width: 10ch;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    
+}
+.highlight{
+    background-color: yellow;
+}
+.team-blue,
+.team-red {
+    display: flex;
+    flex-direction: column;
+    gap: 2px
+}
+
 .section {
     border-radius: 5px;
 }
-
+.sub-text {
+    font-size: .8rem;
+    color: gray
+}
 button {
     display: block;
 }
