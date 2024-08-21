@@ -10,7 +10,7 @@ from match_history.models import *
 
 RIOT_API_KEY = "RGAPI-d0b1ffc6-c349-4654-ad38-45ae7741498e"
 QUEUE = 450  # Aram
-COUNT = 10
+COUNT = 31
 
 
 class SummonerManager():
@@ -168,8 +168,14 @@ class MatchManager():
             win = True if participant_data["win"] is True else False
             spell1 = SummonerSpell.objects.get(spell_id=participant_data["summoner1Id"])
             spell2 = SummonerSpell.objects.get(spell_id=participant_data["summoner2Id"])
-            rune1 = Rune.objects.get(rune_id__iexact=participant_data["perks"]["styles"][0]["selections"][0]["perk"])
-            rune2 = Rune.objects.get(rune_id__iexact=participant_data["perks"]["styles"][1]["style"])
+            try:
+                rune1 = Rune.objects.get(rune_id__iexact=participant_data["perks"]["styles"][0]["selections"][0]["perk"])
+            except Rune.DoesNotExist:
+                rune1 = None
+            try:
+                    rune2 = Rune.objects.get(rune_id__iexact=participant_data["perks"]["styles"][1]["style"])
+            except Rune.DoesNotExist:
+                rune2 = None
             participant, created = Participant.objects.update_or_create(
                 match=match,
                 summoner=summoner,
@@ -203,8 +209,6 @@ class MatchManager():
                     except Item.DoesNotExist:
                         print(f"Item with ID {item_id} does not exist.")
 
-
-
         return
 
     def process_matches(self):
@@ -237,7 +241,7 @@ if __name__ == "__main__":
     matchBuilder = MatchManager("americas", "na1", summoner)
     matchBuilder.process_matches()
     summoners = Summoner.objects.all()
-    for i in range(35):
-        matchMaker = MatchManager("americas", "na1", summoners[i])
-        matchMaker.process_matches()
-        print("hey")
+    # for i in range(35):
+    #     matchMaker = MatchManager("americas", "na1", summoners[i])
+    #     matchMaker.process_matches()
+    #     print("hey")

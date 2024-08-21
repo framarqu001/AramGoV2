@@ -7,6 +7,7 @@ from django.urls import reverse
 from populate_data import SummonerManager, MatchManager
 from riotwatcher import ApiError
 from django.db import transaction
+from django.core.paginator import Paginator
 
 
 # Create your views here.
@@ -32,18 +33,21 @@ def details(request, game_name: str, tag: str):
             # If API call fails, raise Http404
             raise Http404(f"Summoner with game name {game_name} and tag {tag} could not be found and API call failed.")
 
+    matches_per_page = 10
 
-    main_participant_prefetch = Prefetch('participants', queryset=Participant.objects.filter(summoner=summoner), to_attr='main_participant_list')
-    blue_team_prefetch = Prefetch('participants', queryset=Participant.objects.filter(team=100), to_attr='blue_team_list')
-    red_team_prefetch = Prefetch('participants', queryset=Participant.objects.filter(team=200), to_attr='red_team_list')
-    matches = summoner.get_matches_queryset().prefetch_related(
-        main_participant_prefetch,
-        blue_team_prefetch,
-        red_team_prefetch,
+    matches_queryset = summoner.get_matches_queryset()
+
+    paginator = Paginator(matches_queryset, matches_per_page)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    page_obj.object_list = page_obj.object_list.prefetch_related(
+        Prefetch('participants', queryset=Participant.objects.filter(summoner=summoner), to_attr='main_participant_list'),
+        Prefetch('participants', queryset=Participant.objects.filter(team=100), to_attr='blue_team_list'),
+        Prefetch('participants', queryset=Participant.objects.filter(team=200), to_attr='red_team_list')
     )
-
     match_data = []
-    for match in matches:
+    for match in page_obj:
         main_participant = match.main_participant_list[0] if match.main_participant_list else None
         blue_team = match.blue_team_list
         red_team = match.red_team_list
@@ -58,9 +62,16 @@ def details(request, game_name: str, tag: str):
 
     context = {
         "summoner": summoner,
-        "matches": matches, # Pass matches to the context for use in the template
-        "main_participant": main_participant
+        "matches": matches,
+        "main_participant": main_participant,
+        "total_pages": paginator.num_pages,
     }
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        print("here HEY THERE")
+        return render(request, 'match_history/match_list.html', context)
+    else:
+        print("normal")
+    
     return render(request, 'match_history/details.html', context)
 
 
