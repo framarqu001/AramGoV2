@@ -168,7 +168,7 @@ class MatchManager():
             win = True if participant_data["win"] is True else False
             spell1 = SummonerSpell.objects.get(spell_id=participant_data["summoner1Id"])
             spell2 = SummonerSpell.objects.get(spell_id=participant_data["summoner2Id"])
-            rune1 = Rune.objects.get(rune_id__iexact=participant_data["perks"]["styles"][0]["style"])
+            rune1 = Rune.objects.get(rune_id__iexact=participant_data["perks"]["styles"][0]["selections"][0]["perk"])
             rune2 = Rune.objects.get(rune_id__iexact=participant_data["perks"]["styles"][1]["style"])
             participant, created = Participant.objects.update_or_create(
                 match=match,

@@ -51,7 +51,7 @@ def details(request, game_name: str, tag: str):
         cs_min = main_participant.creep_score / (match.game_duration / 60)
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.2f}"
+            "cs_min": f"{cs_min:.1f}"
         }
         match_data.append((match, main_participant, blue_team, red_team, main_stats))
     matches = match_data

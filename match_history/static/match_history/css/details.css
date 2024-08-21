@@ -1,12 +1,18 @@
 .content {
     /* background-color: lightgray; */
 }
-.icon {
+.main-icon {
     width: 100px;
+    height: 100px;
     border-radius: 50%;
     border: 2px solid white
 }
 
+.profile-icon-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 .champion-icon {
     width: 48px;
     overflow: hidden;
@@ -14,14 +20,22 @@
 .small-img{
     width: 22px;
 }
-.spe
+.level {
+    color: black;
+    padding: 0 3px;
+    position: relative;
+    background-color: lightblue;
+    text-align: center;
+    bottom: 10px;
+}
+
+.champ-img {
+    transform: scale(1.15);
+}
 .champ-icon-small {
     width: 15px;
     border-radius: 50%;
     overflow: hidden
-}
-.champ-img {
-    transform: scale(1.15);
 }
 .spells-wrapper {
     overflow: hidden;
@@ -61,13 +75,15 @@
     gap: 1rem
 }
 .sidebar {
+    /* background-color: #222433; */
+}
+.section {
     background-color: #222433;
 }
 .match-history {
     /*background-color: rgb(235, 252, 135);*/
 }
-.matches-container {
-
+.match-container {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -75,7 +91,6 @@
 
 .match-card {
     /* height: 100px; */
-    padding: .2rem;
     height: 100px;
     display: flex;
     font-weight: 1000;
@@ -97,29 +112,48 @@
 }
 
 .match-section-container {
+    width: 100%;
     display: flex;
-    gap: 20px
+    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 .5rem;
 }
 .result-seciton {
 
 }
 
-.build-section {
-
+.build-seciton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap:4px
 }
 .icon-2stack{
+    gap:3px;
+    flex: 1;
     display: flex;
     flex-direction: column;
 }
 .build-container {
-    display: flex
+    display: flex;
+    gap: 3px
 }
 .items {
     display: grid;
     grid-template-columns: repeat(6,1fr);
-    gap:2px;
-    background-color: rgba(145,166,179,.2)
+    gap:4px;
 }
+
+.sub-rune {
+    transform: scale(.8);
+}
+.spells-wrapper {
+    border-radius: 3px;
+}
+
+.build-container .spells-wrapper,
 .items .match-win {
     background-color: rgba(145,166,179,.2)
 }
@@ -129,6 +163,21 @@
 .stat-section {
 
 }
+
+.match-btn {
+    width: 40px;
+    border: 0;
+    justify-self: flex-end;
+}
+
+.match-btn.match-win {
+    background-color: rgba(145,166,179,.2)
+}
+
+.match-btn.match-lose {
+    background-color: rgba(213,123,101,.2);
+}
+
 .participant-section {
     font-size: 11px;
     display: flex;
@@ -166,6 +215,9 @@
 .sub-text {
     font-size: .8rem;
     color: #595a5b
+}
+.stat-text {
+
 }
 button {
     display: block;

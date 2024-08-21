@@ -8,7 +8,12 @@
 {% block content %}
 <div class="summoner-header">
     <div class="summoner-card">
-        <img class="icon" src="{{summoner.profile_icon.get_url}}" alt="" >
+        <div class="profile-icon-container">
+            <img class="main-icon" src="{{summoner.profile_icon.get_url}}" alt="" >
+            <div class="level">
+                {{summoner.summoner_level}}
+            </div>
+        </div>
         <div class="summoner-name">
             <p class="large-text">{{summoner.game_name}} <span id="tag">#{{summoner.tag_line}}</span></p>
             <button id = "update">Update</button>
@@ -16,12 +21,26 @@
     </div>
 </div>
 <div class="main-info">
-    <div class="sidebar section">
+    <div class="sidebar">
+        <div class="Account-container section">
+            Account
+            <hr>
 
+        </div>
+        <div class="Account-container section">
+            Snowball Hits
+            <hr>
+
+        </div>
+        <div class="Account-container section">
+            Champions
+            <hr>
+
+        </div>
     </div>
     <div class="match-history section">
         Match History
-        <div class="matches-container">
+        <div class="match-container">
             {% for match, main_participant, blue_team, red_team, main_stats in matches%}
 
             <div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
@@ -40,7 +59,7 @@
 
                         <div class="build-container">
                             <div class="champion-icon">
-                                <img class="champ-img" src="{{main_participant.champion.get_url}}" alt="" >
+                                <img class="champ-img " src="{{main_participant.champion.get_url}}" alt="" >
                             </div>
                             <div class="icon-2stack">
                                 <div class="spells-wrapper">
@@ -52,10 +71,10 @@
                             </div>
                             <div class="icon-2stack">
                                 <div class="spells-wrapper">
-                                    <img class ="small-img" src="{{main_participant.rune1.get_url}}" alt="">
+                                    <img class ="small-img {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" src="{{main_participant.rune1.get_url}}" alt="">
                                 </div>
                                 <div class="spells-wrapper">
-                                    <img class ="small-img" src="{{main_participant.rune2.get_url}}" alt="">
+                                    <img class ="small-img sub-rune {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" src="{{main_participant.rune2.get_url}}" alt="">
                                 </div>
                             </div>
                         </div>
@@ -94,9 +113,10 @@
                             <div class="item7"></div>
                         </div>
                     </div>
-                    <div class="stat-section">
-                        {{main_stats.kda}}
-                        {{main_stats.cs_min}}
+                    <div class="stat-section stats-text">
+                        <div class="kda">{{main_participant.kills}} / {{main_participant.deaths}} / {{main_participant.assists}}</div>
+                        <div class="calculated-kda sub-text">KDA: {{main_stats.kda}}</div>
+                        <div class="cs sub-text">{{main_participant.creep_score}} CS ({{main_stats.cs_min}})</div>
                     </div>
                     <div class="participant-section">
                         
@@ -128,6 +148,7 @@
                         </div>
                     </div>
                 </div>
+                <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}"></button>
 
             </div>
            {% endfor %}
