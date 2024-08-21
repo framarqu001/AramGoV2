@@ -50,6 +50,14 @@ class SummonerSpell(models.Model):
 
     def __str__(self):
         return f"{self.name} {self.spell_id}"
+    
+class Rune(models.Model):
+    rune_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=30)
+    image_path = models.CharField(max_length=50)
+    
+    def get_url(self):
+        return f"https://ddragon.leagueoflegends.com/cdn/img/{self.image_path}"
 
 class Summoner(models.Model):
     puuid = models.CharField(max_length=100, primary_key=True)
@@ -142,6 +150,8 @@ class Participant(models.Model):
     assists = models.IntegerField()
     spell1 = models.ForeignKey(SummonerSpell, on_delete=models.CASCADE, related_name='participants_spell1')
     spell2 = models.ForeignKey(SummonerSpell, on_delete=models.CASCADE, related_name='participants_spell2')
+    rune1=models.ForeignKey(Rune, on_delete=models.CASCADE, related_name='participants_rune1')
+    rune2=models.ForeignKey(Rune, on_delete=models.CASCADE, related_name='participants_rune2')
     creep_score = models.IntegerField()
     item1 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item1")
     item2 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item2")

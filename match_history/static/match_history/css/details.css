@@ -11,10 +11,10 @@
     width: 48px;
     overflow: hidden;
 }
-.item-img{
+.small-img{
     width: 22px;
 }
-
+.spe
 .champ-icon-small {
     width: 15px;
     border-radius: 50%;
@@ -23,7 +23,9 @@
 .champ-img {
     transform: scale(1.15);
 }
-
+.spells-wrapper {
+    overflow: hidden;
+}
 .large-text {
     font-size: 3rem;
 }
@@ -104,6 +106,13 @@
 
 .build-section {
 
+}
+.icon-2stack{
+    display: flex;
+    flex-direction: column;
+}
+.build-container {
+    display: flex
 }
 .items {
     display: grid;

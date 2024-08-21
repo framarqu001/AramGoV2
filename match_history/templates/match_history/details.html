@@ -35,39 +35,60 @@
                             <div class="match-length sub-text">{{match.get_duration}}</div>
                         </div>
                     </div>
+
                     <div class="build-seciton">
-                        <div class="champion-icon">
-                            <img class="champ-img" src="{{main_participant.champion.get_url}}" alt="" >
+
+                        <div class="build-container">
+                            <div class="champion-icon">
+                                <img class="champ-img" src="{{main_participant.champion.get_url}}" alt="" >
+                            </div>
+                            <div class="icon-2stack">
+                                <div class="spells-wrapper">
+                                    <img class ="small-img" src="{{main_participant.spell1.get_url}}" alt="">
+                                </div>
+                                <div class="spells-wrapper">
+                                    <img class ="small-img" src="{{main_participant.spell2.get_url}}" alt="">
+                                </div>
+                            </div>
+                            <div class="icon-2stack">
+                                <div class="spells-wrapper">
+                                    <img class ="small-img" src="{{main_participant.rune1.get_url}}" alt="">
+                                </div>
+                                <div class="spells-wrapper">
+                                    <img class ="small-img" src="{{main_participant.rune2.get_url}}" alt="">
+                                </div>
+                            </div>
                         </div>
+
                         <div class="items">
                             <div class="item1 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                                 {% if main_participant.item1  %}
-                                    <img class="item-img" src="{{main_participant.item1.get_url}}" alt="">
+                                    <img class="small-img" src="{{main_participant.item1.get_url}}" alt="">
                                 {% endif %}
                             </div>
                             <div class="item2 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                                 {% if main_participant.item2 %}
-                                    <img class="item-img" src="{{main_participant.item2.get_url}}" alt="">
+                                    <img class="small-img" src="{{main_participant.item2.get_url}}" alt="">
                                 {% endif %}
                             </div>
                             <div class="item3 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                                 {% if main_participant.item3 %}
-                                    <img class="item-img" src="{{main_participant.item3.get_url}}" alt="">
+                                    <img class="small-img" src="{{main_participant.item3.get_url}}" alt="">
                                 {% endif %}
                             </div>
                             <div class="item4 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                                 {% if main_participant.item4 %}
-                                    <img class="item-img" src="{{main_participant.item4.get_url}}" alt="">
+                                    <img class="small-img" src="{{main_participant.item4.get_url}}" alt="">
                                 {% endif %}
                             </div>
                             <div class="item5 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                                 {% if main_participant.item5 %}
-                                    <img class="item-img" src="{{main_participant.item5.get_url}}" alt="">
+                                    <img class="small-img" src="{{main_participant.item5.get_url}}" alt="">
                                 {% endif %}
                             </div>  
                             <div class="item6 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                                 {% if main_participant.item6 %}
-                                    <img class="item-img" src="{{main_participant.item6.get_url}}" alt="">
+                                    <img class="small-img" src="{{main_participant.item6.get_url}}" alt="">
                                 {% endif %}
                             </div>
                             <div class="item7"></div>

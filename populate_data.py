@@ -8,7 +8,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
 
-RIOT_API_KEY = "RGAPI-19f2b3ea-44b3-4d0b-b969-6e602d1d031f"
+RIOT_API_KEY = "RGAPI-d0b1ffc6-c349-4654-ad38-45ae7741498e"
 QUEUE = 450  # Aram
 COUNT = 10
 
@@ -168,6 +168,8 @@ class MatchManager():
             win = True if participant_data["win"] is True else False
             spell1 = SummonerSpell.objects.get(spell_id=participant_data["summoner1Id"])
             spell2 = SummonerSpell.objects.get(spell_id=participant_data["summoner2Id"])
+            rune1 = Rune.objects.get(rune_id__iexact=participant_data["perks"]["styles"][0]["style"])
+            rune2 = Rune.objects.get(rune_id__iexact=participant_data["perks"]["styles"][1]["style"])
             participant, created = Participant.objects.update_or_create(
                 match=match,
                 summoner=summoner,
@@ -181,7 +183,9 @@ class MatchManager():
                     "win": win,
                     "game_name": participant_data.get("riotIdGameName", participant_data["summonerName"]),
                     "spell1": spell1,
-                    "spell2": spell2
+                    "spell2": spell2,
+                    "rune1": rune1,
+                    "rune2": rune2,
                 }
             )
             if created:
@@ -198,6 +202,8 @@ class MatchManager():
                         participant.save()
                     except Item.DoesNotExist:
                         print(f"Item with ID {item_id} does not exist.")
+
+
 
         return
 
