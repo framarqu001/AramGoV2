@@ -131,6 +131,9 @@ class Match(models.Model):
     def __str__(self):
         return self.match_id
 
+    class Meta:
+        ordering = ['-game_start']
+
 
 class Participant(models.Model):
     BLUE_TEAM = 100
