@@ -5,6 +5,8 @@ from django.urls import reverse
 from django import template
 
 patch = "14.16.1"
+
+
 class Champion(models.Model):
     champion_id = models.CharField(primary_key=True, max_length=30)
     name = models.CharField(max_length=30)
@@ -19,7 +21,7 @@ class Champion(models.Model):
 
 
 class Item(models.Model):
-    item_id = models.CharField(max_length=30,primary_key=True)
+    item_id = models.CharField(max_length=30, primary_key=True)
     name = models.CharField(max_length=30)
     image_path = models.CharField(max_length=100)
 
@@ -40,6 +42,7 @@ class ProfileIcon(models.Model):
     def __str__(self):
         return self.profile_id
 
+
 class SummonerSpell(models.Model):
     spell_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=30)
@@ -50,14 +53,16 @@ class SummonerSpell(models.Model):
 
     def __str__(self):
         return f"{self.name} {self.spell_id}"
-    
+
+
 class Rune(models.Model):
     rune_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=30)
     image_path = models.CharField(max_length=50)
-    
+
     def get_url(self):
         return f"https://ddragon.leagueoflegends.com/cdn/img/{self.image_path}"
+
 
 class Summoner(models.Model):
     puuid = models.CharField(max_length=100, primary_key=True)
@@ -67,7 +72,7 @@ class Summoner(models.Model):
     tag_line = models.CharField(max_length=10, blank=True, default="")
     normalized_tag_line = models.CharField(max_length=50, blank=True, default="")
     summoner_level = models.IntegerField(blank=True, null=True)
-    profile_icon = models.ForeignKey(ProfileIcon, on_delete=models.SET_NULL,blank=True, null=True)
+    profile_icon = models.ForeignKey(ProfileIcon, on_delete=models.SET_NULL, blank=True, null=True)
     last_updated = models.DateTimeField(null=True, blank=True)
 
     # Get all matches in which a summoner was a participant in.
@@ -75,14 +80,13 @@ class Summoner(models.Model):
         # Returning a QuerySet instead of a list
         return Match.objects.filter(participants__summoner=self)
 
-
     def get_url(self):
         if self.game_name and self.tag_line:
             return reverse('match_history:details', args=[self.game_name, self.tag_line])
         return None
+
     def __str__(self):
         return f"Summoner:{self.game_name} {self.puuid}"
-    
 
 
 class Match(models.Model):
@@ -101,6 +105,9 @@ class Match(models.Model):
     game_version = models.CharField(max_length=50)
     winner = models.IntegerField(choices=WINNER_CHOICES)
 
+    def get_patch(self):
+        return '.'.join(self.game_version.split('.')[:2])
+
     def get_duration(self):
         minutes = self.game_duration // 60
         seconds = self.game_duration % 60
@@ -108,6 +115,7 @@ class Match(models.Model):
 
     def get_minutes(self):
         return self.game_duration // 60
+
     def get_participants(self):
         return self.participants.select_related("match").all()
 
@@ -153,8 +161,8 @@ class Participant(models.Model):
     assists = models.IntegerField()
     spell1 = models.ForeignKey(SummonerSpell, on_delete=models.CASCADE, related_name='participants_spell1')
     spell2 = models.ForeignKey(SummonerSpell, on_delete=models.CASCADE, related_name='participants_spell2')
-    rune1=models.ForeignKey(Rune, on_delete=models.CASCADE, related_name='participants_rune1', blank=True, null=True)
-    rune2=models.ForeignKey(Rune, on_delete=models.CASCADE, related_name='participants_rune2', blank=True, null=True)
+    rune1 = models.ForeignKey(Rune, on_delete=models.CASCADE, related_name='participants_rune1', blank=True, null=True)
+    rune2 = models.ForeignKey(Rune, on_delete=models.CASCADE, related_name='participants_rune2', blank=True, null=True)
     creep_score = models.IntegerField()
     item1 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item1")
     item2 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item2")
@@ -173,3 +181,90 @@ class Participant(models.Model):
 
     def __str__(self):
         return f"{self.game_name} playing {self.champion} in match {self.match}"
+
+
+class SummonerChampionStats(models.Model):
+    summoner = models.ForeignKey(Summoner, on_delete=models.CASCADE, related_name='champion_stats')
+    champion = models.ForeignKey(Champion, on_delete=models.CASCADE, related_name='summoner_stats')
+    total_played = models.IntegerField(default=0)
+    duration_played = models.IntegerField(default=0)  # in seconds
+    total_creep_score = models.IntegerField(default=0)
+    total_wins = models.IntegerField(default=0)
+    total_losses = models.IntegerField(default=0)
+    total_kills = models.IntegerField(default=0)
+    total_deaths = models.IntegerField(default=0)
+    total_assists = models.IntegerField(default=0)
+    year = models.IntegerField(default=2024)
+
+    class Meta:
+        unique_together = ('summoner', 'champion', 'year')
+
+    def win_rate(self):
+        return (self.total_wins / self.total_played) * 100 if self.total_played > 0 else 0
+
+    def __str__(self):
+        return f"stats for {self.summoner.game_name}:{self.champion.name} in {self.year}"
+
+    def update_stats(self, participant: Participant, match: Match):
+        self.total_played += 1
+        self.duration_played += match.game_duration
+        self.total_creep_score += participant.creep_score
+        if participant.win:
+            self.total_wins += 1
+        else:
+            self.total_losses += 1
+        self.total_kills += participant.kills
+        self.total_deaths += participant.deaths
+        self.total_assists += participant.assists
+        self.save()
+
+
+class AccountStats(models.Model):
+    summoner = models.ForeignKey(Summoner, on_delete=models.CASCADE, related_name='account_stats')
+    total_played = models.IntegerField(default=0)
+    total_wins = models.IntegerField(default=0)
+    total_losses = models.IntegerField(default=0)
+    total_kills = models.IntegerField(default=0)
+    total_deaths = models.IntegerField(default=0)
+    total_assists = models.IntegerField(default=0)
+    snowball_hits = models.IntegerField(default=0)
+    year = models.IntegerField(default=2024)
+
+    class Meta:
+        unique_together = ('summoner', 'year')
+
+    def __str__(self):
+        return f"Account stats for {self.summoner}"
+
+    def update_stats(self, participant: Participant):
+        self.total_played += 1
+        if participant.win:
+            self.total_wins += 1
+        else:
+            self.total_losses += 1
+        self.total_kills += participant.kills
+        self.total_deaths += participant.deaths
+        self.total_assists += participant.assists
+        self.save()
+
+
+class ChampionStatsPatch(models.Model):
+    champion = models.ForeignKey(Champion, on_delete=models.CASCADE, related_name='stats')
+    patch = models.CharField(max_length=10)
+    total_played = models.IntegerField(default=0)
+    total_wins = models.IntegerField(default=0)
+    total_losses = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ('champion', 'patch')
+
+    def __str__(self):
+        return f"Stats {self.champion}:{self.patch}"
+
+    def update_stats(self, participant: Participant):
+        self.total_played += 1
+        if participant.win:
+            self.total_wins += 1
+        else:
+            self.total_losses += 1
+        self.save()

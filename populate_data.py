@@ -8,7 +8,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
 
-RIOT_API_KEY = "RGAPI-d0b1ffc6-c349-4654-ad38-45ae7741498e"
+RIOT_API_KEY = "RGAPI-b4a80c83-294b-4f25-8496-5f17ac8221a4"
 QUEUE = 450  # Aram
 COUNT = 100
 
@@ -62,6 +62,13 @@ class SummonerManager():
         return summoner
 
 
+def _convert_stamp(unix_timestamp):
+    unix_timestamp = unix_timestamp / 1000
+    utc_datetime = dt.utcfromtimestamp(unix_timestamp)
+    est_timezone = pytz.timezone('America/New_York')
+    est_datetime = utc_datetime.replace(tzinfo=pytz.utc).astimezone(est_timezone)
+    return est_datetime
+
 
 class MatchManager():
     def __init__(self, platform, region, summoner: Summoner):
@@ -87,21 +94,17 @@ class MatchManager():
             print(f"Error fetching match info for match ID {match_id}: {err}")
 
     def _create_match(self, match_id: str, match_info: dict):
-        SECONDS = 60
-        game_start = self._convert_stamp(match_info["gameStartTimestamp"])
-        game_duration = match_info["gameDuration"] 
-        game_mode = match_info["gameMode"]
-        game_version = match_info["gameVersion"]
+
         blue = match_info["teams"][0]["win"]
         winner = 100 if blue is True else 200
 
         match, created = Match.objects.update_or_create(
             match_id=match_id,
             defaults={
-                "game_start": game_start,
-                "game_duration": game_duration,
-                "game_mode": game_mode,
-                "game_version": game_version,
+                "game_start": _convert_stamp(match_info["gameStartTimestamp"]),
+                "game_duration": match_info["gameDuration"],
+                "game_mode": match_info["gameMode"],
+                "game_version": match_info["gameVersion"],
                 "winner": winner
             }
         )
@@ -112,7 +115,7 @@ class MatchManager():
         return match, created
 
     def create_summoner_match(self, info_dict, game_creation):
-        icon_id = info_dict["iconId"]
+        icon_id = info_dict["profileIcon"]
         try:
             icon = ProfileIcon.objects.get(profile_id=icon_id)
         except ProfileIcon.DoesNotExist:
@@ -125,12 +128,12 @@ class MatchManager():
         summoner, created = Summoner.objects.update_or_create(
             puuid=info_dict["puuid"],
             defaults={
-                'game_name': info_dict["game_name"],
-                'normalized_game_name': info_dict["game_name"].replace(" ", "").lower(),
-                'summoner_name': info_dict["summoner_name"],
-                'tag_line': info_dict["tag"],
-                'normalized_tag_line': info_dict["tag"].replace(" ", "").lower(),
-                'summoner_level': info_dict["level"],
+                'game_name': info_dict.get("riotIdGameName", ""),
+                'normalized_game_name': info_dict.get("riotIdGameName", "").replace(" ", "").lower(),
+                'summoner_name': info_dict["summonerName"],
+                'tag_line': info_dict.get("riotIdTagline" ""),
+                'normalized_tag_line': info_dict.get("riotIdTagline" "").replace(" ", "").lower(),
+                'summoner_level': info_dict["summonerLevel"],
                 'profile_icon': icon,
                 'last_updated': game_creation,
             }
@@ -141,50 +144,73 @@ class MatchManager():
             print(f"{summoner} already exists")
         return summoner
 
+    def _add_items(self, participant, participant_data):
+        for j in range(6):
+            item_id = participant_data[f"item{j}"]
+            if item_id != 0:
+                try:
+                    item = Item.objects.get(pk=participant_data[f"item{j}"])
+                    setattr(participant, f"item{j}", item)
+                    participant.save()
+                except Item.DoesNotExist:
+                    print(f"Item with ID {item_id} does not exist.")
+
+    def _increment_models(self, participant, match):
+        patch = match.get_patch()
+        year = match.game_start.year
+        summoner_champ_stats, createad = SummonerChampionStats.objects.update_or_create(
+            summoner=participant.summoner,
+            champion=participant.champion,
+            year=year
+        )
+        summoner_champ_stats.update_stats(participant, match)
+        print(f"{summoner_champ_stats} created") if createad else print(f"{summoner_champ_stats} already exists")
+
+        account_stats, created = AccountStats.objects.update_or_create(
+            summoner=participant.summoner,
+            year=year
+        )
+        print(f"{account_stats} created") if created else print(f"{account_stats} already exists")
+        account_stats.update_stats(participant)
+
+        champ_stats_patch, created = ChampionStatsPatch.objects.update_or_create(
+            champion=participant.champion,
+            patch=patch
+        )
+        print(f"{champ_stats_patch} created") if created else print(f"{champ_stats_patch} already exists")
+
+
+
     def _create_participants(self, match_info: dict, match: Match):
         participants_puid = match_info["metadata"]["participants"]
 
-
-
         for i in range(len(participants_puid)):
-            # Create a summoner for each participant in matc
             participant_data = match_info["info"]["participants"][i]
-            summoner_info = {"puuid": participants_puid[i], "game_name": participant_data.get("riotIdGameName", ""),
-                             "tag": participant_data.get("riotIdTagline" ""),
-                             "level": participant_data["summonerLevel"], "iconId": participant_data["profileIcon"],
-                             "summoner_name": participant_data["summonerName"]}
-            summoner: Summoner = self.create_summoner_match(summoner_info, match.game_start)
-
-            # Create participant/stats for each participant in match
-
-            ## Change this later, add a #id to champions
+            summoner: Summoner = self.create_summoner_match(participant_data, match.game_start)
             champion: Champion = Champion.objects.get(champion_id__iexact=participant_data["championName"])
-
-            kills = participant_data["kills"]
-            deaths = participant_data["deaths"]
-            assists = participant_data["assists"]
-            creep_score = participant_data["totalMinionsKilled"]
             team_id = participant_data["teamId"]
             win = True if participant_data["win"] is True else False
             spell1 = SummonerSpell.objects.get(spell_id=participant_data["summoner1Id"])
             spell2 = SummonerSpell.objects.get(spell_id=participant_data["summoner2Id"])
             try:
-                rune1 = Rune.objects.get(rune_id__iexact=participant_data["perks"]["styles"][0]["selections"][0]["perk"])
+                rune1 = Rune.objects.get(
+                    rune_id__iexact=participant_data["perks"]["styles"][0]["selections"][0]["perk"])
             except Rune.DoesNotExist:
                 rune1 = None
             try:
-                    rune2 = Rune.objects.get(rune_id__iexact=participant_data["perks"]["styles"][1]["style"])
+                rune2 = Rune.objects.get(rune_id__iexact=participant_data["perks"]["styles"][1]["style"])
             except Rune.DoesNotExist:
                 rune2 = None
+
             participant, created = Participant.objects.update_or_create(
                 match=match,
                 summoner=summoner,
                 champion=champion,
                 defaults={
-                    "kills": kills,
-                    "deaths": deaths,
-                    "assists": assists,
-                    "creep_score": creep_score,
+                    "kills": participant_data["kills"],
+                    "deaths": participant_data["deaths"],
+                    "assists": participant_data["assists"],
+                    "creep_score": participant_data["totalMinionsKilled"],
                     "team": team_id,
                     "win": win,
                     "game_name": participant_data.get("riotIdGameName", participant_data["summonerName"]),
@@ -198,18 +224,9 @@ class MatchManager():
                 print(f"{participant} added to match {match}")
             else:
                 print(f"{participant} already exists ERORR!!!!")
+            self._add_items(participant, participant_data)
 
-            for j in range(6):
-                item_id = participant_data[f"item{j}"]
-                if item_id != 0:
-                    try:
-                        item = Item.objects.get(pk=participant_data[f"item{j}"])
-                        setattr(participant, f"item{j}", item)
-                        participant.save()
-                    except Item.DoesNotExist:
-                        print(f"Item with ID {item_id} does not exist.")
-
-        return
+            self._increment_models(participant, match)
 
     def process_matches(self):
         count = 0
@@ -223,13 +240,6 @@ class MatchManager():
             count += 1
             print(f"{count} matches processed")
 
-    def _convert_stamp(self, unix_timestamp):
-        unix_timestamp = unix_timestamp / 1000
-        utc_datetime = dt.utcfromtimestamp(unix_timestamp)
-        est_timezone = pytz.timezone('America/New_York')
-        est_datetime = utc_datetime.replace(tzinfo=pytz.utc).astimezone(est_timezone)
-        return est_datetime
-
     def set_summoner(self, summoner: Summoner):
         self._summoner = summoner
         self._matches = self._get_matches()
@@ -237,8 +247,8 @@ class MatchManager():
 
 if __name__ == "__main__":
     summonerBuilder = SummonerManager("americas", "na1")
-    summoner = summonerBuilder.create_summoner("highkeysavage", "na1")
-    matchBuilder = MatchManager("americas", "na1", summoner)
+    summonertest = summonerBuilder.create_summoner("highkeysavage", "na1")
+    matchBuilder = MatchManager("americas", "na1", summonertest)
     matchBuilder.process_matches()
     summoners = Summoner.objects.all()
     # for i in range(35):
