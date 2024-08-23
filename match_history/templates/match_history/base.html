@@ -17,7 +17,7 @@
         <div class="header">
             <ul class="nav-list">
                 <li><a href = "{% url 'match_history:home'%}">Home</a></li>
-                <li>Champions</li>
+                <li><a href="{% url "match_history:champions" %}">Champions</a></li>
             </ul>
             <form  action="{% url 'match_history:summoner' %}" method="post">
                 {% csrf_token %}

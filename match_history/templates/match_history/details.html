@@ -24,7 +24,10 @@
 <div class="main-info">
     <div class="sidebar">
         <div class="account-container section">
-            2024 Account Stats
+            <div class="section-header">
+                <div class="title">Account Summary</div>
+                <div class="year">2024</div>
+            </div>
             <hr>
             <div class="account-card">
                 <div class="account-aram">ARAM</div>
@@ -40,7 +43,10 @@
 
         </div>
         <div class="snowball-container section">
-            2024 Snowball Hits
+            <div class="section-header">
+                <div class="title">Snowballs</div>
+                <div class="year">2024</div>
+            </div>
             <hr>
             <div class="snowball-content">
                 <div class="icon-med">
@@ -54,7 +60,10 @@
 
         </div>
         <div class="champion-container section">
-            Champion Stats
+            <div class="section-header">
+                <div class="title">Champions Played</div>
+                <div class="year">2024</div>
+            </div>
             <hr>
             <div class="champ-list">
                 {% for champ, stats in champion_stats%}
@@ -76,11 +85,42 @@
                     </div>
                 {% endfor %}
             </div>
+        </div>
 
+        <div class="recent-container section">
+            <div class="section-header">
+                <div class="title">Recently Played</div>
+                <div class="year sub-text">(last {{recent_list.0}} games)</div>
+            </div>
+            <hr>
+            <div class="recent-list">
+            
+                {% for participant in recent_list.1 %}
+                <div class="recent-card">
+                    <div class="recent-info">
+                        <div class="icon-med">
+                            <img class="champ-img" src="{{participant.participant.profile_icon.get_url}}" alt="">
+                        </div>
+                        <div class="account-info">
+                            <div class="recent-name"><a href ="{{participant.participant.get_url}}">{{participant.participant.get_full_name}}</a></div>
+                            <div class="recent-level sub-text">level {{participant.participant.summoner_level}}</div>
+                        </div>
+                    </div>
+                    <div class="recent-stats">
+                        <div class="win-loss">{{participant.total_wins}}W / {{participant.total_losses}}L</div>
+                    </div>
+                    <div class="recent-wr">
+                        {{participant.winrate}}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
+
     <div class="match-history section">
         Match History
+        <hr>
         <div id="match-list" data-total-pages ={{ total_pages }}>
 
             {% include "match_history/match_list.html"%}

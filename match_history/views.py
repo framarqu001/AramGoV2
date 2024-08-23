@@ -1,14 +1,15 @@
 from django.db.models import Prefetch
 from django.http import HttpResponse, HttpResponseNotAllowed, Http404, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404
-from match_history.models import Summoner, Participant, Match, AccountStats, SummonerChampionStats
+from match_history.models import Summoner, Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from populate_data import SummonerManager, MatchManager
 from riotwatcher import ApiError
 from django.db import transaction
 from django.core.paginator import Paginator
-
+from collections import Counter, defaultdict
+import pdb
 
 # Create your views here.
 
@@ -23,15 +24,15 @@ def details(request, game_name: str, tag: str):
     except Http404 as e:
         raise Http404(e)
 
-    matches_per_page = 5
+    matches_per_page = 10
 
     matches_queryset = Match.objects.filter(participants__summoner=summoner).prefetch_related(
         Prefetch('participants', queryset=Participant.objects.select_related(
             'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", "item1", "item2", "item3",
-            'item4', 'item5', 'item6'),
+            'item4', 'item5', 'item6', 'summoner__profile_icon'),
                  to_attr='all_participants')
     )
-
+    recent_list = _get_recent(summoner, matches_queryset)
     paginator = Paginator(matches_queryset, matches_per_page)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
@@ -53,6 +54,7 @@ def details(request, game_name: str, tag: str):
         "total_pages": paginator.num_pages,
         "account_stats": account_stats,
         "champion_stats": champion_stats,
+        "recent_list": recent_list,
     }
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return render(request, 'match_history/match_list.html', context)
@@ -105,8 +107,21 @@ def about(request):
     pass
 
 
-def champions(reques):
-    pass
+def champions(request):
+    champion_query = ChampionStatsPatch.objects.filter(patch__iexact="14.16").prefetch_related('champion')
+    champion_data = []
+
+    for champion_stat in champion_query:
+        champion_stat_tuple = (
+            champion_stat.patch,
+            champion_stat.total_played,
+            champion_stat.total_wins,
+            champion_stat.total_losses,
+        )
+        champion_data.append((champion_stat.champion.name, champion_stat_tuple))
+
+    context = {'champion_query': champion_data}
+    return render(request, 'match_history/champions.html', context)
 
 
 def _validate_summoner(game_name, tag):
@@ -117,34 +132,81 @@ def _validate_summoner(game_name, tag):
         try:
             summoner_manager = SummonerManager("americas", "na1")
             puuid = summoner_manager._get_puid(game_name, tag)
-            # Assuming we might need to create or update the Summoner entry in our DB
             Summoner.objects.update_or_create(
                 game_name=game_name, tag_line=tag, defaults={'puuid': puuid}
             )
         except ApiError:
-            # If API call fails, raise Http404
             raise Http404(f"Summoner with game name {game_name} and tag {tag} could not be found and API call failed.")
     return summoner
 
 
 def _get_match_data(summoner, page_obj):
-    match_data = []
+    match_data= []
+
     for match in page_obj:
-        main_participant_list = [p for p in match.all_participants if p.summoner == summoner]
-        blue_team_list = [p for p in match.all_participants if p.team == 100]
-        red_team_list = [p for p in match.all_participants if p.team == 200]
+        blue_team_list = []
+        red_team_list = []
+        for participant in match.all_participants:
+            if participant.summoner == summoner:
+                main_participant = participant
+            if participant.team == 100:
+                blue_team_list.append(participant)
+            else:
+                red_team_list.append(participant)
 
-        main_participant = main_participant_list[0] if main_participant_list else None
-        if main_participant:
-            kda = (main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
-            cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        kda = (main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
+        cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
-            main_stats = {
-                "kda": f"{kda:.2f}",
-                "cs_min": f"{cs_min:.1f}"
-            }
-            match_data.append((match, main_participant, blue_team_list, red_team_list, main_stats))
+        main_stats = {
+            "kda": f"{kda:.2f}",
+            "cs_min": f"{cs_min:.1f}"
+        }
+        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+    print(match_data)
     return match_data
+
+def _get_recent(summoner, matches_queryset):
+    counter = defaultdict(lambda: {'count': 0, 'wins': 0})
+    matches = matches_queryset[:50]
+    games_played = len(matches)
+    main_team = None
+    for match in matches:
+        for participant in match.all_participants:
+            if participant.summoner == summoner:
+                main_team = participant.team
+                break;
+            
+        for participant in match.all_participants:
+            if participant.team != main_team or participant.summoner == summoner:
+                continue
+            if participant.win:
+                counter[participant.summoner]['wins'] += 1
+            counter[participant.summoner]['count'] += 1
+    recent_sorted = sorted(counter.items(), key=lambda item: item[1]['count'], reverse=True)[:7]
+
+    recent_stats = []
+    for participant in recent_sorted:
+        total_played = participant[1]['count']
+        if total_played == 1:
+            continue
+        total_wins = participant[1]['wins']
+        total_loses = total_played - total_wins
+        win_rate = (total_wins / total_played * 100) if total_played > 0 else 0
+        stats = {
+            'participant': participant[0],
+            'total_wins': participant[1]['wins'],
+            'total_losses': total_loses,
+            'winrate': f"{int(round(win_rate))}%",
+        }
+        recent_stats.append(stats)
+    print(recent_stats)
+    return games_played, recent_stats
+
+
+
+
+
+
 
 def _get_champion_stats_data(summoner_champion_stats: SummonerChampionStats):
     champion_stats_data = []

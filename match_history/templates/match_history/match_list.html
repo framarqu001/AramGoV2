@@ -34,6 +34,9 @@
                         <img class ="small-img sub-rune {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" src="{{main_participant.rune2.get_url}}" alt="">
                     </div>
                 </div>
+                <div class="spells-wrapper">
+                    <img class ="small-img {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" src="https://ddragon.leagueoflegends.com/cdn/14.16.1/img/item/2052.png" alt="">
+                </div>
             </div>
 
             <div class="items">
@@ -105,7 +108,9 @@
             </div>
         </div>
     </div>
-    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}"></button>
+    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+        <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
+    </button>
 
 </div>
 {% endfor %}

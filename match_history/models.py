@@ -85,6 +85,9 @@ class Summoner(models.Model):
             return reverse('match_history:details', args=[self.game_name, self.tag_line])
         return None
 
+    def get_full_name(self):
+        return f"{self.game_name}#{self.tag_line}"
+    
     def __str__(self):
         return f"Summoner:{self.game_name} {self.puuid}"
 

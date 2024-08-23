@@ -1,13 +1,18 @@
 .content {
     /* background-color: lightgray; */
 }
+hr {
+    margin-bottom: 12px;
+}
 .main-icon {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    border: 2px solid white
 }
-
+.drop {
+    width: 30px;
+    margin-bottom: 5px;
+}
 .profile-icon-container {
     display: flex;
     flex-direction: column;
@@ -21,21 +26,23 @@
     width: 36px;
     overflow: hidden;
 }
+.champ-img {
+    width: 36px;
+    transform: scale(1.15)
+}
+
 .small-img{
     width: 22px;
 }
 .level {
-    color: black;
     padding: 0 3px;
     position: relative;
-    background-color: lightblue;
+    background-color: #222433;
     text-align: center;
     bottom: 10px;
 }
 
-.champ-img {
-    transform: scale(1.15);
-}
+
 .champ-icon-small {
     width: 15px;
     border-radius: 50%;
@@ -71,7 +78,6 @@
     padding-top: 1rem;
     display: grid;
     /* background-color: salmon; */
-    min-height: 1400px;
     margin: auto;
     width: var(--max-width);
     display: grid;
@@ -124,14 +130,14 @@
 
 .match-section-container {
     width: 100%;
-    display: flex;
-    gap: 20px;
-    justify-content: space-between;
-    align-items: center;
+    display: grid;
+    grid-template-columns: .6fr 1fr 1fr 1fr;
     padding: 0 .5rem;
+    place-items: center;
 }
-.result-seciton {
-
+.result-section {
+    justify-self: start;
+    margin-left: 10px;
 }
 
 .build-section {
@@ -148,6 +154,7 @@
     flex-direction: column;
 }
 .build-container {
+    align-items: center;
     display: flex;
     gap: 3px
 }
@@ -178,6 +185,10 @@
 }
 
 .match-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: center;
     width: 40px;
     border: 0;
     justify-self: flex-end;
@@ -192,6 +203,7 @@
 }
 
 .participant-section {
+    justify-self: end;
     font-size: 11px;
     display: flex;
     color: #e6e6e6;
@@ -203,7 +215,7 @@
     align-items: center;
 }
 .game-name {
-    max-width: 10ch;
+    max-width: 50px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -231,9 +243,7 @@
 .stat-text {
 
 }
-button {
-    display: block;
-}
+
 
 
 /* ----------------------------------------------- */
@@ -242,6 +252,7 @@ button {
     flex-direction: column;
     gap: 3px;
 }
+
 .kda {
     white-space: nowrap;
 }
@@ -297,4 +308,43 @@ button {
 }
 .account-aram {
     font-weight: 1000;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+}
+/* ------------------------------- */
+.recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.recent-list img {
+    width: 31px;
+}
+
+.recent-card {
+    padding:4px;
+    display: grid;
+    grid-template-columns: 150px 1fr 1fr;
+}
+.recent-info {
+    display: flex;
+    align-items: center;
+    gap:5px
+}
+.recent-stats {
+    text-align: center;
+}
+.recent-name {
+    font-size: .8rem;
+    max-width: 100px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 1;
+}
+.recent-wr {
+    justify-self: end;
 }

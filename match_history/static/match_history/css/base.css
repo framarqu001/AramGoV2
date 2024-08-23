@@ -105,6 +105,7 @@
     min-width: var(--max-width);
     background-color: var(--primary-color);
     z-index: 999;
+    background-color: #222433;
   }
   #nav-search {
     width: 300px;
