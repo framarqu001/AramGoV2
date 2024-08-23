@@ -177,9 +177,8 @@ class MatchManager():
             champion=participant.champion,
             patch=patch
         )
+        champ_stats_patch.update_stats(participant)
         print(f"{champ_stats_patch} created") if created else print(f"{champ_stats_patch} already exists")
-
-
 
     def _create_participants(self, match_info: dict, match: Match):
         participants_puid = match_info["metadata"]["participants"]
@@ -254,10 +253,10 @@ class MatchManager():
 
 
 if __name__ == "__main__":
-    # summonerBuilder = SummonerManager("americas", "na1")
-    # summonertest = summonerBuilder.create_summoner("highkeysavage", "na1")
-    # matchBuilder = MatchManager("americas", "na1", summonertest)
-    # matchBuilder.process_matches()
+    summonerBuilder = SummonerManager("americas", "na1")
+    summonertest = summonerBuilder.create_summoner("highkeysavage", "na1")
+    matchBuilder = MatchManager("americas", "na1", summonertest)
+    matchBuilder.process_matches()
     summoners = Summoner.objects.all()
     for i in range(35):
         matchMaker = MatchManager("americas", "na1", summoners[i])
