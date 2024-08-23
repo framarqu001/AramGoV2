@@ -1,7 +1,7 @@
 from django.db.models import Prefetch
 from django.http import HttpResponse, HttpResponseNotAllowed, Http404, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404
-from match_history.models import Summoner, Participant, Match
+from match_history.models import Summoner, Participant, Match, AccountStats, SummonerChampionStats
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from populate_data import SummonerManager, MatchManager
@@ -41,10 +41,18 @@ def details(request, game_name: str, tag: str):
         context = {"matches": matches}
         return render(request, 'match_history/match_list.html', context)
 
+    account_stats = AccountStats.objects.filter(summoner=summoner).first()
+    champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by('-total_played')[:7].prefetch_related(
+        'champion'
+    )
+    champion_stats = _get_champion_stats_data(champion_stats)
+    account_stats = _get_account_stats(account_stats)
     context = {
         "summoner": summoner,
         "matches": matches,
         "total_pages": paginator.num_pages,
+        "account_stats": account_stats,
+        "champion_stats": champion_stats,
     }
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return render(request, 'match_history/match_list.html', context)
@@ -128,8 +136,7 @@ def _get_match_data(summoner, page_obj):
 
         main_participant = main_participant_list[0] if main_participant_list else None
         if main_participant:
-            kda = (
-                          main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
+            kda = (main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
             cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
             main_stats = {
@@ -138,3 +145,45 @@ def _get_match_data(summoner, page_obj):
             }
             match_data.append((match, main_participant, blue_team_list, red_team_list, main_stats))
     return match_data
+
+def _get_champion_stats_data(summoner_champion_stats: SummonerChampionStats):
+    champion_stats_data = []
+    for stat in summoner_champion_stats:
+        win_rate = (stat.total_wins / stat.total_played * 100) if stat.total_played > 0 else 0
+        average_kills = stat.total_kills / stat.total_played
+        average_deaths = stat.total_deaths / stat.total_played
+        average_assists = stat.total_assists / stat.total_played
+        kda = (average_kills + average_assists) / average_deaths if average_deaths else 0
+        champion_data = {
+            "total_played": stat.total_played,
+            "total_wins": stat.total_wins,
+            "total_losses": stat.total_losses,
+            "winrate": f"{int(round(win_rate))}%",
+            "kills": f"{average_kills:.1f}".rstrip('0').rstrip('.'),
+            "deaths": f"{average_deaths:.1f}".rstrip('0').rstrip('.'),
+            "assists": f"{average_assists:.1f}".rstrip('0').rstrip('.'),
+            "kda": f"{kda:.2f}".rstrip('0').rstrip('.'),
+            "year": stat.year
+        }
+        champion_stats_data.append((stat.champion, champion_data))
+    return champion_stats_data
+
+def _get_account_stats(account_stats):
+    win_rate = (account_stats.total_wins / account_stats.total_played * 100) if account_stats.total_played > 0 else 0
+    average_kills = account_stats.total_kills / account_stats.total_played
+    average_deaths = account_stats.total_deaths / account_stats.total_played
+    average_assists = account_stats.total_assists / account_stats.total_played
+    kda = (average_kills + average_assists) / average_deaths if average_deaths else 0
+    account_stats = {
+        "total_played": account_stats.total_played,
+        "total_wins": account_stats.total_wins,
+        "total_losses": account_stats.total_losses,
+        "winrate": f"{int(round(win_rate))}%",
+        "kills": f"{average_kills:.1f}".rstrip('0').rstrip('.'),
+        "deaths": f"{average_deaths:.1f}".rstrip('0').rstrip('.'),
+        "assists": f"{average_assists:.1f}".rstrip('0').rstrip('.'),
+        "kda": f"{kda:.2f}".rstrip('0').rstrip('.'),
+        "snowballs_hitrate": account_stats.get_snowball_percent(),
+        'snowballs_thrown': account_stats.snowballs_thrown
+    }
+    return account_stats

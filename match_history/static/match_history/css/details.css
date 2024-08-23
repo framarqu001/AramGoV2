@@ -17,6 +17,10 @@
     width: 48px;
     overflow: hidden;
 }
+.icon-med {
+    width: 36px;
+    overflow: hidden;
+}
 .small-img{
     width: 22px;
 }
@@ -76,9 +80,16 @@
 }
 .sidebar {
     /* background-color: #222433; */
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
 }
 .section {
+    padding-top: 3px;
+    padding-bottom: 1rem;
     background-color: #222433;
+    min-height: 100px;
+    padding: 8px
 }
 .match-history {
     /*background-color: rgb(235, 252, 135);*/
@@ -161,7 +172,9 @@
     background-color: rgba(213,123,101,.2);
 }
 .stat-section {
-
+    display: flex;
+    align-items: center;
+    flex-direction: column;
 }
 
 .match-btn {
@@ -210,7 +223,6 @@
 .section {
     border-radius: 12px;
     /* background-color:#222433 ; */
-    padding: 20px
 }
 .sub-text {
     font-size: .8rem;
@@ -221,4 +233,68 @@
 }
 button {
     display: block;
+}
+
+
+/* ----------------------------------------------- */
+.champ-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.kda {
+    white-space: nowrap;
+}
+
+.champ-card {
+    align-items: center;
+    padding: 4px;
+    display: flex;
+    gap:1rem
+}
+.total-played {
+    display:flex;
+    flex-direction: column;
+    align-items: end;
+}
+
+.champs-text {
+    display: grid;
+    grid-template-columns: .8fr 1fr 1fr;
+    align-items: center;
+    width: 100%;
+}
+/* ------------------------------------------- */
+.snowball-container {
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+}
+.snowball-content {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px
+}
+.snowball-wrapper{
+    text-align: center;
+}
+.snowball-content .icon-med {
+    border-radius: 50%;
+}
+/* --------------------------------------- */
+.account-container{
+    display: flex;
+    flex-direction: column;
+}
+.account-card {
+    display: grid;
+    height: 100%;
+    align-items: center;
+    gap: 10x;
+    grid-template-columns: 1fr 2fr 1fr;
+}
+.account-aram {
+    font-weight: 1000;
 }

@@ -155,7 +155,7 @@ class MatchManager():
                 except Item.DoesNotExist:
                     print(f"Item with ID {item_id} does not exist.")
 
-    def _increment_models(self, participant, match):
+    def _increment_models(self, participant, match, snowballs):
         patch = match.get_patch()
         year = match.game_start.year
         summoner_champ_stats, createad = SummonerChampionStats.objects.update_or_create(
@@ -171,7 +171,7 @@ class MatchManager():
             year=year
         )
         print(f"{account_stats} created") if created else print(f"{account_stats} already exists")
-        account_stats.update_stats(participant)
+        account_stats.update_stats(participant, snowballs)
 
         champ_stats_patch, created = ChampionStatsPatch.objects.update_or_create(
             champion=participant.champion,
@@ -220,13 +220,21 @@ class MatchManager():
                     "rune2": rune2,
                 }
             )
+            total_snowballs = 0
+            if participant.spell1.spell_id == 32:
+                total_snowballs = participant_data["summoner1Casts"]
+            elif participant.spell2.spell_id == 32:
+                total_snowballs = participant_data["summoner2Casts"]
+            snowball_hits = participant_data["challenges"]['snowballsHit']
+            snowballs = (snowball_hits, total_snowballs)
+
             if created:
                 print(f"{participant} added to match {match}")
             else:
                 print(f"{participant} already exists ERORR!!!!")
             self._add_items(participant, participant_data)
 
-            self._increment_models(participant, match)
+            self._increment_models(participant, match, snowballs)
 
     def process_matches(self):
         count = 0
@@ -246,12 +254,12 @@ class MatchManager():
 
 
 if __name__ == "__main__":
-    summonerBuilder = SummonerManager("americas", "na1")
-    summonertest = summonerBuilder.create_summoner("highkeysavage", "na1")
-    matchBuilder = MatchManager("americas", "na1", summonertest)
-    matchBuilder.process_matches()
+    # summonerBuilder = SummonerManager("americas", "na1")
+    # summonertest = summonerBuilder.create_summoner("highkeysavage", "na1")
+    # matchBuilder = MatchManager("americas", "na1", summonertest)
+    # matchBuilder.process_matches()
     summoners = Summoner.objects.all()
-    # for i in range(35):
-    #     matchMaker = MatchManager("americas", "na1", summoners[i])
-    #     matchMaker.process_matches()
-    #     print("hey")
+    for i in range(35):
+        matchMaker = MatchManager("americas", "na1", summoners[i])
+        matchMaker.process_matches()
+        print("hey")

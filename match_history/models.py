@@ -227,6 +227,7 @@ class AccountStats(models.Model):
     total_kills = models.IntegerField(default=0)
     total_deaths = models.IntegerField(default=0)
     total_assists = models.IntegerField(default=0)
+    snowballs_thrown = models.IntegerField(default=0)
     snowball_hits = models.IntegerField(default=0)
     year = models.IntegerField(default=2024)
 
@@ -235,8 +236,12 @@ class AccountStats(models.Model):
 
     def __str__(self):
         return f"Account stats for {self.summoner}"
+    
+    def get_snowball_percent(self):
+        hit_rate = (self.snowball_hits / self.snowballs_thrown * 100) if self.snowballs_thrown > 0 else 0
+        return  f"{int(round(hit_rate))}%"
 
-    def update_stats(self, participant: Participant):
+    def update_stats(self, participant: Participant, snowballs):
         self.total_played += 1
         if participant.win:
             self.total_wins += 1
@@ -245,6 +250,8 @@ class AccountStats(models.Model):
         self.total_kills += participant.kills
         self.total_deaths += participant.deaths
         self.total_assists += participant.assists
+        self.snowballs_thrown += snowballs[1]
+        self.snowball_hits += snowballs[0]
         self.save()
 
 

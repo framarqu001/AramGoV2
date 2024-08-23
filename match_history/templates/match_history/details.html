@@ -23,19 +23,59 @@
 </div>
 <div class="main-info">
     <div class="sidebar">
-        <div class="Account-container section">
-            Account
+        <div class="account-container section">
+            2024 Account Stats
             <hr>
+            <div class="account-card">
+                <div class="account-aram">ARAM</div>
+                <div class="stat-section stats-text sub-text">
+                    <div class="champ-kda"> {{account_stats.kda}} </div>
+                    <div class="kda"> {{account_stats.kills}} / {{account_stats.deaths}} / {{account_stats.assists}} </div>
+                </div>
+                <div class=" total-played">
+                    <div class="winrate">{{account_stats.winrate}}</div>
+                    <div class="total-played">{{account_stats.total_played}} games</div>
+                </div>
+            </div>
 
         </div>
-        <div class="Account-container section">
-            Snowball Hits
+        <div class="snowball-container section">
+            2024 Snowball Hits
             <hr>
+            <div class="snowball-content">
+                <div class="icon-med">
+                    <img src="https://ddragon.leagueoflegends.com/cdn/14.16.1/img/spell/SummonerSnowball.png" alt="" class="champ-img">
+                </div>
+                <div class="snowball-wrapper">
+                    <div class="snowballs">{{account_stats.snowballs_hitrate}} </div>
+                    <div class="thrown">{{account_stats.snowballs_thrown}} thrown</div>
+                </div>
+            </div>
 
         </div>
-        <div class="Account-container section">
-            Champions
+        <div class="champion-container section">
+            Champion Stats
             <hr>
+            <div class="champ-list">
+                {% for champ, stats in champion_stats%}
+                    <div class="champ-card">
+                        <div class="icon-med">
+                            <img class="champ-img" src="{{champ.get_url}}" alt="">
+                        </div>
+                        <div class="champs-text">
+                            <div class="div">{{champ.name}}</div>
+                            <div class="stat-section stats-text sub-text">
+                                <div class="champ-kda">{{stats.kda}}</div>
+                                <div class="kda">{{stats.kills}} / {{stats.deaths}} / {{stats.assists}}</div>
+                            </div>
+                            <div class=" total-played">
+                                <div class="winrate">{{stats.winrate}}</div>
+                                <div class="total-played">{{stats.total_played}} games</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
 
         </div>
     </div>
@@ -45,7 +85,6 @@
 
             {% include "match_history/match_list.html"%}
             
-           <p>done</p>
         </div>
     </div>
 </div>

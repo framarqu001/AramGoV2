@@ -95,12 +95,16 @@
     color: inherit
   }
   .header {
+    position: sticky;
+    top: 0px;
     height: 100%;
     display: flex;
     align-items: center;
     padding: 2rem;
     justify-content: space-between;
-    min-width: var(--max-width)
+    min-width: var(--max-width);
+    background-color: var(--primary-color);
+    z-index: 999;
   }
   #nav-search {
     width: 300px;
