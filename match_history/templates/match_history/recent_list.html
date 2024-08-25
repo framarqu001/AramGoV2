@@ -1,0 +1,19 @@
+{% for participant in recent_list.1 %}
+    <div class="recent-card">
+        <div class="recent-info">
+            <div class="icon-med">
+                <img class="champ-img" src="{{participant.participant.profile_icon.get_url}}" alt="">
+            </div>
+            <div class="account-info">
+                <div class="recent-name"><a href ="{{participant.participant.get_url}}">{{participant.participant.get_full_name}}</a></div>
+                <div class="recent-level sub-text">level {{participant.participant.summoner_level}}</div>
+            </div>
+        </div>
+        <div class="recent-stats">
+            <div class="win-loss">{{participant.total_wins}}W / {{participant.total_losses}}L</div>
+        </div>
+        <div class="recent-wr">
+            {{participant.winrate}}
+        </div>
+    </div>
+{% endfor %}
