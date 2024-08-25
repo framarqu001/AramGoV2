@@ -6,7 +6,7 @@ from datetime import datetime as dt
 import pytz
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', "test.settings")
 django.setup()
 from match_history.models import *
 
