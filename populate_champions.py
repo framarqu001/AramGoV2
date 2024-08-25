@@ -3,7 +3,7 @@ import os
 import django
 import requests
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', "test.settings")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 
 from match_history.models import Champion, Item, ProfileIcon, SummonerSpell, Rune

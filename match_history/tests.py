@@ -67,6 +67,6 @@ class MatchParticipantTest(TestCase):
         self.assertFalse(Participant.objects.filter(pk=self.participant.pk).exists())
 
 
-    ##test if user changes there name
-    ## test all items are retriavable
+    ##AramGoV2 if user changes there name
+    ## AramGoV2 all items are retriavable
 
