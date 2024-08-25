@@ -83,7 +83,7 @@
         <div id="match-list" data-total-pages ={{ total_pages }}>
 
             {% include "match_history/match_list.html"%}
-            
+
         </div>
     </div>
 </div>
@@ -161,7 +161,6 @@
                             // Append the loaded data to the match list
                             $('#match-list').append(data);
 
-                            // Optionally, add a "done" element after loading the page for visual feedback
                             $('#match-list').append('<div class="done">Done with page ' + page + '</div>');
 
                             // Increment the page for the next load
@@ -178,11 +177,32 @@
         });
     });
 </script>
-    <script>
-        document.getElementById('update').addEventListener('click', function() {
-            let summonerId = '{{ summoner.id }}';  // Dynamically pass the summoner ID
+<script>
+    $(document).ready(function() {
+        function updateSections() {
             $.ajax({
-                url: '{% url "match_history:update" %}',  // Django view URL
+                url: window.location.href,  // Corrected URL to a Django view
+                method: 'GET',
+                data: {
+                    'section': 'update'
+                },
+                success: function(response) {
+                    console.log(response.recent_list);
+                    $('.account-card').html(response.account_summary);
+                    $('.champ-list').html(response.champion_list);
+                    $('.recent-list').html(response.recent_list);
+                },
+                error: function() {
+                    console.error("Error updating sections.");
+                }
+            });
+        }
+
+        document.getElementById('update').addEventListener('click', function() {
+            console.log("hey you clicked me");
+            let summonerId = '{{ summoner.puuid }}';  // Ensure this renders correctly
+            $.ajax({
+                url: {%  url 'match_history:update' %},  // Confirm this URL with Django routing
                 method: 'POST',
                 data: {
                     'summoner_id': summonerId,
@@ -190,7 +210,7 @@
                 },
                 success: function(response) {
                     let taskId = response.task_id;
-                    console.log(taskId)
+                    console.log(taskId);
                     pollTaskStatus(taskId);
                 },
                 error: function() {
@@ -201,13 +221,15 @@
 
         function pollTaskStatus(taskId) {
             let interval = setInterval(function() {
+                let taskStatusUrl = `/celery-progress/${taskId}/`;
                 $.ajax({
-                    {#url: '{% url "celery_progress:task_status" task_id=taskId %}',  // Ensure correct task status URL#}
+                    url: taskStatusUrl,
                     method: 'GET',
                     success: function(response) {
                         if (response.state === 'SUCCESS') {
+                            console.log("success");
                             clearInterval(interval);
-                            updateSection('account-summary');
+                            updateSections();
                         } else if (response.state === 'FAILURE') {
                             clearInterval(interval);
                             console.error("Task failed.");
@@ -219,7 +241,11 @@
                 });
             }, 2000);
         }
-    </script>
+    });
+
+
+</script>
+
 
 
 {% endblock %}

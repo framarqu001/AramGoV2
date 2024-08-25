@@ -26,4 +26,3 @@ urlpatterns = [
 ]
 if not settings.TESTING:
     urlpatterns += debug_toolbar_urls()
-ada

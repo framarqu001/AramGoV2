@@ -10,7 +10,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
 
-RIOT_API_KEY = "RGAPI-6c4184ef-1995-403f-9070-73261a2eea1e"
+RIOT_API_KEY = 'RGAPI-a9929b33-ba47-4756-8551-b0e18cba659f'
 QUEUE = 450  # Aram
 COUNT = 50
 from django.db import transaction
@@ -292,7 +292,7 @@ class MatchManager():
             self._summoner.save()
 
     def last_20(self, progress_recorder=None):
-        self._matches = self._get_20(self._matches)
+        self._matches = self._get_20()
         total_matches = len(self._matches)
 
         for i, match in enumerate(self._matches):
@@ -304,8 +304,7 @@ class MatchManager():
                     self._create_participants(match_info, match_model)
                 else:
                     print(f"{match} already exists")
-                print(f"{self._processed_matches} matches processed")
-                sleep(2);
+                print(f"{i} matches processed")
                 if progress_recorder:
                     progress_recorder.set_progress(i,total_matches,description="matches processed")
 

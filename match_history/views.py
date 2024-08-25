@@ -58,7 +58,7 @@ def details(request, game_name: str, tag: str):
     matches = _get_match_data(summoner, page_obj)
     section = request.GET.get('section', None)
 
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and section != "account-summary":
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and section != "update":
         print('hi')
         if int(page_number) <= paginator.num_pages:
             context = {"matches": matches}
@@ -77,11 +77,20 @@ def details(request, game_name: str, tag: str):
         account_stats = _get_account_stats(account_stats)
 
     print(section)
-    if section == "account-summary":
-        print('hey')
-        html = render_to_string('match_history/account_summary.html', {'account_stats': account_stats})
-        return JsonResponse({
-                                'html': html})  # Return the HTML wrapped in JSON for easier handlingeturn render(request, 'match_history/account_summary.html', {'account_stats': account_stats})
+    if section == "update":
+        print("hey")
+        context = {
+            'account_stats': account_stats,  # Fetch the latest account stats
+            'champion_stats': champion_stats,  # Fetch the latest champions played stats
+            'recent_stats': recent_list,  # Fetch the latest recently played stats
+        }
+        data = {
+            'account_summary': render_to_string('match_history/account_summary.html', {'account_stats': context['account_stats']}),
+            'champion_list': render_to_string('match_history/champ_list.html', {'champion_stats': context['champion_stats']}),
+            'recent_list': render_to_string('match_history/recent_list.html', {'recent_list': context['recent_stats']}),
+        }
+        print(data['recent_list'])
+        return JsonResponse(data)
 
     context = {
         "summoner": summoner,
