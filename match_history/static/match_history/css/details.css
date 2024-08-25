@@ -1,6 +1,18 @@
 .content {
     /* background-color: lightgray; */
 }
+.loading-wrapper {
+    width: 800px;
+    position: absolute;
+    left: 50%;
+    top: 30%;
+    transform: translate(-50%, -50%);
+}
+#progress-bar-message {
+    margin-top: 100px;
+    text-align: center;
+}
+
 hr {
     margin-bottom: 12px;
 }

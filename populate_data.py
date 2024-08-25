@@ -1,4 +1,6 @@
 import os
+from time import sleep
+
 import django
 from datetime import datetime as dt
 import pytz
@@ -8,9 +10,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
 
-RIOT_API_KEY = "RGAPI-3b997c42-e0ca-418f-ac53-021e2f188c78"
+RIOT_API_KEY = "RGAPI-6c4184ef-1995-403f-9070-73261a2eea1e"
 QUEUE = 450  # Aram
-COUNT = 100
+COUNT = 50
+from django.db import transaction
 
 
 class SummonerManager():
@@ -77,11 +80,20 @@ class MatchManager():
         self._region = region
         self._summoner = summoner
         self._matches = self._get_matches()
+        self._processed_matches = 0
 
     def _get_matches(self):
         try:
-            match_list = self._watcher.match.matchlist_by_puuid(self._region, self._summoner.puuid, queue=QUEUE,
-                                                                count=COUNT)
+            match_list = []
+            start = 0
+            # while True:
+            new_matches = self._watcher.match.matchlist_by_puuid(self._region, self._summoner.puuid, queue=QUEUE,
+                                                                 count=COUNT, start=start)
+            match_list += new_matches
+                # print(f"Matches: {len(new_matches)}")
+                # if len(new_matches) != COUNT:
+                #     break
+                # start += COUNT
             return match_list
         except ApiError as err:
             print(f"API Error: {err}")
@@ -235,30 +247,46 @@ class MatchManager():
 
             self._increment_models(participant, match, snowballs)
 
-    def process_matches(self):
-        count = 0
-        for match in self._matches:
-            if not Match.objects.filter(match_id=match).exists():
-                match_info = self._get_match_info(match)
-                match_model, created = self._create_match(match, match_info["info"])
-                self._create_participants(match_info, match_model)
-            else:
-                print(f"{match} already exists")
-            count += 1
-            print(f"{count} matches processed")
+    def process_matches(self, progress_recorder=None):
+        with transaction.atomic():
+            total_matches = len(self._matches)
+            self._summoner.being_parsed = True
+            self._summoner.total_matches = total_matches
+            self._summoner.save()
 
-    def set_summoner(self, summoner: Summoner):
-        self._summoner = summoner
-        self._matches = self._get_matches()
+        for i, match in enumerate(self._matches):
+            with transaction.atomic():
+                if not Match.objects.filter(match_id=match).exists():
+                    match_info = self._get_match_info(match)
+                    match_model, created = self._create_match(match, match_info["info"])
+                    self._create_participants(match_info, match_model)
+                else:
+                    print(f"{match} already exists")
+                self._processed_matches += 1
+                self._summoner.parsed_matches += 1;
+                print(f"{self._processed_matches} matches processed")
+                sleep(2);
+                if progress_recorder:
+                    print(i)
+                    print(f"{total_matches} total")
+                    progress_recorder.set_progress(
+                        self._summoner.parsed_matches,
+                        self._summoner.total_matches,
+                        description="matches processed")
+                    self._summoner.save()
+
+        with transaction.atomic():
+            self._summoner.being_parsed = False
+            self._summoner.save()
 
 
 if __name__ == "__main__":
     summonerBuilder = SummonerManager("americas", "na1")
-    summonertest = summonerBuilder.create_summoner("highkeysavage", "na1")
+    summonertest = summonerBuilder.create_summoner("highkeysavage", 'na1')
     matchBuilder = MatchManager("americas", "na1", summonertest)
     matchBuilder.process_matches()
-    summoners = Summoner.objects.all()
-    for i in range(35):
-        matchMaker = MatchManager("americas", "na1", summoners[i])
-        matchMaker.process_matches()
-        print("hey")
+    # summoners = Summoner.objects.all()
+    # for i in range(35):
+    #     matchMaker = MatchManager("americas", "na1", summoners[i])
+    #     matchMaker.process_matches()
+    #     print("hey")

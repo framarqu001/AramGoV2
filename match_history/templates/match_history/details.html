@@ -21,6 +21,15 @@
         </div>
     </div>
 </div>
+{#{% if summoner.being_parsed %}#}
+    <div class="loading-wrapper" style="">
+        <div class='progress-wrapper'>
+            <div id='progress-bar' class='progress-bar' style="background-color: #68a9ef; border-radius: 12px; width: 0%;">&nbsp; </div>
+        </div>
+        <div id="progress-bar-message"></div>
+    </div>
+
+{#{% else %}#}
 <div class="main-info">
     <div class="sidebar">
         <div class="account-container section">
@@ -30,15 +39,7 @@
             </div>
             <hr>
             <div class="account-card">
-                <div class="account-aram">ARAM</div>
-                <div class="stat-section stats-text sub-text">
-                    <div class="champ-kda"> {{account_stats.kda}} </div>
-                    <div class="kda"> {{account_stats.kills}} / {{account_stats.deaths}} / {{account_stats.assists}} </div>
-                </div>
-                <div class=" total-played">
-                    <div class="winrate">{{account_stats.winrate}}</div>
-                    <div class="total-played">{{account_stats.total_played}} games</div>
-                </div>
+                {% include 'match_history/account_summary.html' %}
             </div>
 
         </div>
@@ -49,13 +50,7 @@
             </div>
             <hr>
             <div class="snowball-content">
-                <div class="icon-med">
-                    <img src="https://ddragon.leagueoflegends.com/cdn/14.16.1/img/spell/SummonerSnowball.png" alt="" class="champ-img">
-                </div>
-                <div class="snowball-wrapper">
-                    <div class="snowballs">{{account_stats.snowballs_hitrate}} </div>
-                    <div class="thrown">{{account_stats.snowballs_thrown}} thrown</div>
-                </div>
+                {% include 'match_history/snowballs.html' %}
             </div>
 
         </div>
@@ -66,24 +61,7 @@
             </div>
             <hr>
             <div class="champ-list">
-                {% for champ, stats in champion_stats%}
-                    <div class="champ-card">
-                        <div class="icon-med">
-                            <img class="champ-img" src="{{champ.get_url}}" alt="">
-                        </div>
-                        <div class="champs-text">
-                            <div class="div">{{champ.name}}</div>
-                            <div class="stat-section stats-text sub-text">
-                                <div class="champ-kda">{{stats.kda}}</div>
-                                <div class="kda">{{stats.kills}} / {{stats.deaths}} / {{stats.assists}}</div>
-                            </div>
-                            <div class=" total-played">
-                                <div class="winrate">{{stats.winrate}}</div>
-                                <div class="total-played">{{stats.total_played}} games</div>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
+                {% include 'match_history/champ_list.html' %}
             </div>
         </div>
 
@@ -94,26 +72,7 @@
             </div>
             <hr>
             <div class="recent-list">
-            
-                {% for participant in recent_list.1 %}
-                <div class="recent-card">
-                    <div class="recent-info">
-                        <div class="icon-med">
-                            <img class="champ-img" src="{{participant.participant.profile_icon.get_url}}" alt="">
-                        </div>
-                        <div class="account-info">
-                            <div class="recent-name"><a href ="{{participant.participant.get_url}}">{{participant.participant.get_full_name}}</a></div>
-                            <div class="recent-level sub-text">level {{participant.participant.summoner_level}}</div>
-                        </div>
-                    </div>
-                    <div class="recent-stats">
-                        <div class="win-loss">{{participant.total_wins}}W / {{participant.total_losses}}L</div>
-                    </div>
-                    <div class="recent-wr">
-                        {{participant.winrate}}
-                    </div>
-                </div>
-                {% endfor %}
+                {% include 'match_history/recent_list.html' %}
             </div>
         </div>
     </div>
@@ -128,59 +87,117 @@
         </div>
     </div>
 </div>
+{#    {% endif %}#}
 
 {% endblock content %}
 {% block extra_scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    console.log("hey")
-    let page = 2;  // Start from the second page
-    let loading = false;
-    let noMorePages = false;
-    console.log("hey")
-    let totalPages = Number($('#match-list').data('total-pages'));
-    console.log("Total Pages: " + totalPages);
-    $(window).scroll(function() {
-        // Check if the user has scrolled near the bottom and we have more pages to load
-        if (page <= totalPages && $(window).scrollTop() + $(window).height() >= $(document).height() - 100 && !loading && !noMorePages) {
-            loading = true;
+    {% if summoner.being_parsed %}
 
-            $.ajax({
-                url: window.location.href,
-                data: {
-                    'page': page
-                },
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                success: function(data) {
-                    // If there are no more pages of data, set noMorePages to true
-                    if (data.trim() === '' || page > totalPages) {
-                        noMorePages = true;
+    <script src="{% static 'celery_progress/celery_progress.js' %}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            {#var progressUrl = "{% url 'celery_progress:task_status' task_id %}";#}
+
+            function customProgress(progressBarElement, progressBarMessageElement, progress) {
+                progressBarElement.style.backgroundColor = this.barColors.progress;
+                progressBarElement.style.width = progress.percent + "%";
+                var description = progress.description || "";
+                if (progress.current === 0) {
+                    if (progress.pending === true) {
+                        progressBarMessageElement.textContent = this.messages.waiting;
                     } else {
-                        console.log("hey ye")
-                        console.log("Page loaded");
-                        $('#match-list').append(data);  // Append the new data
-
-                        // Add the "done" element after loading the page
-                        $('#match-list').append('<div class="done">Done with this page</div>');
-
-                        page += 1;  // Increment the page
+                        progressBarMessageElement.textContent = this.messages.started;
                     }
-                    loading = false;
+                } else {
+                    progressBarMessageElement.textContent = progress.current + ' of ' + progress.total + ' matches processed. '
+                    }
+
+            }
+
+            CeleryProgressBar.initProgressBar(progressUrl, {
+                pollInterval: 1000,
+                onSuccess: function() {
+                    document.getElementById('progress-bar-message').innerText = "Success!";
+                    {#window.location.reload();  // Reload the page once parsing is complete#}
                 },
-                error: function() {
-                    loading = false;
-                }
+                onError: function() {
+                    document.getElementById('progress-bar-message').innerText = "An error occurred.";
+                },
+                defaultMessages: {
+                    waiting: 'Processing matches...',  // Custom message for the waiting state
+                    started: 'Processing matches...'   // Custom message for the started state
+                },
+                onProgress: customProgress
             });
-        }
+        });
+    </script>
+    {% endif %}
+<script>
+    $(document).ready(function() {
+        let page = 2;  // Start from the second page since the first page is already loaded
+        let loading = false;
+        let noMorePages = false;  // Flag to indicate no more pages to load
 
-        // Stop sending requests if we've reached the last page
-        if (page > totalPages) {
-            noMorePages = true;
-        }
+        $(window).scroll(function() {
+            // Check if the user has scrolled near the bottom and a request is not in progress
+            if (!loading && !noMorePages && $(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
+                loading = true;
+
+                // Make an AJAX request to load the next page
+                $.ajax({
+                    url: window.location.href,
+                    data: {
+                        'page': page  // Pass the current page number to load
+                    },
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(data, textStatus, xhr) {
+                        if (xhr.status === 204 || data.trim() === '') {
+                            noMorePages = true;
+                            console.log("No more pages to load.");
+                        } else {
+                            // Append the loaded data to the match list
+                            $('#match-list').append(data);
+
+                            // Optionally, add a "done" element after loading the page for visual feedback
+                            $('#match-list').append('<div class="done">Done with page ' + page + '</div>');
+
+                            // Increment the page for the next load
+                            page += 1;
+                        }
+                        loading = false;  // Reset loading flag
+                    },
+                    error: function() {
+                        console.error("Error loading page " + page);
+                        loading = false;  // Reset loading flag on error
+                    }
+                });
+            }
+        });
     });
-
+</script>
+<script>
+    document.getElementById('update').addEventListener('click', function() {
+        updateSection('account-summary');  // Trigger AJAX request for the account summary section
+    });
+    function updateSection(section) {
+        $.ajax({
+            url: window.location.href,  // Replace with your Django URL pattern
+            method: 'GET',
+            data: {
+                'section': section  // Send the section identifier
+            },
+            success: function(response) {
+                // Replace the content with the new HTML
+                if (section === 'account-summary') {
+                    $('.account-card').html(response.html);
+                    console.log(response.html)
+                }
+            }
+        });
+    }
 </script>
 
 

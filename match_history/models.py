@@ -74,6 +74,10 @@ class Summoner(models.Model):
     summoner_level = models.IntegerField(blank=True, null=True)
     profile_icon = models.ForeignKey(ProfileIcon, on_delete=models.SET_NULL, blank=True, null=True)
     last_updated = models.DateTimeField(null=True, blank=True)
+    task_id = models.CharField(max_length=100, blank=True, null=True)
+    being_parsed = models.BooleanField(default=False)
+    parsed_matches = models.IntegerField(default=False)
+    total_matches = models.IntegerField(default=0)
 
     # Get all matches in which a summoner was a participant in.
     def get_matches_queryset(self):

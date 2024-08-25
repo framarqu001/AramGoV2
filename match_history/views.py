@@ -1,6 +1,8 @@
 from django.db.models import Prefetch
-from django.http import HttpResponse, HttpResponseNotAllowed, Http404, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotAllowed, Http404, HttpResponseNotFound, JsonResponse
 from django.shortcuts import render, get_object_or_404
+from django.template.loader import render_to_string
+
 from match_history.models import Summoner, Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
@@ -10,8 +12,8 @@ from django.db import transaction
 from django.core.paginator import Paginator
 from collections import Counter, defaultdict
 import pdb
-
-# Create your views here.
+from .tasks import *
+from celery.result import AsyncResult
 
 def home(request):
     return render(request, 'match_history/index.html')
@@ -24,7 +26,15 @@ def details(request, game_name: str, tag: str):
     except Http404 as e:
         raise Http404(e)
 
+    # if summoner.being_parsed:
+    #     context = {
+    #         "task_id": summoner.task_id,
+    #         "summoner": summoner
+    #     }
+    #     return render(request, 'match_history/details.html', context)
+
     matches_per_page = 10
+
 
     matches_queryset = Match.objects.filter(participants__summoner=summoner).prefetch_related(
         Prefetch('participants', queryset=Participant.objects.select_related(
@@ -37,21 +47,37 @@ def details(request, game_name: str, tag: str):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     matches = _get_match_data(summoner, page_obj)
+    section = request.GET.get('section', None)
 
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        context = {"matches": matches}
-        return render(request, 'match_history/match_list.html', context)
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and section != "account-summary":
+        print('hi')
+        if int(page_number) <= paginator.num_pages:
+            context = {"matches": matches}
+            return render(request, 'match_history/match_list.html', context)
+        else:
+            return HttpResponse(status=204)
 
     account_stats = AccountStats.objects.filter(summoner=summoner).first()
     champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by('-total_played')[:7].prefetch_related(
         'champion'
     )
-    champion_stats = _get_champion_stats_data(champion_stats)
-    account_stats = _get_account_stats(account_stats)
+
+    if account_stats:
+        champion_stats = _get_champion_stats_data(champion_stats)
+        account_stats = _get_account_stats(account_stats)
+
+
+    print(section)
+    if section == "account-summary":
+        print('hey')
+        html = render_to_string('match_history/account_summary.html', {'account_stats': account_stats})
+        return JsonResponse({'html': html})  # Return the HTML wrapped in JSON for easier handlingeturn render(request, 'match_history/account_summary.html', {'account_stats': account_stats})
+
+
     context = {
         "summoner": summoner,
         "matches": matches,
-        "total_pages": paginator.num_pages,
         "account_stats": account_stats,
         "champion_stats": champion_stats,
         "recent_list": recent_list,
@@ -61,6 +87,18 @@ def details(request, game_name: str, tag: str):
 
     return render(request, 'match_history/details.html', context)
 
+def load_account_summary(request, summoner_id):
+    account_stats = AccountStats.objects.filter(summoner=summoner).first()
+    champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by('-total_played')[:7].prefetch_related(
+        'champion'
+    )
+    if account_stats:
+        champion_stats = _get_champion_stats_data(champion_stats)
+        account_stats = _get_account_stats(account_stats)
+    context = {
+        "account_stats": account_stats,
+    }
+    return render(request, 'match_history/account_summary.html', context)
 
 def summoner(request):
     if request.method != 'POST':
@@ -77,24 +115,15 @@ def summoner(request):
         Summoner.objects.get(normalized_game_name=summoner_name, normalized_tag_line=tag)
     except Summoner.DoesNotExist:
         print(f"Summoner not found, trying Riot servers for {full_name}")
-        summonerBuilder = SummonerManager("americas", "na1")
-
         try:
-            # Create the summoner and ensure it is saved to the database
+            summonerBuilder = SummonerManager("americas", "na1")
             newSummoner = summonerBuilder.create_summoner(summoner_name, tag)
-            newSummoner.save()  # Ensure the summoner is saved
-            print(f"Summoner {summoner_name} saved to database.")
-
-            # Verify that the summoner exists in the database after saving
-            if Summoner.objects.filter(normalized_game_name=summoner_name, normalized_tag_line=tag).exists():
-                print(f"Confirmed: Summoner {summoner_name} exists in database.")
-            else:
-                print(f"ERROR: Summoner {summoner_name} not found in database after save.")
-                raise Exception("Summoner save failed.")
-
-            # Proceed with processing matches
-            matchBuilder = MatchManager("americas", "na1", newSummoner)
-            matchBuilder.process_matches()
+            match_builder = MatchManager("americas", "na1", newSummoner)
+            match_builder.process_matches()
+            # task = process_matches.delay(newSummoner.puuid)
+            # newSummoner.being_parsed = True
+            # newSummoner.task_id = task.task_id
+            # newSummoner.save()
 
         except ApiError as e:
             print(f"{full_name} not found in db or Riot servers")
