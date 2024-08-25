@@ -2,6 +2,7 @@ from django.db.models import Prefetch
 from django.http import HttpResponse, HttpResponseNotAllowed, Http404, HttpResponseNotFound, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
+from django.views.decorators.http import require_POST
 
 from match_history.models import Summoner, Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
 from django.http import HttpResponse, HttpResponseRedirect
@@ -15,8 +16,17 @@ import pdb
 from .tasks import *
 from celery.result import AsyncResult
 
+
 def home(request):
     return render(request, 'match_history/index.html')
+
+
+@require_POST
+def update(request):
+    print("Hey there!")
+    summoner_id = request.POST.get('summoner_id')
+    task = update_matches.delay(summoner_id)  # Start the Celery task
+    return JsonResponse({'task_id': task.id}, status=202)
 
 
 def details(request, game_name: str, tag: str):
@@ -35,7 +45,6 @@ def details(request, game_name: str, tag: str):
 
     matches_per_page = 10
 
-
     matches_queryset = Match.objects.filter(participants__summoner=summoner).prefetch_related(
         Prefetch('participants', queryset=Participant.objects.select_related(
             'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", "item1", "item2", "item3",
@@ -49,7 +58,6 @@ def details(request, game_name: str, tag: str):
     matches = _get_match_data(summoner, page_obj)
     section = request.GET.get('section', None)
 
-
     if request.headers.get('x-requested-with') == 'XMLHttpRequest' and section != "account-summary":
         print('hi')
         if int(page_number) <= paginator.num_pages:
@@ -59,7 +67,8 @@ def details(request, game_name: str, tag: str):
             return HttpResponse(status=204)
 
     account_stats = AccountStats.objects.filter(summoner=summoner).first()
-    champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by('-total_played')[:7].prefetch_related(
+    champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by('-total_played')[
+                     :7].prefetch_related(
         'champion'
     )
 
@@ -67,13 +76,12 @@ def details(request, game_name: str, tag: str):
         champion_stats = _get_champion_stats_data(champion_stats)
         account_stats = _get_account_stats(account_stats)
 
-
     print(section)
     if section == "account-summary":
         print('hey')
         html = render_to_string('match_history/account_summary.html', {'account_stats': account_stats})
-        return JsonResponse({'html': html})  # Return the HTML wrapped in JSON for easier handlingeturn render(request, 'match_history/account_summary.html', {'account_stats': account_stats})
-
+        return JsonResponse({
+                                'html': html})  # Return the HTML wrapped in JSON for easier handlingeturn render(request, 'match_history/account_summary.html', {'account_stats': account_stats})
 
     context = {
         "summoner": summoner,
@@ -87,9 +95,11 @@ def details(request, game_name: str, tag: str):
 
     return render(request, 'match_history/details.html', context)
 
+
 def load_account_summary(request, summoner_id):
     account_stats = AccountStats.objects.filter(summoner=summoner).first()
-    champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by('-total_played')[:7].prefetch_related(
+    champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by('-total_played')[
+                     :7].prefetch_related(
         'champion'
     )
     if account_stats:
@@ -99,6 +109,7 @@ def load_account_summary(request, summoner_id):
         "account_stats": account_stats,
     }
     return render(request, 'match_history/account_summary.html', context)
+
 
 def summoner(request):
     if request.method != 'POST':
@@ -118,8 +129,8 @@ def summoner(request):
         try:
             summonerBuilder = SummonerManager("americas", "na1")
             newSummoner = summonerBuilder.create_summoner(summoner_name, tag)
-            match_builder = MatchManager("americas", "na1", newSummoner)
-            match_builder.process_matches()
+            # match_builder = MatchManager("americas", "na1", newSummoner)
+            # match_builder.process_matches()
             # task = process_matches.delay(newSummoner.puuid)
             # newSummoner.being_parsed = True
             # newSummoner.task_id = task.task_id
@@ -170,7 +181,7 @@ def _validate_summoner(game_name, tag):
 
 
 def _get_match_data(summoner, page_obj):
-    match_data= []
+    match_data = []
 
     for match in page_obj:
         blue_team_list = []
@@ -183,7 +194,8 @@ def _get_match_data(summoner, page_obj):
             else:
                 red_team_list.append(participant)
 
-        kda = (main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
+        kda = (
+                          main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
         main_stats = {
@@ -193,6 +205,7 @@ def _get_match_data(summoner, page_obj):
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     print(match_data)
     return match_data
+
 
 def _get_recent(summoner, matches_queryset):
     counter = defaultdict(lambda: {'count': 0, 'wins': 0})
@@ -204,7 +217,7 @@ def _get_recent(summoner, matches_queryset):
             if participant.summoner == summoner:
                 main_team = participant.team
                 break;
-            
+
         for participant in match.all_participants:
             if participant.team != main_team or participant.summoner == summoner:
                 continue
@@ -232,11 +245,6 @@ def _get_recent(summoner, matches_queryset):
     return games_played, recent_stats
 
 
-
-
-
-
-
 def _get_champion_stats_data(summoner_champion_stats: SummonerChampionStats):
     champion_stats_data = []
     for stat in summoner_champion_stats:
@@ -258,6 +266,7 @@ def _get_champion_stats_data(summoner_champion_stats: SummonerChampionStats):
         }
         champion_stats_data.append((stat.champion, champion_data))
     return champion_stats_data
+
 
 def _get_account_stats(account_stats):
     win_rate = (account_stats.total_wins / account_stats.total_played * 100) if account_stats.total_played > 0 else 0

@@ -95,43 +95,43 @@
     {% if summoner.being_parsed %}
 
     <script src="{% static 'celery_progress/celery_progress.js' %}"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+{#    <script>#}
+{#        document.addEventListener("DOMContentLoaded", function () {#}
             {#var progressUrl = "{% url 'celery_progress:task_status' task_id %}";#}
-
-            function customProgress(progressBarElement, progressBarMessageElement, progress) {
-                progressBarElement.style.backgroundColor = this.barColors.progress;
-                progressBarElement.style.width = progress.percent + "%";
-                var description = progress.description || "";
-                if (progress.current === 0) {
-                    if (progress.pending === true) {
-                        progressBarMessageElement.textContent = this.messages.waiting;
-                    } else {
-                        progressBarMessageElement.textContent = this.messages.started;
-                    }
-                } else {
-                    progressBarMessageElement.textContent = progress.current + ' of ' + progress.total + ' matches processed. '
-                    }
-
-            }
-
-            CeleryProgressBar.initProgressBar(progressUrl, {
-                pollInterval: 1000,
-                onSuccess: function() {
-                    document.getElementById('progress-bar-message').innerText = "Success!";
+{##}
+{#            function customProgress(progressBarElement, progressBarMessageElement, progress) {#}
+{#                progressBarElement.style.backgroundColor = this.barColors.progress;#}
+{#                progressBarElement.style.width = progress.percent + "%";#}
+{#                var description = progress.description || "";#}
+{#                if (progress.current === 0) {#}
+{#                    if (progress.pending === true) {#}
+{#                        progressBarMessageElement.textContent = this.messages.waiting;#}
+{#                    } else {#}
+{#                        progressBarMessageElement.textContent = this.messages.started;#}
+{#                    }#}
+{#                } else {#}
+{#                    progressBarMessageElement.textContent = progress.current + ' of ' + progress.total + ' matches processed. '#}
+{#                    }#}
+{##}
+{#            }#}
+{##}
+{#            CeleryProgressBar.initProgressBar(progressUrl, {#}
+{#                pollInterval: 1000,#}
+{#                onSuccess: function() {#}
+{#                    document.getElementById('progress-bar-message').innerText = "Success!";#}
                     {#window.location.reload();  // Reload the page once parsing is complete#}
-                },
-                onError: function() {
-                    document.getElementById('progress-bar-message').innerText = "An error occurred.";
-                },
-                defaultMessages: {
-                    waiting: 'Processing matches...',  // Custom message for the waiting state
-                    started: 'Processing matches...'   // Custom message for the started state
-                },
-                onProgress: customProgress
-            });
-        });
-    </script>
+{#                },#}
+{#                onError: function() {#}
+{#                    document.getElementById('progress-bar-message').innerText = "An error occurred.";#}
+{#                },#}
+{#                defaultMessages: {#}
+{#                    waiting: 'Processing matches...',  // Custom message for the waiting state#}
+{#                    started: 'Processing matches...'   // Custom message for the started state#}
+{#                },#}
+{#                onProgress: customProgress#}
+{#            });#}
+{#        });#}
+{#    </script>#}
     {% endif %}
 <script>
     $(document).ready(function() {
@@ -178,27 +178,48 @@
         });
     });
 </script>
-<script>
-    document.getElementById('update').addEventListener('click', function() {
-        updateSection('account-summary');  // Trigger AJAX request for the account summary section
-    });
-    function updateSection(section) {
-        $.ajax({
-            url: window.location.href,  // Replace with your Django URL pattern
-            method: 'GET',
-            data: {
-                'section': section  // Send the section identifier
-            },
-            success: function(response) {
-                // Replace the content with the new HTML
-                if (section === 'account-summary') {
-                    $('.account-card').html(response.html);
-                    console.log(response.html)
+    <script>
+        document.getElementById('update').addEventListener('click', function() {
+            let summonerId = '{{ summoner.id }}';  // Dynamically pass the summoner ID
+            $.ajax({
+                url: '{% url "match_history:update" %}',  // Django view URL
+                method: 'POST',
+                data: {
+                    'summoner_id': summonerId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    let taskId = response.task_id;
+                    console.log(taskId)
+                    pollTaskStatus(taskId);
+                },
+                error: function() {
+                    console.error("Failed to start update task.");
                 }
-            }
+            });
         });
-    }
-</script>
+
+        function pollTaskStatus(taskId) {
+            let interval = setInterval(function() {
+                $.ajax({
+                    {#url: '{% url "celery_progress:task_status" task_id=taskId %}',  // Ensure correct task status URL#}
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.state === 'SUCCESS') {
+                            clearInterval(interval);
+                            updateSection('account-summary');
+                        } else if (response.state === 'FAILURE') {
+                            clearInterval(interval);
+                            console.error("Task failed.");
+                        }
+                    },
+                    error: function() {
+                        console.error("Failed to get task status.");
+                    }
+                });
+            }, 2000);
+        }
+    </script>
 
 
 {% endblock %}

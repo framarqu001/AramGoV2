@@ -79,21 +79,32 @@ class MatchManager():
         self._platform = platform
         self._region = region
         self._summoner = summoner
-        self._matches = self._get_matches()
+        self._matches = []
         self._processed_matches = 0
 
     def _get_matches(self):
         try:
             match_list = []
             start = 0
-            # while True:
-            new_matches = self._watcher.match.matchlist_by_puuid(self._region, self._summoner.puuid, queue=QUEUE,
-                                                                 count=COUNT, start=start)
+            while True:
+                new_matches = self._watcher.match.matchlist_by_puuid(self._region, self._summoner.puuid, queue=QUEUE,
+                                                                     count=COUNT, start=start)
+                match_list += new_matches
+                print(f"Matches: {len(new_matches)}")
+                if len(new_matches) != COUNT:
+                    break
+                start += COUNT
+            return match_list
+        except ApiError as err:
+            print(f"API Error: {err}")
+
+    def _get_20(self):
+        match_list = []
+        try:
+            start = 0
+            new_matches = self._watcher.match.matchlist_by_puuid(self._region, self._summoner.puuid, queue=QUEUE,count=20, start=start)
             match_list += new_matches
-                # print(f"Matches: {len(new_matches)}")
-                # if len(new_matches) != COUNT:
-                #     break
-                # start += COUNT
+
             return match_list
         except ApiError as err:
             print(f"API Error: {err}")
@@ -248,6 +259,7 @@ class MatchManager():
             self._increment_models(participant, match, snowballs)
 
     def process_matches(self, progress_recorder=None):
+        self._matches = self._get_matches()
         with transaction.atomic():
             total_matches = len(self._matches)
             self._summoner.being_parsed = True
@@ -278,6 +290,26 @@ class MatchManager():
         with transaction.atomic():
             self._summoner.being_parsed = False
             self._summoner.save()
+
+    def last_20(self, progress_recorder=None):
+        self._matches = self._get_20(self._matches)
+        total_matches = len(self._matches)
+
+        for i, match in enumerate(self._matches):
+            print("here")
+            with transaction.atomic():
+                if not Match.objects.filter(match_id=match).exists():
+                    match_info = self._get_match_info(match)
+                    match_model, created = self._create_match(match, match_info["info"])
+                    self._create_participants(match_info, match_model)
+                else:
+                    print(f"{match} already exists")
+                print(f"{self._processed_matches} matches processed")
+                sleep(2);
+                if progress_recorder:
+                    progress_recorder.set_progress(i,total_matches,description="matches processed")
+
+
 
 
 if __name__ == "__main__":

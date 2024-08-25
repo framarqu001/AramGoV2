@@ -9,5 +9,6 @@ urlpatterns = [
     path("summoner/<str:game_name>-<str:tag>", views.details, name="details"),
     path("champions/",views.champions, name="champions"),
     path("summoner/", views.summoner, name="summoner"),  # Ensure this line exists
+    path("update/", views.update, name="update"),
 
 ]
