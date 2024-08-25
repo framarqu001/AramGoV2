@@ -21,7 +21,8 @@ from debug_toolbar.toolbar import debug_toolbar_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", include("match_history.urls"))
+    path("", include("match_history.urls")),
+    path('celery-progress/', include('celery_progress.urls')),
 ]
 if not settings.TESTING:
     urlpatterns += debug_toolbar_urls()
