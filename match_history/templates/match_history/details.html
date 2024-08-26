@@ -186,6 +186,7 @@
                 success: function(response) {
                     console.log(response.recent_list);
                     $('.account-card').html(response.account_summary);
+                    $('.snowball-content').html(response.snowballs)
                     $('.champ-list').html(response.champion_list);
                     $('.recent-list').html(response.recent_list);
                     $('#match-list').prepend(response.match_list);
@@ -221,18 +222,7 @@
                 },
                 error: function(xhr) {
                     if (xhr.status === 429) {
-                        let response = JSON.parse(xhr.responseText);
-                        let remainingCooldown = response.remaining_cooldown;
-                        console.log(`Please wait ${remainingCooldown} seconds before updating again.`);
-                        let countdownInterval = setInterval(function() {
-                            if (remainingCooldown > 0) {
-                                $('#update').prop('disabled', true).text(`Updated ${remainingCooldown}s`);
-                                remainingCooldown--;
-                            } else {
-                                clearInterval(countdownInterval);
-                                $('#update').prop('disabled', false).text('Update');
-                            }
-                        }, 1000);
+                        startCooldown(JSON.parse(xhr.responseText).remaining_cooldown);
                     } else {
                         console.error("Failed to start update task.");
                         $('#update').prop('disabled', false).text('Update (Failed)');
@@ -252,6 +242,7 @@
                             console.log("success");
                             clearInterval(interval);
                             updateSections();
+                            startCooldown(600);  // assuming 30 seconds cooldown
                         } else if (response.state === 'FAILURE') {
                             clearInterval(interval);
                             console.error("Task failed.");
@@ -259,11 +250,24 @@
                         }
                     },
                     error: function() {
+                        clearInterval(interval);
                         console.error("Failed to get task status.");
                         $('#update').prop('disabled', false).text('Update (Failed)');
                     }
                 });
             }, 2000);
+        }
+
+        function startCooldown(remainingCooldown) {
+            let countdownInterval = setInterval(function() {
+                if (remainingCooldown > 0) {
+                    $('#update').prop('disabled', true).text(`Updated ${remainingCooldown}s`);
+                    remainingCooldown--;
+                } else {
+                    clearInterval(countdownInterval);
+                    $('#update').prop('disabled', false).text('Update');
+                }
+            }, 1000);
         }
     });
     

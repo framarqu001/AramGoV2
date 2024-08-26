@@ -1,0 +1,45 @@
+services:
+  pgdb:
+    image: postgres
+    container_name: pgdb
+    environment:
+      - POSTGRES_DB=AramGo
+      - POSTGRES_USER=steven
+      - POSTGRES_PASSWORD=steven2020
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: "redis:alpine"
+
+  django:
+    build: .
+    container_name: django
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0  # Fixed comma-separated hosts
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - POSTGRES_NAME=AramGo
+      - POSTGRES_USER=steven
+      - POSTGRES_PASSWORD=steven2020
+    depends_on:
+      - pgdb
+      - redis
+
+  celery:
+    build: .
+    command: celery -A AramGoV2 worker --loglevel=info
+    depends_on:
+      - django
+      - redis
+
+volumes:
+  pgdata:

@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
+import os
 import sys
 from pathlib import Path
 
@@ -29,7 +30,9 @@ SECRET_KEY = 'django-insecure-y^y16p$+op0$#3a_eh8+1j852wn++smx3#sr0hl(kk4h=kcvnz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
+
+
 
 
 # Application definition
@@ -87,8 +90,12 @@ WSGI_APPLICATION = 'AramGoV2.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_NAME', 'AramGo'),
+        'USER': os.environ.get('POSTGRES_USER', 'steven'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'steven2020'),
+        'HOST': 'pgdb',
+        'PORT': '5432',
     }
 }
 
@@ -135,12 +142,12 @@ INTERNAL_IPS = [
     # ...
 ]
 
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER', 'redis://redis:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT', 'redis://redis:6379/0')
 
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_BACKEND = 'django-db'
 CELERY_WORKER_CONCURRENCY = 1
 
 # Default primary key field type

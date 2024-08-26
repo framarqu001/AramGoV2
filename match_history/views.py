@@ -29,7 +29,12 @@ def update(request):
     if not request.session.session_key:
         request.session.save()
     session_key = request.session.session_key
-    cache_key = f'update-cooldown-{session_key}'
+
+    summoner_id = request.POST.get('summoner_id')
+    if not summoner_id:
+        return JsonResponse({'error': 'Summoner ID is required'}, status=400)
+
+    cache_key = f'update-cooldown-{session_key}-{summoner_id}'
 
     last_update_time = cache.get(cache_key)
     current_time = time.time()
@@ -43,11 +48,9 @@ def update(request):
                 'remaining_cooldown': int(remaining_cooldown)
             }, status=429)
 
-    cache.set(cache_key, current_time, timeout=cooldown_duration)  # 10-minute timeout
+    cache.set(cache_key, current_time, timeout=cooldown_duration)
 
-    summoner_id = request.POST.get('summoner_id')
     task = update_matches.delay(summoner_id)
-
     return JsonResponse({'task_id': task.id}, status=202)
 
 
@@ -77,9 +80,11 @@ def details(request, game_name: str, tag: str):
     page_obj = paginator.get_page(page_number)
 
     if request.GET.get('section') == 'update' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        account_stats = _get_account_stats(summoner)
         data = {
             'account_summary': render_to_string('match_history/account_summary.html',
-                                                {'account_stats': _get_account_stats(summoner)}),
+                                                {'account_stats': account_stats}),
+            'snowballs' : render_to_string('match_history/snowballs.html', {'account_stats': account_stats}),
             'champion_list': render_to_string('match_history/champ_list.html',
                                               {'champion_stats': _get_champion_stats_data(summoner)}),
             'recent_list': render_to_string('match_history/recent_list.html',
@@ -106,10 +111,8 @@ def details(request, game_name: str, tag: str):
 
     return render(request, 'match_history/details.html', context)
 
-
+@require_POST
 def summoner(request):
-    if request.method != 'POST':
-        return HttpResponseNotAllowed(['POST'])
     try:
         full_name = request.POST.get('full_name')
         full_name = full_name.replace(" ", "").lower()

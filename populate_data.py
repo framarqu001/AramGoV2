@@ -10,7 +10,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
 
-RIOT_API_KEY = 'RGAPI-a9929b33-ba47-4756-8551-b0e18cba659f'
+RIOT_API_KEY = 'RGAPI-d3f5ad41-a12f-442a-afb1-d89b901d82f5'
 QUEUE = 450  # Aram
 COUNT = 100
 from django.db import transaction
@@ -161,7 +161,7 @@ class MatchManager():
                 'summoner_level': info_dict["summonerLevel"],
                 'profile_icon': icon,
                 'last_updated': game_creation,
-                'being_parsed': True
+                'being_parsed': False
             }
         )
         if created:
@@ -219,11 +219,11 @@ class MatchManager():
             spell2 = SummonerSpell.objects.get(spell_id=participant_data["summoner2Id"])
             try:
                 rune1 = Rune.objects.get(
-                    rune_id__iexact=participant_data["perks"]["styles"][0]["selections"][0]["perk"])
+                    rune_id=participant_data["perks"]["styles"][0]["selections"][0]["perk"])
             except Rune.DoesNotExist:
                 rune1 = None
             try:
-                rune2 = Rune.objects.get(rune_id__iexact=participant_data["perks"]["styles"][1]["style"])
+                rune2 = Rune.objects.get(rune_id=participant_data["perks"]["styles"][1]["style"])
             except Rune.DoesNotExist:
                 rune2 = None
 
@@ -315,7 +315,7 @@ class MatchManager():
 
 if __name__ == "__main__":
     summonerBuilder = SummonerManager("americas", "na1")
-    summonertest = summonerBuilder.create_summoner("aram0netrick", 'na1')
+    summonertest = summonerBuilder.create_summoner("kittykatmarco", 'na1')
     matchBuilder = MatchManager("americas", "na1", summonertest)
     matchBuilder.process_matches()
     # summoners = Summoner.objects.all()

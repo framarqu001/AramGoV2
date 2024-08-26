@@ -8,8 +8,8 @@ patch = "14.16.1"
 
 
 class Champion(models.Model):
-    champion_id = models.CharField(primary_key=True, max_length=30)
-    name = models.CharField(max_length=30)
+    champion_id = models.CharField(primary_key=True, max_length=100)
+    name = models.CharField(max_length=100)
     title = models.CharField(max_length=200)
     image_path = models.CharField(max_length=100)
 
@@ -21,9 +21,9 @@ class Champion(models.Model):
 
 
 class Item(models.Model):
-    item_id = models.CharField(max_length=30, primary_key=True)
-    name = models.CharField(max_length=30)
-    image_path = models.CharField(max_length=100)
+    item_id = models.CharField(max_length=255, primary_key=True)
+    name = models.CharField(max_length=255)
+    image_path = models.CharField(max_length=255)
 
     def get_url(self):
         return f"https://ddragon.leagueoflegends.com/cdn/{patch}/img/item/{self.image_path}"
@@ -33,7 +33,7 @@ class Item(models.Model):
 
 
 class ProfileIcon(models.Model):
-    profile_id = models.CharField(primary_key=True, max_length=30)
+    profile_id = models.CharField(primary_key=True, max_length=100)
     image_path = models.CharField(max_length=100)
 
     def get_url(self):
@@ -45,7 +45,7 @@ class ProfileIcon(models.Model):
 
 class SummonerSpell(models.Model):
     spell_id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=100)
     image_path = models.CharField(max_length=100)
 
     def get_url(self):
@@ -57,8 +57,8 @@ class SummonerSpell(models.Model):
 
 class Rune(models.Model):
     rune_id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=30)
-    image_path = models.CharField(max_length=50)
+    name = models.CharField(max_length=100)
+    image_path = models.CharField(max_length=100)
 
     def get_url(self):
         return f"https://ddragon.leagueoflegends.com/cdn/img/{self.image_path}"
