@@ -111,6 +111,7 @@ class Match(models.Model):
     game_mode = models.CharField(max_length=50)
     game_version = models.CharField(max_length=50)
     winner = models.IntegerField(choices=WINNER_CHOICES)
+    new_match = models.BooleanField(default=False)
 
     def get_patch(self):
         return '.'.join(self.game_version.split('.')[:2])

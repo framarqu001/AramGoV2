@@ -30,7 +30,6 @@ def update(request):
 
 
 def details(request, game_name: str, tag: str):
-    # Use get_object_or_404 to automatically handle cases where the summoner does not exist
     try:
         summoner = _validate_summoner(game_name, tag)
     except Http404 as e:
@@ -42,82 +41,47 @@ def details(request, game_name: str, tag: str):
     #         "summoner": summoner
     #     }
     #     return render(request, 'match_history/details.html', context)
-
-    matches_per_page = 10
-
     matches_queryset = Match.objects.filter(participants__summoner=summoner).prefetch_related(
         Prefetch('participants', queryset=Participant.objects.select_related(
             'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", "item1", "item2", "item3",
             'item4', 'item5', 'item6', 'summoner__profile_icon'),
                  to_attr='all_participants')
     )
-    recent_list = _get_recent(summoner, matches_queryset)
+    matches_per_page = 10
     paginator = Paginator(matches_queryset, matches_per_page)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
-    matches = _get_match_data(summoner, page_obj)
-    section = request.GET.get('section', None)
 
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and section != "update":
-        print('hi')
+    if request.GET.get('section') == 'update' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        data = {
+            'account_summary': render_to_string('match_history/account_summary.html', {'account_stats':_get_account_stats(summoner) }),
+            'champion_list': render_to_string('match_history/champ_list.html', {'champion_stats': _get_champion_stats_data(summoner)}),
+            'recent_list': render_to_string('match_history/recent_list.html', {'recent_list': _get_recent(summoner, matches_queryset)}),
+            'match_list': render_to_string('match_history/match_list.html', {'matches': _get_new_match_data(summoner)})
+        }
+        return JsonResponse(data)
+
+    matches = _get_match_data(summoner, page_obj)
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        print("hey pagin")
         if int(page_number) <= paginator.num_pages:
             context = {"matches": matches}
             return render(request, 'match_history/match_list.html', context)
         else:
             return HttpResponse(status=204)
 
-    account_stats = AccountStats.objects.filter(summoner=summoner).first()
-    champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by('-total_played')[
-                     :7].prefetch_related(
-        'champion'
-    )
-
-    if account_stats:
-        champion_stats = _get_champion_stats_data(champion_stats)
-        account_stats = _get_account_stats(account_stats)
-
-    print(section)
-    if section == "update":
-        print("hey")
-        context = {
-            'account_stats': account_stats,  # Fetch the latest account stats
-            'champion_stats': champion_stats,  # Fetch the latest champions played stats
-            'recent_stats': recent_list,  # Fetch the latest recently played stats
-        }
-        data = {
-            'account_summary': render_to_string('match_history/account_summary.html', {'account_stats': context['account_stats']}),
-            'champion_list': render_to_string('match_history/champ_list.html', {'champion_stats': context['champion_stats']}),
-            'recent_list': render_to_string('match_history/recent_list.html', {'recent_list': context['recent_stats']}),
-        }
-        print(data['recent_list'])
-        return JsonResponse(data)
-
     context = {
         "summoner": summoner,
         "matches": matches,
-        "account_stats": account_stats,
-        "champion_stats": champion_stats,
-        "recent_list": recent_list,
+        "account_stats": _get_account_stats(summoner),
+        "champion_stats": _get_champion_stats_data(summoner),
+        "recent_list": _get_recent(summoner, matches_queryset),
     }
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'match_history/match_list.html', context)
 
     return render(request, 'match_history/details.html', context)
 
 
-def load_account_summary(request, summoner_id):
-    account_stats = AccountStats.objects.filter(summoner=summoner).first()
-    champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by('-total_played')[
-                     :7].prefetch_related(
-        'champion'
-    )
-    if account_stats:
-        champion_stats = _get_champion_stats_data(champion_stats)
-        account_stats = _get_account_stats(account_stats)
-    context = {
-        "account_stats": account_stats,
-    }
-    return render(request, 'match_history/account_summary.html', context)
 
 
 def summoner(request):
@@ -189,6 +153,37 @@ def _validate_summoner(game_name, tag):
     return summoner
 
 
+def _get_new_match_data(summoner):
+    matches_queryset = Match.objects.filter(participants__summoner=summoner, new_match=True).prefetch_related(
+        Prefetch('participants', queryset=Participant.objects.select_related(
+            'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", "item1", "item2", "item3",
+            'item4', 'item5', 'item6', 'summoner__profile_icon'),
+                 to_attr='all_participants')
+    )
+    match_data = []
+
+    for match in matches_queryset:
+        blue_team_list = []
+        red_team_list = []
+        for participant in match.all_participants:
+            if participant.summoner == summoner:
+                main_participant = participant
+            if participant.team == 100:
+                blue_team_list.append(participant)
+            else:
+                red_team_list.append(participant)
+
+        kda = (
+                      main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
+        cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+
+        main_stats = {
+            "kda": f"{kda:.2f}",
+            "cs_min": f"{cs_min:.1f}"
+        }
+        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+    matches_queryset.update(new_match=False)
+    return match_data
 def _get_match_data(summoner, page_obj):
     match_data = []
 
@@ -254,7 +249,10 @@ def _get_recent(summoner, matches_queryset):
     return games_played, recent_stats
 
 
-def _get_champion_stats_data(summoner_champion_stats: SummonerChampionStats):
+def _get_champion_stats_data(summoner):
+    summoner_champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by('-total_played')[:7].prefetch_related('champion')
+    if not summoner_champion_stats:
+        return
     champion_stats_data = []
     for stat in summoner_champion_stats:
         win_rate = (stat.total_wins / stat.total_played * 100) if stat.total_played > 0 else 0
@@ -277,7 +275,11 @@ def _get_champion_stats_data(summoner_champion_stats: SummonerChampionStats):
     return champion_stats_data
 
 
-def _get_account_stats(account_stats):
+def _get_account_stats(summoner):
+    account_stats = AccountStats.objects.filter(summoner=summoner).first()
+    print(account_stats)
+    if not account_stats:
+        return
     win_rate = (account_stats.total_wins / account_stats.total_played * 100) if account_stats.total_played > 0 else 0
     average_kills = account_stats.total_kills / account_stats.total_played
     average_deaths = account_stats.total_deaths / account_stats.total_played

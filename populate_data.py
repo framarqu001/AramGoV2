@@ -82,10 +82,10 @@ class MatchManager():
         self._matches = []
         self._processed_matches = 0
 
-    def _get_matches(self):
+    def _get_all(self):
         try:
             match_list = []
-            start = 0
+            start = 50
             while True:
                 new_matches = self._watcher.match.matchlist_by_puuid(self._region, self._summoner.puuid, queue=QUEUE,
                                                                      count=COUNT, start=start)
@@ -116,7 +116,7 @@ class MatchManager():
         except ApiError as err:
             print(f"Error fetching match info for match ID {match_id}: {err}")
 
-    def _create_match(self, match_id: str, match_info: dict):
+    def _create_match(self, match_id: str, match_info: dict, new=False):
 
         blue = match_info["teams"][0]["win"]
         winner = 100 if blue is True else 200
@@ -128,7 +128,8 @@ class MatchManager():
                 "game_duration": match_info["gameDuration"],
                 "game_mode": match_info["gameMode"],
                 "game_version": match_info["gameVersion"],
-                "winner": winner
+                "winner": winner,
+                "new_match": new
             }
         )
         if created:
@@ -259,7 +260,7 @@ class MatchManager():
             self._increment_models(participant, match, snowballs)
 
     def process_matches(self, progress_recorder=None):
-        self._matches = self._get_matches()
+        self._matches = self._get_all()
         with transaction.atomic():
             total_matches = len(self._matches)
             self._summoner.being_parsed = True
@@ -277,7 +278,6 @@ class MatchManager():
                 self._processed_matches += 1
                 self._summoner.parsed_matches += 1;
                 print(f"{self._processed_matches} matches processed")
-                sleep(2);
                 if progress_recorder:
                     print(i)
                     print(f"{total_matches} total")
@@ -300,7 +300,7 @@ class MatchManager():
             with transaction.atomic():
                 if not Match.objects.filter(match_id=match).exists():
                     match_info = self._get_match_info(match)
-                    match_model, created = self._create_match(match, match_info["info"])
+                    match_model, created = self._create_match(match, match_info["info"], new=True)
                     self._create_participants(match_info, match_model)
                 else:
                     print(f"{match} already exists")
@@ -313,7 +313,7 @@ class MatchManager():
 
 if __name__ == "__main__":
     summonerBuilder = SummonerManager("americas", "na1")
-    summonertest = summonerBuilder.create_summoner("highkeysavage", 'na1')
+    summonertest = summonerBuilder.create_summoner("aram0netrick", 'na1')
     matchBuilder = MatchManager("americas", "na1", summonertest)
     matchBuilder.process_matches()
     # summoners = Summoner.objects.all()
