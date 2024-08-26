@@ -1,3 +1,5 @@
+import time
+
 from django.db.models import Prefetch
 from django.http import HttpResponse, HttpResponseNotAllowed, Http404, HttpResponseNotFound, JsonResponse
 from django.shortcuts import render, get_object_or_404
@@ -23,9 +25,29 @@ def home(request):
 
 @require_POST
 def update(request):
-    print("Hey there!")
+    print("here")
+    if not request.session.session_key:
+        request.session.save()
+    session_key = request.session.session_key
+    cache_key = f'update-cooldown-{session_key}'
+
+    last_update_time = cache.get(cache_key)
+    current_time = time.time()
+    cooldown_duration = 600
+    if last_update_time:
+        time_since_last_update = current_time - last_update_time
+        if time_since_last_update < cooldown_duration:
+            remaining_cooldown = cooldown_duration - time_since_last_update
+            return JsonResponse({
+                'error': 'Cooldown active. Please wait.',
+                'remaining_cooldown': int(remaining_cooldown)
+            }, status=429)
+
+    cache.set(cache_key, current_time, timeout=cooldown_duration)  # 10-minute timeout
+
     summoner_id = request.POST.get('summoner_id')
-    task = update_matches.delay(summoner_id)  # Start the Celery task
+    task = update_matches.delay(summoner_id)
+
     return JsonResponse({'task_id': task.id}, status=202)
 
 
@@ -35,18 +57,20 @@ def details(request, game_name: str, tag: str):
     except Http404 as e:
         raise Http404(e)
 
-    # if summoner.being_parsed:
-    #     context = {
-    #         "task_id": summoner.task_id,
-    #         "summoner": summoner
-    #     }
-    #     return render(request, 'match_history/details.html', context)
+    if summoner.being_parsed:
+        context = {
+            "task_id": summoner.task_id,
+            "summoner": summoner
+        }
+
+        return render(request, 'match_history/details.html', context)
     matches_queryset = Match.objects.filter(participants__summoner=summoner).prefetch_related(
         Prefetch('participants', queryset=Participant.objects.select_related(
             'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", "item1", "item2", "item3",
             'item4', 'item5', 'item6', 'summoner__profile_icon'),
                  to_attr='all_participants')
     )
+
     matches_per_page = 10
     paginator = Paginator(matches_queryset, matches_per_page)
     page_number = request.GET.get('page', 1)
@@ -54,34 +78,33 @@ def details(request, game_name: str, tag: str):
 
     if request.GET.get('section') == 'update' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         data = {
-            'account_summary': render_to_string('match_history/account_summary.html', {'account_stats':_get_account_stats(summoner) }),
-            'champion_list': render_to_string('match_history/champ_list.html', {'champion_stats': _get_champion_stats_data(summoner)}),
-            'recent_list': render_to_string('match_history/recent_list.html', {'recent_list': _get_recent(summoner, matches_queryset)}),
+            'account_summary': render_to_string('match_history/account_summary.html',
+                                                {'account_stats': _get_account_stats(summoner)}),
+            'champion_list': render_to_string('match_history/champ_list.html',
+                                              {'champion_stats': _get_champion_stats_data(summoner)}),
+            'recent_list': render_to_string('match_history/recent_list.html',
+                                            {'recent_list': _get_recent(summoner, matches_queryset)}),
             'match_list': render_to_string('match_history/match_list.html', {'matches': _get_new_match_data(summoner)})
         }
         return JsonResponse(data)
 
-    matches = _get_match_data(summoner, page_obj)
-
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         print("hey pagin")
         if int(page_number) <= paginator.num_pages:
-            context = {"matches": matches}
+            context = {"matches": _get_match_data(summoner, page_obj)}
             return render(request, 'match_history/match_list.html', context)
         else:
             return HttpResponse(status=204)
 
     context = {
         "summoner": summoner,
-        "matches": matches,
+        "matches": _get_match_data(summoner, page_obj),
         "account_stats": _get_account_stats(summoner),
         "champion_stats": _get_champion_stats_data(summoner),
         "recent_list": _get_recent(summoner, matches_queryset),
     }
 
     return render(request, 'match_history/details.html', context)
-
-
 
 
 def summoner(request):
@@ -102,12 +125,10 @@ def summoner(request):
         try:
             summonerBuilder = SummonerManager("americas", "na1")
             newSummoner = summonerBuilder.create_summoner(summoner_name, tag)
-            # match_builder = MatchManager("americas", "na1", newSummoner)
-            # match_builder.process_matches()
-            # task = process_matches.delay(newSummoner.puuid)
-            # newSummoner.being_parsed = True
-            # newSummoner.task_id = task.task_id
-            # newSummoner.save()
+            task = process_matches.delay(newSummoner.puuid)
+            print("ok")
+            newSummoner.task_id = task.task_id
+            newSummoner.save()
 
         except ApiError as e:
             print(f"{full_name} not found in db or Riot servers")
@@ -137,6 +158,7 @@ def champions(request):
     return render(request, 'match_history/champions.html', context)
 
 
+# ----------------------------------------------------------------------------------------------------------------------
 def _validate_summoner(game_name, tag):
     game_name, tag = game_name.replace(" ", "").lower(), tag.lower().replace(" ", "").lower()
     try:
@@ -184,6 +206,8 @@ def _get_new_match_data(summoner):
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
     return match_data
+
+
 def _get_match_data(summoner, page_obj):
     match_data = []
 
@@ -199,7 +223,7 @@ def _get_match_data(summoner, page_obj):
                 red_team_list.append(participant)
 
         kda = (
-                          main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
+                      main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
         main_stats = {
@@ -250,7 +274,8 @@ def _get_recent(summoner, matches_queryset):
 
 
 def _get_champion_stats_data(summoner):
-    summoner_champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by('-total_played')[:7].prefetch_related('champion')
+    summoner_champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by(
+        '-total_played')[:7].prefetch_related('champion')
     if not summoner_champion_stats:
         return
     champion_stats_data = []

@@ -21,15 +21,15 @@
         </div>
     </div>
 </div>
-{#----------------------#}
-<div class="loading-wrapper" style="">
-    <div class='progress-wrapper'>
-        <div id='progress-bar' class='progress-bar' style="background-color: #68a9ef; border-radius: 12px; width: 0%;">&nbsp; </div>
+{% if summoner.being_parsed %}
+    <div class="loading-wrapper" style="">
+        <div class='progress-wrapper'>
+            <div id='progress-bar' class='progress-bar' style="background-color: #68a9ef; border-radius: 12px; width: 0%;">&nbsp; </div>
+        </div>
+        <div id="progress-bar-message"></div>
     </div>
-    <div id="progress-bar-message"></div>
-</div>
-{#----------------------#}
 
+{% else %}
 <div class="main-info">
     <div class="sidebar">
         <div class="account-container section">
@@ -87,30 +87,70 @@
         </div>
     </div>
 </div>
+    {% endif %}
 
 {% endblock content %}
 {% block extra_scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {% if summoner.being_parsed %}
+
+    <script src="{% static 'celery_progress/celery_progress.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
+
+        function customProgress(progressBarElement, progressBarMessageElement, progress) {
+            progressBarElement.style.backgroundColor = this.barColors.progress;
+            progressBarElement.style.width = progress.percent + "%";
+            var description = progress.description || "";
+            if (progress.current === 0) {
+                if (progress.pending === true) {
+                    progressBarMessageElement.textContent = this.messages.waiting;
+                } else {
+                    progressBarMessageElement.textContent = this.messages.started;
+                }
+            } else {
+                progressBarMessageElement.textContent = progress.current + ' of ' + progress.total + ' matches processed. '
+                }
+
+        }
+
+        CeleryProgressBar.initProgressBar(progressUrl, {
+            pollInterval: 5000,
+            onSuccess: function() {
+                document.getElementById('progress-bar-message').innerText = "Success!";
+                window.location.reload();
+            },
+            onError: function() {
+                document.getElementById('progress-bar-message').innerText = "An error occurred.";
+            },
+            defaultMessages: {
+                waiting: 'Processing matches...',
+                started: 'Processing matches...'
+            },
+            onProgress: customProgress
+        });
+    });
+</script>
+    {% endif %}
 <script>
     $(document).ready(function() {
-        let page = 2;  // Start from the second page since the first page is already loaded
+        let page = 2;
         let loading = false;
-        let noMorePages = false;  // Flag to indicate no more pages to load
+        let noMorePages = false;
         if ($('#match-list').children().length === 0) {
             console.log('No matches to load.');
             return;
         }
 
         $(window).scroll(function() {
-            // Check if the user has scrolled near the bottom and a request is not in progress
             if (!loading && !noMorePages && $(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
                 loading = true;
 
-                // Make an AJAX request to load the next page
                 $.ajax({
                     url: window.location.href,
                     data: {
-                        'page': page  // Pass the current page number to load
+                        'page': page
                     },
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
@@ -120,66 +160,20 @@
                             noMorePages = true;
                             console.log("No more pages to load.");
                         } else {
-                            // Append the loaded data to the match list
                             $('#match-list').append(data);
-
-                            $('#match-list').append('<div class="done">Done with page ' + page + '</div>');
-
-                            // Increment the page for the next load
                             page += 1;
                         }
-                        loading = false;  // Reset loading flag
+                        loading = false;
                     },
                     error: function() {
                         console.error("Error loading page " + page);
-                        loading = false;  // Reset loading flag on error
+                        loading = false;
                     }
                 });
             }
         });
     });
 </script>
-    {% if summoner.being_parsed %}
-
-        <script src="{% static 'celery_progress/celery_progress.js' %}"></script>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
-
-                function customProgress(progressBarElement, progressBarMessageElement, progress) {
-                    progressBarElement.style.backgroundColor = this.barColors.progress;
-                    progressBarElement.style.width = progress.percent + "%";
-                    var description = progress.description || "";
-                    if (progress.current === 0) {
-                        if (progress.pending === true) {
-                            progressBarMessageElement.textContent = this.messages.waiting;
-                        } else {
-                            progressBarMessageElement.textContent = this.messages.started;
-                        }
-                    } else {
-                        progressBarMessageElement.textContent = progress.current + ' of ' + progress.total + ' matches processed. '
-                    }
-
-                }
-
-                CeleryProgressBar.initProgressBar(progressUrl, {
-                    pollInterval: 1000,
-                    onSuccess: function() {
-                        document.getElementById('progress-bar-message').innerText = "Success!";
-                        window.location.reload();  // Reload the page once parsing is complete
-                    },
-                    onError: function() {
-                        document.getElementById('progress-bar-message').innerText = "An error occurred.";
-                    },
-                    defaultMessages: {
-                        waiting: 'Processing matches...',  // Custom message for the waiting state
-                        started: 'Processing matches...'   // Custom message for the started state
-                    },
-                    onProgress: customProgress
-                });
-            });
-        </script>
-    {% endif %}
 <script>
     $(document).ready(function() {
         function updateSections() {
@@ -196,7 +190,6 @@
                     $('.recent-list').html(response.recent_list);
                     $('#match-list').prepend(response.match_list);
 
-                    // Reset the button once the update sections have been processed
                     $('#update').text('Update');
                     setTimeout(function() {
                         $('#update').prop('disabled', false).text('Update');
@@ -212,13 +205,10 @@
 
         document.getElementById('update').addEventListener('click', function() {
             console.log("hey you clicked me");
-
-            // Disable the button and show updating text
             $('#update').prop('disabled', true).text('Updating...');
-
-            let summonerId = '{{ summoner.puuid }}';  // Ensure this renders correctly
+            let summonerId = '{{ summoner.puuid }}';
             $.ajax({
-                url: '{% url "match_history:update" %}',  // Confirm this URL with Django routing
+                url: '{% url "match_history:update" %}',
                 method: 'POST',
                 data: {
                     'summoner_id': summonerId,
@@ -229,9 +219,24 @@
                     console.log(taskId);
                     pollTaskStatus(taskId);
                 },
-                error: function() {
-                    console.error("Failed to start update task.");
-                    $('#update').prop('disabled', false).text('Update (Failed)');
+                error: function(xhr) {
+                    if (xhr.status === 429) {
+                        let response = JSON.parse(xhr.responseText);
+                        let remainingCooldown = response.remaining_cooldown;
+                        console.log(`Please wait ${remainingCooldown} seconds before updating again.`);
+                        let countdownInterval = setInterval(function() {
+                            if (remainingCooldown > 0) {
+                                $('#update').prop('disabled', true).text(`Updated ${remainingCooldown}s`);
+                                remainingCooldown--;
+                            } else {
+                                clearInterval(countdownInterval);
+                                $('#update').prop('disabled', false).text('Update');
+                            }
+                        }, 1000);
+                    } else {
+                        console.error("Failed to start update task.");
+                        $('#update').prop('disabled', false).text('Update (Failed)');
+                    }
                 }
             });
         });

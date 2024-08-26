@@ -191,6 +191,7 @@ hr {
     background-color: rgba(213,123,101,.2);
 }
 .stat-section {
+    margin-left: 5px;
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -259,6 +260,11 @@ hr {
 
 
 /* ----------------------------------------------- */
+.champ-text {
+    text-overflow: ellipsis;
+    white-space: no-wrap;
+    overflow: hidden;
+}
 .champ-list {
     display: flex;
     flex-direction: column;
@@ -270,6 +276,7 @@ hr {
 }
 
 .champ-card {
+    line-height: 1.5;
     align-items: center;
     padding: 4px;
     display: flex;
@@ -283,7 +290,10 @@ hr {
 
 .champs-text {
     display: grid;
-    grid-template-columns: .8fr 1fr 1fr;
+    grid-template-columns: 65px 1fr 1fr;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     align-items: center;
     width: 100%;
 }

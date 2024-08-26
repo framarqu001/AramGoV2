@@ -12,7 +12,7 @@ from match_history.models import *
 
 RIOT_API_KEY = 'RGAPI-a9929b33-ba47-4756-8551-b0e18cba659f'
 QUEUE = 450  # Aram
-COUNT = 50
+COUNT = 100
 from django.db import transaction
 
 
@@ -55,7 +55,8 @@ class SummonerManager():
                 'tag_line': account_names["tagLine"],
                 'normalized_tag_line': account_names["tagLine"].replace(" ", "").lower(),
                 'summoner_level': level,
-                'profile_icon': icon
+                'profile_icon': icon,
+                'being_parsed': True
             }
         )
         if created:
@@ -85,7 +86,7 @@ class MatchManager():
     def _get_all(self):
         try:
             match_list = []
-            start = 50
+            start = 0
             while True:
                 new_matches = self._watcher.match.matchlist_by_puuid(self._region, self._summoner.puuid, queue=QUEUE,
                                                                      count=COUNT, start=start)
@@ -160,6 +161,7 @@ class MatchManager():
                 'summoner_level': info_dict["summonerLevel"],
                 'profile_icon': icon,
                 'last_updated': game_creation,
+                'being_parsed': True
             }
         )
         if created:

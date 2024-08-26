@@ -8,6 +8,7 @@ from celery_progress.backend import ProgressRecorder
 
 @shared_task(bind=True)
 def process_matches(self, summoner_id):
+    print('test')
     try:
         progress_recorder = ProgressRecorder(self)
         summoner = Summoner.objects.get(puuid=summoner_id)
