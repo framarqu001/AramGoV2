@@ -55,6 +55,7 @@ def update(request):
 
 
 def details(request, game_name: str, tag: str):
+    print("hey there")
     try:
         summoner = _validate_summoner(game_name, tag)
     except Http404 as e:
@@ -234,7 +235,6 @@ def _get_match_data(summoner, page_obj):
             "cs_min": f"{cs_min:.1f}"
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
-    print(match_data)
     return match_data
 
 
@@ -272,7 +272,6 @@ def _get_recent(summoner, matches_queryset):
             'winrate': f"{int(round(win_rate))}%",
         }
         recent_stats.append(stats)
-    print(recent_stats)
     return games_played, recent_stats
 
 
@@ -305,7 +304,6 @@ def _get_champion_stats_data(summoner):
 
 def _get_account_stats(summoner):
     account_stats = AccountStats.objects.filter(summoner=summoner).first()
-    print(account_stats)
     if not account_stats:
         return
     win_rate = (account_stats.total_wins / account_stats.total_played * 100) if account_stats.total_played > 0 else 0

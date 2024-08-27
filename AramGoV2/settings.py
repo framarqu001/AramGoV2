@@ -25,7 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!s
-SECRET_KEY = 'django-insecure-y^y16p$+op0$#3a_eh8+1j852wn++smx3#sr0hl(kk4h=kcvnz'
+SECRET_KEY = os.environ.get('SECRET_KEY')
+
+DEBUG = bool(int(os.environ.get('DEBUG', '0')))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -91,9 +93,9 @@ WSGI_APPLICATION = 'AramGoV2.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_NAME', 'AramGo'),
-        'USER': os.environ.get('POSTGRES_USER', 'steven'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'steven2020'),
+        'NAME': os.getenv('POSTGRES_NAME', 'AramGo'),
+        'USER': os.getenv('POSTGRES_USER', 'steven'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'steven2020'),
         'HOST': 'pgdb',
         'PORT': '5432',
     }
