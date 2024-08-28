@@ -37,6 +37,8 @@ services:
 
   redis:
     image: "redis:alpine"
+    expose:
+      - 6379
 
   celery:
     build: .
