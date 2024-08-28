@@ -17,9 +17,15 @@ services:
   django:
     build: .
     container_name: django
-    command: python manage.py runserver 0.0.0.0:8000
+    command: >
+      /bin/sh -c "python manage.py wait_for_db &&
+              python manage.py migrate &&
+              python manage.py makemigrations &&
+              python manage.py populate_assets &&
+              python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/code
+      - ./web:/vol/web
     ports:
       - "8000:8000"
     environment:
@@ -38,9 +44,21 @@ services:
   celery:
     build: .
     command: celery -A AramGoV2 worker --loglevel=info
+    volumes:
+      - .:/code
+    environment:
+      - DEBUG=1
+      - SECRET_KEY="f^aei#w6*5pum8fzk=+g-tznk5j7h6gd@5)ys%9xpx6il0=f80"
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0  # Fixed comma-separated hosts
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - POSTGRES_NAME=AramGo
+      - POSTGRES_USER=steven
+      - POSTGRES_PASSWORD=steven2020
     depends_on:
       - pgdb
       - redis
+      - django
 
 volumes:
   pgdata:

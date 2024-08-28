@@ -1,22 +1,20 @@
 import time
 
+from django.core.cache import cache
 from django.db.models import Prefetch
-from django.http import HttpResponse, HttpResponseNotAllowed, Http404, HttpResponseNotFound, JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
-from match_history.models import Summoner, Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
+from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-from populate_data import SummonerManager, MatchManager
+from match_history.util.populate_data import SummonerManager
 from riotwatcher import ApiError
-from django.db import transaction
 from django.core.paginator import Paginator
-from collections import Counter, defaultdict
-import pdb
+from collections import defaultdict
 from .tasks import *
-from celery.result import AsyncResult
 
 
 def home(request):
@@ -130,7 +128,6 @@ def summoner(request):
             summonerBuilder = SummonerManager("americas", "na1")
             newSummoner = summonerBuilder.create_summoner(summoner_name, tag)
             task = process_matches.delay(newSummoner.puuid)
-            print("ok")
             newSummoner.task_id = task.task_id
             newSummoner.save()
 

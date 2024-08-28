@@ -1,8 +1,8 @@
-from celery import shared_task
-from django.core.cache import cache
+import os
 
-from populate_data import Summoner, MatchManager
-from django.core.exceptions import ObjectDoesNotExist
+from celery import shared_task
+
+from match_history.util.populate_data import Summoner, MatchManager
 from celery_progress.backend import ProgressRecorder
 
 
@@ -16,6 +16,8 @@ def process_matches(self, summoner_id):
         match_builder.process_matches(progress_recorder=progress_recorder)
     except Summoner.DoesNotExist:
         print(f"Summoner with id {summoner_id} does not exist")
+    except Exception as e:
+        print("Summoner could not be parsed")
     finally:
         summoner.being_parsed = False
         summoner.save()

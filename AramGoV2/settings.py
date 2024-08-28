@@ -13,7 +13,7 @@ import os
 import sys
 from pathlib import Path
 
-
+from tornado import web
 
 import AramGoV2
 
@@ -27,10 +27,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!s
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
-DEBUG = bool(int(os.environ.get('DEBUG', '0')))
+DEBUG = os.environ.get('DEBUG', '0') == '1'
+
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
 
@@ -93,7 +94,7 @@ WSGI_APPLICATION = 'AramGoV2.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_NAME', 'AramGo'),
+        'NAME': os.getenv('POSTGRES_NAME', "AramGo"),
         'USER': os.getenv('POSTGRES_USER', 'steven'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'steven2020'),
         'HOST': 'pgdb',
@@ -101,6 +102,7 @@ DATABASES = {
     }
 }
 
+print(DATABASES)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -136,7 +138,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/static/'
+MEDIA_URL = '/media/media/'
+
+MEDIA_ROOT = '/vol/web/media'
+STATIC_ROOT = '/vol/web/static'
 
 INTERNAL_IPS = [
     # ...

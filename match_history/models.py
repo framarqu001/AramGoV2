@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.db import connection
 from django.urls import reverse
 from django import template
-
+from django.core.cache import cache
 patch = "14.16.1"
 
 

@@ -10,7 +10,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
 
-RIOT_API_KEY = 'RGAPI-d3f5ad41-a12f-442a-afb1-d89b901d82f5'
+RIOT_API_KEY = 'RGAPI-8f03a1ef-3e60-4e37-88cc-29563e24b7c1'
 QUEUE = 450  # Aram
 COUNT = 100
 from django.db import transaction
@@ -27,6 +27,7 @@ class SummonerManager():
     def _get_puid(self, summoner_name, tag):
         try:
             account_info = self._riotWatcher.account.by_riot_id(self._platform, summoner_name, tag)
+            print(account_info)
             return account_info
         except ApiError as err:
             raise ApiError(f"Error fetching PUUID for {summoner_name}#{tag}: {err}")
