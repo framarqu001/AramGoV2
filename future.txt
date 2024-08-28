@@ -1,4 +1,0 @@
-1) add infinite scrolling
-2) find ways to cache information
-3) optimize queries
-4) implement rest api/react

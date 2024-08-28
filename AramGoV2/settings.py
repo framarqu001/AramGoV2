@@ -35,7 +35,7 @@ DEBUG = os.environ.get('DEBUG', '0') == '1'
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
 
-
+RIOT_API_KEY = os.getenv('RIOT_API_KEY')
 
 
 # Application definition
@@ -150,8 +150,8 @@ INTERNAL_IPS = [
     # ...
 ]
 
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER', 'redis://redis:6379/0')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT', 'redis://redis:6379/0')
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_BACKEND')
 
 
 CELERY_ACCEPT_CONTENT = ['json']

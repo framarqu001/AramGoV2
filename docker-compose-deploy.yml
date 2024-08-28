@@ -1,7 +1,7 @@
 
 services:
   pgdb:
-    image: postgres:13-alpine
+    image: postgres
     restart: always
     volumes:
       - postgres-data:/var/lib/postgresql/data
@@ -9,7 +9,7 @@ services:
     environment:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
       - "5432:5432"
 
@@ -22,13 +22,14 @@ services:
       - static-data:/vol/web
     environment:
       - DEBUG=${DEBUG}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
       - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - RIOT_API_KEY=${RIOT_API_KEY}
+      - DJANGO_ALLOWED_HOSTS=${ALLOWED_HOSTS}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - POSTGRES_NAME=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     depends_on:
       - pgdb
       - redis
@@ -41,13 +42,14 @@ services:
     build: .
     command: celery -A AramGoV2 worker --loglevel=info
     environment:
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
+      - DEBUG=${DEBUG}
       - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DJANGO_ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - CELERY_BROKER_URL=${BROKER_URL}
+      - CELERY_RESULT_BACKEND=${BROKER_BACKEND}
+      - POSTGRES_NAME=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     depends_on:
       - pgdb
       - redis

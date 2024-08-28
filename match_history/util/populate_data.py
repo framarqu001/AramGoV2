@@ -6,11 +6,13 @@ from datetime import datetime as dt
 import pytz
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
 
+from AramGoV2 import settings
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
 
-RIOT_API_KEY = 'RGAPI-8f03a1ef-3e60-4e37-88cc-29563e24b7c1'
+RIOT_API_KEY = settings.RIOT_API_KEY
 QUEUE = 450  # Aram
 COUNT = 100
 from django.db import transaction
