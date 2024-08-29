@@ -76,6 +76,7 @@
     font-family: "Space Mono", monospace;
     font-weight: 400;
     font-style: normal;
+    gap: 40px
     
   }
   .test {
@@ -107,7 +108,7 @@
     min-width: var(--max-width);
     background-color: var(--primary-color);
     z-index: 999;
-    background-color: #222433;
+
   }
   #nav-search {
     width: 300px;

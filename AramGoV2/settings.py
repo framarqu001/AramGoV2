@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    # 'livereload',
+    'livereload',
     'django.contrib.staticfiles',
     "match_history.apps.MatchHistoryConfig",
     "debug_toolbar",
@@ -62,7 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     "debug_toolbar.middleware.DebugToolbarMiddleware",
-    # 'livereload.middleware.LiveReloadScript',
+    'livereload.middleware.LiveReloadScript',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -149,6 +149,7 @@ INTERNAL_IPS = [
     "127.0.0.1",
     # ...
 ]
+LIVERELOAD_HOST = '0.0.0.0'
 
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_BACKEND_URL')

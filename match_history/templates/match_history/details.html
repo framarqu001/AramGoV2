@@ -11,9 +11,6 @@
     <div class="summoner-card">
         <div class="profile-icon-container">
             <img class="main-icon" src="{{summoner.profile_icon.get_url}}" alt="" >
-            <div class="level">
-                {{summoner.summoner_level}}
-            </div>
         </div>
         <div class="summoner-name">
             <p class="large-text">{{summoner.game_name}} <span id="tag">#{{summoner.tag_line}}</span></p>
@@ -37,7 +34,6 @@
                 <div class="title">Account Summary</div>
                 <div class="year">2024</div>
             </div>
-            <hr>
             <div class="account-card">
                 {% include 'match_history/account_summary.html' %}
             </div>
@@ -48,7 +44,6 @@
                 <div class="title">Snowballs</div>
                 <div class="year">2024</div>
             </div>
-            <hr>
             <div class="snowball-content">
                 {% include 'match_history/snowballs.html' %}
             </div>
@@ -59,7 +54,6 @@
                 <div class="title">Champions Played</div>
                 <div class="year">2024</div>
             </div>
-            <hr>
             <div class="champ-list">
                 {% include 'match_history/champ_list.html' %}
             </div>
@@ -70,7 +64,6 @@
                 <div class="title">Recently Played</div>
                 <div class="year sub-text">(last {{recent_list.0}} games)</div>
             </div>
-            <hr>
             <div class="recent-list">
                 {% include 'match_history/recent_list.html' %}
             </div>
@@ -78,8 +71,9 @@
     </div>
 
     <div class="match-history section">
-        Match History
-        <hr>
+        <div class="section-header">
+            <div class="title">Match</div>
+        </div>
         <div id="match-list" data-total-pages ={{ total_pages }}>
 
             {% include "match_history/match_list.html"%}

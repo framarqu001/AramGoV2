@@ -1,5 +1,6 @@
 .content {
-    /* background-color: lightgray; */
+   flex-direction: column;
+
 }
 .loading-wrapper {
     width: 800px;
@@ -17,8 +18,8 @@ hr {
     margin-bottom: 12px;
 }
 .main-icon {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
 }
 .drop {
@@ -52,6 +53,7 @@ hr {
     background-color: #222433;
     text-align: center;
     bottom: 10px;
+    letter-spacing: -2px;
 }
 
 
@@ -64,26 +66,50 @@ hr {
     overflow: hidden;
 }
 .large-text {
-    font-size: 3rem;
+    font-size: 2rem;
+    font-family: "Mulish", sans-serif;
+    font-weight: 600;
+    margin-bottom: 1rem;
 }
 #tag {
-    font-weight: 1000;
+    font-size: 2rem;
+    font-family: "Space Mono", monospace;
+    font-weight: 300;
     color: gray;
 }
 #update {
+    color: black;
     padding: .2rem 1rem;
 }
-.summoner-header{
-    /*background-color: #222534;*/
+.summoner-header {
     margin: auto;
+    margin-bottom: 1rem;
     width: var(--max-width);
-    height: 12.5rem;
+    height: 16rem;
     display: flex;
     align-items: center;
+    background-image: url(https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aatrox_0.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.582); /* Darken the background image */
+    background-blend-mode: darken;
+    border-radius: 10px; /* Optional: Adjust to match rounded corners */
 }
+
+
+.summoner-header * {
+    position: relative;
+    /* z-index: 2; */
+    color: white; /* Ensure text and elements are visible over the dark background */
+}
+
+
+
 .summoner-card {
+    margin-left: 70px;
     display: flex;
-    gap: 1rem
+    gap: 3rem;
 }
 
 .main-info {
@@ -103,16 +129,18 @@ hr {
     gap: 2rem;
 }
 .section {
-    padding-top: 3px;
-    padding-bottom: 1rem;
+
+
     background-color: #222433;
     min-height: 100px;
-    padding: 8px
+
 }
 .match-history {
     /*background-color: rgb(235, 252, 135);*/
 }
 #match-list {
+    padding: 8px;
+    padding-top: 0px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -190,6 +218,7 @@ hr {
     background-color: rgba(213,123,101,.2);
 }
 .stat-section {
+    letter-spacing: -2px;
     margin-left: 5px;
     display: flex;
     align-items: center;
@@ -207,14 +236,15 @@ hr {
 }
 
 .match-btn.match-win {
-    background-color: rgba(145,166,179,.2)
+    background-color: #4b6bc3
 }
 
 .match-btn.match-lose {
-    background-color: rgba(213,123,101,.2);
+    background-color:  #f46bf483
 }
 
 .participant-section {
+    font-family: "Mulish", sans-serif;
     justify-self: end;
     font-size: 11px;
     display: flex;
@@ -249,8 +279,9 @@ hr {
     /* background-color:#222433 ; */
 }
 .sub-text {
+
     font-weight: 400;
-    font-size: .8rem;
+    font-size: 11px;
     color: #87888a
 }
 .stat-text {
@@ -264,11 +295,18 @@ hr {
     text-overflow: ellipsis;
     white-space: no-wrap;
     overflow: hidden;
+    font-family: "Space Mono", monospace;
+    font-size: 14px;
+}
+.champ-kda {
+    font-size: 14px;
+    font-weight: 700;
 }
 .champ-list {
     display: flex;
     flex-direction: column;
     gap: 3px;
+    padding-bottom: 12px;
 }
 
 .kda {
@@ -278,11 +316,14 @@ hr {
 .champ-card {
     line-height: 1.5;
     align-items: center;
-    padding: 4px;
+    padding: 8px 12px;
     display: flex;
-    gap:1rem
+    gap:.5rem;
+    border-top: 1px solid var(--primary-color);
 }
 .total-played {
+    font-size: 13px;
+    white-space: nowrap;
     display:flex;
     flex-direction: column;
     align-items: end;
@@ -299,12 +340,15 @@ hr {
 }
 /* ------------------------------------------- */
 .snowball-container {
-    height: 100px;
+
+    height: 120px;
+    gap: 5px;
     display: flex;
     flex-direction: column;
 }
 .snowball-content {
     height: 100%;
+    margin-top: -20px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -320,10 +364,13 @@ hr {
 .account-container{
     display: flex;
     flex-direction: column;
+    height: 120px;
+    gap: 5px
 }
 .account-card {
+    padding: 8px 12px;
     display: grid;
-    height: 100%;
+
     align-items: center;
     gap: 10x;
     grid-template-columns: 1fr 2fr 1fr;
@@ -333,23 +380,30 @@ hr {
 }
 
 .section-header {
+    padding: 8px 12px;
+    font-family: "Mulish", sans-serif;
     display: flex;
     justify-content: space-between;
+    font-weight: 700;
+    padding-bottom: 1rem;
+
 }
 /* ------------------------------- */
 .recent-list {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    padding-bottom: 12px;
 }
 .recent-list img {
     width: 31px;
 }
 
 .recent-card {
-    padding:4px;
+    padding: 8px 12px;
     display: grid;
     grid-template-columns: 150px 1fr 1fr;
+    border-top: 1px solid var(--primary-color);
 }
 .recent-info {
     display: flex;
@@ -359,8 +413,16 @@ hr {
 .recent-stats {
     text-align: center;
 }
+
+.recent-list {
+}
+
+.recent-level {
+    letter-spacing: -2px;
+}
 .recent-name {
-    font-size: .8rem;
+    font-family: "Mulish", sans-serif;
+    font-size: 14px;
     max-width: 100px;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -370,3 +432,9 @@ hr {
 .recent-wr {
     justify-self: end;
 }
+.win-loss {
+    font-size: 14px;
+}
+/* -------------------
+ */
+ 
