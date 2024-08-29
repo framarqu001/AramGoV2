@@ -73,7 +73,9 @@
     background-color: var(--primary-color);
     color: white;
     min-width: var(--max-width);
-    font-family: "franklin-gothic-urw", sans-serif;
+    font-family: "Space Mono", monospace;
+    font-weight: 400;
+    font-style: normal;
     
   }
   .test {

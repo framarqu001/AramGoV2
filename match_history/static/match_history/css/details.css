@@ -127,17 +127,16 @@ hr {
 }
 
 .match-card.match-win {
-    background-color: rgba(145,166,179,.3);
+    background-color: #263358;
 }
 .match-card.match-lose {
-    background-color: rgba(213,123,101,.3);
-    opacity: .9;
+    background-color:#64336a;
 }
 .match-win:hover {
-    background-color: rgba(145,166,179,.1);
+
 }
 .match-lose:hover {
-    background-color: rgba(213,123,101,.1);
+ 
 }
 
 .match-section-container {
@@ -250,8 +249,9 @@ hr {
     /* background-color:#222433 ; */
 }
 .sub-text {
+    font-weight: 400;
     font-size: .8rem;
-    color: #595a5b
+    color: #87888a
 }
 .stat-text {
 

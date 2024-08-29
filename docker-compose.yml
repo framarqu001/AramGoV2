@@ -29,14 +29,15 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DEBUG=1
-      - SECRET_KEY="f^aei#w6*5pum8fzk=+g-tznk5j7h6gd@5)ys%9xpx6il0=f80"
-      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0  # Fixed comma-separated hosts
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - POSTGRES_NAME=AramGo
-      - POSTGRES_USER=steven
-      - POSTGRES_PASSWORD=steven2020
+      - DEBUG=${DEBUG}
+      - SECRET_KEY=${SECRET_KEY}
+      - RIOT_API_KEY=${RIOT_API_KEY}
+      - DJANGO_ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - CELERY_BROKER_URL=${BROKER_URL}
+      - CELERY_RESULT_BACKEND=${BACKEND_URL}
+      - POSTGRES_NAME=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     depends_on:
       - pgdb
       - redis
@@ -47,14 +48,15 @@ services:
     volumes:
       - .:/code
     environment:
-      - DEBUG=1
-      - SECRET_KEY="f^aei#w6*5pum8fzk=+g-tznk5j7h6gd@5)ys%9xpx6il0=f80"
-      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0  # Fixed comma-separated hosts
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - POSTGRES_NAME=AramGo
-      - POSTGRES_USER=steven
-      - POSTGRES_PASSWORD=steven2020
+      - DEBUG=${DEBUG}
+      - SECRET_KEY=${SECRET_KEY}
+      - RIOT_API_KEY=${RIOT_API_KEY}
+      - DJANGO_ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - CELERY_BROKER_URL=${BROKER_URL}
+      - CELERY_RESULT_BACKEND=${BACKEND_URL}
+      - POSTGRES_NAME=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     depends_on:
       - pgdb
       - redis
