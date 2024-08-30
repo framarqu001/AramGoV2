@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name aram-go.com www.aram-go.com;
+    server_name ${DOMAIN} www.${DOMAIN};
 
     location /.well-known/acme-challenge/ {
         root /vol/www/;
@@ -13,10 +13,10 @@ server {
 
 server {
     listen      443 ssl;
-    server_name aram-go.com www.aram-go.com;
+    server_name ${DOMAIN} www.${DOMAIN};
 
-    ssl_certificate     /etc/letsencrypt/live/aram-go.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/aram-go.com/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
 
     include     /etc/nginx/options-ssl-nginx.conf;
 
@@ -29,7 +29,7 @@ server {
     }
 
     location / {
-        uwsgi_pass           django:9000;  # Replace with your actual app host and port
+        uwsgi_pass           ${APP_HOST}:${APP_PORT};
         include              /etc/nginx/uwsgi_params;
         client_max_body_size 10M;
     }

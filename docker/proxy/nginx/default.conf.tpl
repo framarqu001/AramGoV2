@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name aram-go www.aram-go.com;
+    server_name ${DOMAIN} www.${DOMAIN};
 
     location /.well-known/acme-challenge/ {
         root /vol/www/;
