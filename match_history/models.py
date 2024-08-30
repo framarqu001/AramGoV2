@@ -12,9 +12,13 @@ class Champion(models.Model):
     name = models.CharField(max_length=100)
     title = models.CharField(max_length=200)
     image_path = models.CharField(max_length=100)
+    splash_image_path = models.CharField(max_length=100)
 
     def get_url(self):
         return f"https://ddragon.leagueoflegends.com/cdn/{patch}/img/champion/{self.image_path}"
+
+    def get_splash_url(self):
+        return f"https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{self.splash_image_path}"
 
     def __str__(self):
         return self.name

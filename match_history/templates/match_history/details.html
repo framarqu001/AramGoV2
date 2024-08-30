@@ -7,7 +7,8 @@
 
 
 {% block content %}
-<div class="summoner-header">
+<div class="summoner-header" style="background-image: url('{{ main_champ.get_splash_url }}');">
+
     <div class="summoner-card">
         <div class="profile-icon-container">
             <img class="main-icon" src="{{summoner.profile_icon.get_url}}" alt="" >
@@ -31,8 +32,8 @@
     <div class="sidebar">
         <div class="account-container section">
             <div class="section-header">
+                <img class="icon" src="{%static 'match_history/icons/account.svg'%}" alt="">
                 <div class="title">Account Summary</div>
-                <div class="year">2024</div>
             </div>
             <div class="account-card">
                 {% include 'match_history/account_summary.html' %}
@@ -41,8 +42,8 @@
         </div>
         <div class="snowball-container section">
             <div class="section-header">
+                <img class="icon" src="{%static 'match_history/icons/snowflake.svg'%}" alt="">
                 <div class="title">Snowballs</div>
-                <div class="year">2024</div>
             </div>
             <div class="snowball-content">
                 {% include 'match_history/snowballs.html' %}
@@ -51,8 +52,9 @@
         </div>
         <div class="champion-container section">
             <div class="section-header">
+                <img class="icon" src="{%static 'match_history/icons/sword.svg'%}" alt="">
+
                 <div class="title">Champions Played</div>
-                <div class="year">2024</div>
             </div>
             <div class="champ-list">
                 {% include 'match_history/champ_list.html' %}
@@ -61,8 +63,11 @@
 
         <div class="recent-container section">
             <div class="section-header">
-                <div class="title">Recently Played</div>
-                <div class="year sub-text">(last {{recent_list.0}} games)</div>
+                <img class="icon" src="{%static 'match_history/icons/history.svg'%}" alt="">
+                <div class="recent-wrapper">
+                    <div class="title">Recently Played</div>
+                    <div class="year sub-text">(last {{recent_list.0}} games)</div>
+                </div>
             </div>
             <div class="recent-list">
                 {% include 'match_history/recent_list.html' %}
@@ -72,7 +77,8 @@
 
     <div class="match-history section">
         <div class="section-header">
-            <div class="title">Match</div>
+            <img class="icon" src="{%static 'match_history/icons/trophy.svg'%}" alt="">
+            <div class="title">Match History</div>
         </div>
         <div id="match-list" data-total-pages ={{ total_pages }}>
 

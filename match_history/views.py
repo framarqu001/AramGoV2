@@ -72,6 +72,10 @@ def details(request, game_name: str, tag: str):
             'item4', 'item5', 'item6', 'summoner__profile_icon'),
                  to_attr='all_participants')
     )
+    summoner_champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by(
+        '-total_played')[:7].prefetch_related('champion')
+    first_stats = summoner_champion_stats[0]
+    main_champ = first_stats.champion
 
     matches_per_page = 10
     paginator = Paginator(matches_queryset, matches_per_page)
@@ -85,7 +89,7 @@ def details(request, game_name: str, tag: str):
                                                 {'account_stats': account_stats}),
             'snowballs' : render_to_string('match_history/snowballs.html', {'account_stats': account_stats}),
             'champion_list': render_to_string('match_history/champ_list.html',
-                                              {'champion_stats': _get_champion_stats_data(summoner)}),
+                                              {'champion_stats': _get_champion_stats_data(summoner, summoner_champion_stats)}),
             'recent_list': render_to_string('match_history/recent_list.html',
                                             {'recent_list': _get_recent(summoner, matches_queryset)}),
             'match_list': render_to_string('match_history/match_list.html', {'matches': _get_new_match_data(summoner)})
@@ -99,13 +103,14 @@ def details(request, game_name: str, tag: str):
             return render(request, 'match_history/match_list.html', context)
         else:
             return HttpResponse(status=204)
-
+    print("how r u doing")
     context = {
         "summoner": summoner,
         "matches": _get_match_data(summoner, page_obj),
         "account_stats": _get_account_stats(summoner),
-        "champion_stats": _get_champion_stats_data(summoner),
+        "champion_stats": _get_champion_stats_data(summoner, summoner_champion_stats),
         "recent_list": _get_recent(summoner, matches_queryset),
+        "main_champ": main_champ,
     }
 
     return render(request, 'match_history/details.html', context)
@@ -272,12 +277,11 @@ def _get_recent(summoner, matches_queryset):
     return games_played, recent_stats
 
 
-def _get_champion_stats_data(summoner):
-    summoner_champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by(
-        '-total_played')[:7].prefetch_related('champion')
+def _get_champion_stats_data(summoner, summoner_champion_stats):
     if not summoner_champion_stats:
         return
     champion_stats_data = []
+    main_champ = summoner_champion_stats[0].champion
     for stat in summoner_champion_stats:
         win_rate = (stat.total_wins / stat.total_played * 100) if stat.total_played > 0 else 0
         average_kills = stat.total_kills / stat.total_played

@@ -56,7 +56,8 @@ class Command(BaseCommand):
                 defaults={
                     "name": champion_name,
                     "title": champion_title,
-                    "image_path": champion_square_image
+                    "image_path": champion_square_image,
+                    "splash_image_path": f"{champion_id}_0.jpg",
                 }
             )
             if created:

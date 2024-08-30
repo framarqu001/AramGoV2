@@ -88,7 +88,6 @@ hr {
     height: 16rem;
     display: flex;
     align-items: center;
-    background-image: url(https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aatrox_0.jpg);
     background-size: cover;
     background-repeat: no-repeat;
     position: relative;
@@ -235,12 +234,20 @@ hr {
     justify-self: flex-end;
 }
 
+
 .match-btn.match-win {
     background-color: #4b6bc3
 }
-
 .match-btn.match-lose {
-    background-color:  #f46bf483
+    background-color: #f46bf483;
+}
+.queue.match-lose{
+    color:  #f46bf483;
+    font-weight: 800;
+}
+.queue.match-win{
+    color:  #4b6bc3;
+    font-weight: 800;
 }
 
 .participant-section {
@@ -306,7 +313,7 @@ hr {
     display: flex;
     flex-direction: column;
     gap: 3px;
-    padding-bottom: 12px;
+
 }
 
 .kda {
@@ -365,7 +372,6 @@ hr {
     display: flex;
     flex-direction: column;
     height: 120px;
-    gap: 5px
 }
 .account-card {
     padding: 8px 12px;
@@ -381,26 +387,24 @@ hr {
 
 .section-header {
     padding: 8px 12px;
-    font-family: "Mulish", sans-serif;
+    font-family: "Space Mono", monospace;
     display: flex;
-    justify-content: space-between;
-    font-weight: 700;
+    font-weight: 2000;
     padding-bottom: 1rem;
-
+    gap: 20px;
+    font-size: 20px;
 }
 /* ------------------------------- */
 .recent-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding-bottom: 12px;
 }
 .recent-list img {
     width: 31px;
 }
 
 .recent-card {
-    padding: 8px 12px;
+    padding: 12px 12px;
     display: grid;
     grid-template-columns: 150px 1fr 1fr;
     border-top: 1px solid var(--primary-color);
@@ -437,4 +441,6 @@ hr {
 }
 /* -------------------
  */
- 
+ .icon {
+    width: 25px;
+ }
