@@ -37,12 +37,10 @@ ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
 
 RIOT_API_KEY = os.getenv('RIOT_API_KEY')
 
-
+CSRF_TRUSTED_ORIGINS = ["https://aram-go.com", "https://www.aram-go.com"]
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-SECURE_HSTS_SECONDS = 31536000  # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+
 
 # Application definition
 
