@@ -11,7 +11,6 @@ COPY nginx/* /etc/nginx/
 COPY run.sh /run.sh
 
 # Environment variables
-ENV LISTEN_PORT=8000
 ENV APP_HOST=django
 ENV APP_PORT=9000
 
