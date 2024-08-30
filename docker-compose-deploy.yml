@@ -86,8 +86,8 @@ services:
     depends_on:
       - proxy
 
-volumes:
-  postgres-data:
-  static-data:
-  certbot-web:/vol/www:
-  proxy-dhparams:/vol/proxy:
+  volumes:
+    postgres-data:
+    static-data:
+    certbot-web:/vol/www:
+    proxy-dhparams:/vol/proxy:
