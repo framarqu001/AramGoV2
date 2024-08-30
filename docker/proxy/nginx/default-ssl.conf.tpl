@@ -29,7 +29,7 @@ server {
     }
 
     location = //riot.txt {
-        alias /vol/static/riot.txt;
+            alias /vol/static/static/match_history/texts/riot.txt;
     }
 
 
