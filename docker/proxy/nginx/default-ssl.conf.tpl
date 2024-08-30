@@ -29,7 +29,7 @@ server {
     }
 
     location / {
-        uwsgi_pass           django:8000;  # Replace with your actual app host and port
+        uwsgi_pass           django:9000;  # Replace with your actual app host and port
         include              /etc/nginx/uwsgi_params;
         client_max_body_size 10M;
     }
