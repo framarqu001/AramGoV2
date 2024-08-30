@@ -28,6 +28,11 @@ server {
         alias /vol/static;
     }
 
+    location = //riot.txt {
+        alias /vol/static/riot.txt;
+    }
+
+
     location / {
         uwsgi_pass           ${APP_HOST}:${APP_PORT};
         include              /etc/nginx/uwsgi_params;
