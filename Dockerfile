@@ -8,7 +8,6 @@ COPY . /code
 COPY ./scripts /scripts
 EXPOSE 8000
 
-RUN chown -R app:app /code
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
     apk add --update --no-cache postgresql-client && \
