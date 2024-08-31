@@ -122,7 +122,7 @@ def summoner(request):
         full_name = full_name.replace(" ", "").lower()
         summoner_name, tag = full_name.split("#")
     except ValueError:
-        return Http404("Invalid summoner name")
+        return render(request, 'match_history/404.html')
 
     try:
         print(f"Trying to retrieve {full_name} from db")
@@ -138,7 +138,7 @@ def summoner(request):
 
         except ApiError as e:
             print(f"{full_name} not found in db or Riot servers")
-            raise Http404
+            return render(request, 'match_history/404.html')
 
     return HttpResponseRedirect(reverse("match_history:details", args=[summoner_name, tag]))
 
