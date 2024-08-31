@@ -7,7 +7,6 @@
 }
 
 
-
 h1 {
     font-family: "Mulish", sans-serif;
     color: white;
@@ -20,16 +19,30 @@ h1 {
     width: 600px;
     padding: .5rem 1.5rem;
     border-radius: 12px;
-    border: 1px solid lightgray;
+    border: 1px solid lightgray;;
 }
 
 input[type="search"]:focus {
-    outline: none; /* Removes the default outline */
-    /* Optional: you can add custom styles for the focus state if needed */
-    border: 1px solid #ccc; /* Example: change border color to something subtle */
-    box-shadow: none; /* Removes any default box-shadow if present */
+    outline: none;
+   
+    border: 1px solid #ccc;
+    box-shadow: none;
 }
 
 button {
     display: block;
+}
+.input-wrapper{
+    display: flex;
+    align-items: center;
+}
+.search-icon {
+    background-color: white;
+    width: 30px;
+    height: 30px;
+    position: relative;
+    right: 45px
+}
+.icon {
+
 }

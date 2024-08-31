@@ -20,6 +20,8 @@ from django.conf import settings
 from debug_toolbar.toolbar import debug_toolbar_urls
 from django.conf.urls.static import static
 
+handler404 = 'match_history.views.handlerException'
+handler400 = 'match_history.views.handlerException'
 
 urlpatterns = [
     path('admin/', admin.site.urls),

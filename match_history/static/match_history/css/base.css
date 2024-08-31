@@ -55,15 +55,27 @@
   #root, #__next {
     isolation: isolate;
   }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px white inset; /* Keeps the background white */
+    box-shadow: 0 0 0px 1000px white inset; /* Same for non-webkit browsers */
+    -webkit-text-fill-color: black; /* Ensures text color stays black */
+    transition: background-color 5000s ease-in-out 0s; /* Prevents color change */
+}
   :root {
     --primary-color: #10131a;
     --max-width: 1080px;
+    --secondary-color: #222433;
   }
 
   .nav-list {
+
     list-style: None;
     display: flex;
     gap: 2rem;
+    padding: 0 40px
   }
 .nav-link {
     padding: 6px;
@@ -74,7 +86,16 @@
   transform: scale(1.05);
   background-color: #222433
 }
-
+.header-form {
+  justify-self: center;
+  align-items: center;
+}
+.header-wrapper {
+  display: flex;
+}
+.right {
+  justify-self: end;
+}
 
   .wrapper {
     min-height: 100vh;
@@ -111,14 +132,14 @@
     position: sticky;
     top: 0px;
     height: 100%;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     align-items: center;
-    padding: 2rem 3rem;
     justify-content: space-between;
     min-width: var(--max-width);
     z-index: 999;
-
     background-color: var(--primary-color);
+
   }
   #nav-search {
     width: 300px;

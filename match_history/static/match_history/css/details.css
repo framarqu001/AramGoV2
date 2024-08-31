@@ -4,10 +4,7 @@
 }
 .loading-wrapper {
     width: 800px;
-    position: absolute;
-    left: 50%;
-    top: 30%;
-    transform: translate(-50%, -50%);
+    margin: 3rem auto;
 }
 #progress-bar-message {
     margin-top: 100px;
@@ -127,10 +124,9 @@ hr {
     gap: 2rem;
 }
 .section {
-
-
-    background-color: #222433;
+    background-color: var(--secondary-color);
     min-height: 100px;
+    border-radius: 12px;
 
 }
 .match-history {
@@ -303,10 +299,7 @@ hr {
     gap: 2px
 }
 
-.section {
-    border-radius: 12px;
-    /* background-color:#222433 ; */
-}
+
 .sub-text {
 
     font-weight: 400;

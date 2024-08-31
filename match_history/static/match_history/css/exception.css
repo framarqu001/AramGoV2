@@ -1,0 +1,22 @@
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.error{
+   margin-top: 10%;
+   display: flex;
+   font-size: 80px;
+   width: 1080px;
+   align-items: center;
+}
+.error-type{
+    font-weight: 1000;
+    font-size: 100px;
+}
+
+
+.poro-img {
+    width: 400px;
+    height: 400px;
+}

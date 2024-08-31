@@ -1,0 +1,34 @@
+{% extends "match_history/base.html" %}
+{% load static  %}
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'match_history/css/about.css' %}">
+{% endblock %}
+{% block content %}
+<div class="about-wrapper">
+    <div class="section">
+        <h1>AramGo</h1>
+        <p>AramGo is a statistical website for League of Legends, specifically focused on ARAM. I created this website to demonstrate the skills I've developed since my first version of <a class="link" href="https://github.com/framarqu001/aramgoproto">AramGo</a>. Originally built as a capstone project, AramGo has been completely revamped and stylized.</p>
+    </div>
+    
+    <div class="section">
+        <h1>How It Works</h1>
+        <p>When a summoner's profile is first accessed, AramGo fully parses their ARAM match history. After the initial parsing, a match-history crawler and an update button ensure the profile remains up-to-date. Match data is stored in a database to minimize dependency on the Riot Games API, allowing for quick access to results and the aggregation of data into meaningful statistics.</p>
+    </div>
+    
+    <div class="section">
+        <h1>Future Plans</h1>
+        <p>If I obtain approval for a Riot Games Production API Key, I plan to continue enhancing the site. Future improvements include:</p>
+        <ul class="bullet">
+            <li class="list">Expanding match cards to display detailed statistics for every participant</li>
+            <li class="list">Creating a champion winrate per patch page</li>
+            <li class="list">Implementing a match crawler to populate the database with match data</li>
+        </ul>
+        <p>In the long term, I plan to revise this project once more to integrate Django's REST Framework, enabling a front-end framework like React.</p>
+    </div>
+    
+    <div class="section">
+        <h1>Contact Me</h1>
+        <p>I welcome all feedback, please contant me if you have any suggestions whether they relate to a feature you'd like to see, statistics, or design changes. If you encounter any bugs or have ideas, please don't hesitate to reach out. You can message me on Discord at <code>@stevenv3</code>.</p>
+    </div>
+</div>
+{% endblock %}

@@ -186,13 +186,13 @@
                     'section': 'update'
                 },
                 success: function(response) {
-                    console.log(response.recent_list);
-                    $('.account-card').html(response.account_summary);
-                    $('.snowball-content').html(response.snowballs)
-                    $('.champ-list').html(response.champion_list);
-                    $('.recent-list').html(response.recent_list);
-                    $('#match-list').prepend(response.match_list);
-
+                    {#console.log(response.recent_list);#}
+                    {#$('.account-card').html(response.account_summary);#}
+                    {#$('.snowball-content').html(response.snowballs)#}
+                    {#$('.champ-list').html(response.champion_list);#}
+                    {#$('.recent-list').html(response.recent_list);#}
+                    {#$('#match-list').prepend(response.match_list);#}
+                    window.location.reload();
                     $('#update').text('Update');
                     setTimeout(function() {
                         $('#update').prop('disabled', false).text('Update');

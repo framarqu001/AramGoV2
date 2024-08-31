@@ -1,0 +1,52 @@
+h1,h2,h3,h4,h5,h6 {
+    font-family: "Mulish", sans-serif;
+}
+
+.about-wrapper {
+    max-width: var(--max-width);
+    margin: auto;
+    margin-bottom: 5rem;
+    position: relative;
+    top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem
+}
+#nav-search {
+    display: none;
+}
+h1{
+    margin-bottom: 1rem;
+}
+.link{
+    font-weight: 800;
+    text-decoration: underline;
+}
+.wrapper {
+    min-width:0%
+}
+.header {
+    min-width: auto;
+}
+.bullet {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 40px;
+  }
+.list{
+    margin-bottom: 1rem;
+}
+p {
+    max-width: 80ch;
+    margin-bottom: 1rem;
+}
+
+code {
+    font-family: "Mulish", sans-serif;
+    background-color: gray;
+    padding: 3px 3px;
+    border-radius: 6px;
+    font-weight: 10000;
+}

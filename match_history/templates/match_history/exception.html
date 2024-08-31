@@ -1,0 +1,16 @@
+{% extends "match_history/base.html" %}
+{% load static  %}
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'match_history/css/exception.css' %}">
+{% endblock %}
+{% block content %}
+
+<div class="error">
+    <div class="text-wrapper">
+        <div class="error-type">{{type}}</div>
+        <div class="error-text">{{error}}</div>
+    </div>
+    <img class= "poro-img" src="{% static 'match_history/icons/poro.png'%}" alt="" srcset="">
+</div>
+
+{% endblock %}

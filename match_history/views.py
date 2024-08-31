@@ -2,10 +2,12 @@ import time
 
 from django.core.cache import cache
 from django.db.models import Prefetch
-from django.http import Http404, JsonResponse
+from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
+from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
+
 
 from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
 from django.http import HttpResponse, HttpResponseRedirect
@@ -19,6 +21,24 @@ from .tasks import *
 
 def home(request):
     return render(request, 'match_history/index.html')
+
+def about(request):
+    return render(request, "match_history/about.html")
+
+def handlerException(request, exception=None):
+    print(exception)
+    message = ""
+    if isinstance(exception, Http404):
+        message = "This Page Does Not Exist"
+    elif isinstance(exception, HttpResponseBadRequest):
+        message = "Bad Request"
+    context = {
+        'type': type(exception),
+        'error': message
+    }
+    response = render(request, "match_history/exception.html", context)
+    response.status_code = 404
+    return response
 
 
 @require_POST
@@ -57,7 +77,7 @@ def details(request, game_name: str, tag: str):
     try:
         summoner = _validate_summoner(game_name, tag)
     except Http404 as e:
-        raise Http404(e)
+        raise Http404("This Page Does Not Exist")
 
     if summoner.being_parsed:
         context = {
@@ -87,9 +107,10 @@ def details(request, game_name: str, tag: str):
         data = {
             'account_summary': render_to_string('match_history/account_summary.html',
                                                 {'account_stats': account_stats}),
-            'snowballs' : render_to_string('match_history/snowballs.html', {'account_stats': account_stats}),
+            'snowballs': render_to_string('match_history/snowballs.html', {'account_stats': account_stats}),
             'champion_list': render_to_string('match_history/champ_list.html',
-                                              {'champion_stats': _get_champion_stats_data(summoner, summoner_champion_stats)}),
+                                              {'champion_stats': _get_champion_stats_data(summoner,
+                                                                                          summoner_champion_stats)}),
             'recent_list': render_to_string('match_history/recent_list.html',
                                             {'recent_list': _get_recent(summoner, matches_queryset)}),
             'match_list': render_to_string('match_history/match_list.html', {'matches': _get_new_match_data(summoner)})
@@ -97,13 +118,13 @@ def details(request, game_name: str, tag: str):
         return JsonResponse(data)
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        print("hey pagin")
         if int(page_number) <= paginator.num_pages:
             context = {"matches": _get_match_data(summoner, page_obj)}
             return render(request, 'match_history/match_list.html', context)
         else:
             return HttpResponse(status=204)
-    print("how r u doing")
+
+
     context = {
         "summoner": summoner,
         "matches": _get_match_data(summoner, page_obj),
@@ -115,14 +136,18 @@ def details(request, game_name: str, tag: str):
 
     return render(request, 'match_history/details.html', context)
 
-@require_POST
+
+
 def summoner(request):
+    if request.method == 'GET':
+        return HttpResponseRedirect(reverse("match_history:home"))
+
     try:
         full_name = request.POST.get('full_name')
         full_name = full_name.replace(" ", "").lower()
         summoner_name, tag = full_name.split("#")
     except ValueError:
-        return render(request, 'match_history/404.html')
+        raise Http404("This Page Does Not Exist")
 
     try:
         print(f"Trying to retrieve {full_name} from db")
@@ -135,16 +160,12 @@ def summoner(request):
             task = process_matches.delay(newSummoner.puuid)
             newSummoner.task_id = task.task_id
             newSummoner.save()
-
         except ApiError as e:
             print(f"{full_name} not found in db or Riot servers")
-            return render(request, 'match_history/404.html')
-
+            raise Http404("This Page Does Not Exist")
     return HttpResponseRedirect(reverse("match_history:details", args=[summoner_name, tag]))
 
 
-def about(request):
-    pass
 
 
 def champions(request):
