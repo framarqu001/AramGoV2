@@ -91,16 +91,16 @@ hr {
     background-size: cover;
     background-repeat: no-repeat;
     position: relative;
-    background-color: rgba(0, 0, 0, 0.582); /* Darken the background image */
+    background-color: rgba(0, 0, 0, 0.582);
     background-blend-mode: darken;
-    border-radius: 10px; /* Optional: Adjust to match rounded corners */
+    border-radius: 10px;/* Optional: Adjust to match rounded corners */
 }
 
 
 .summoner-header * {
     position: relative;
     /* z-index: 2; */
-    color: white; /* Ensure text and elements are visible over the dark background */
+    color: white;/* Ensure text and elements are visible over the dark background */
 }
 
 
@@ -114,7 +114,6 @@ hr {
 .main-info {
     padding-top: 1rem;
     display: grid;
-    /* background-color: salmon; */
     margin: auto;
     width: var(--max-width);
     display: grid;
@@ -158,18 +157,7 @@ hr {
     top: 3px
 }
 
-.match-card.match-win {
-    background-color: #263358;
-}
-.match-card.match-lose {
-    background-color:#64336a;
-}
-.match-win:hover {
 
-}
-.match-lose:hover {
- 
-}
 .match-result.sub-text{
     font-family: "Mulish", sans-serif;
     font-weight: 800;
@@ -243,12 +231,37 @@ hr {
 }
 
 
+.match-card.match-win {
+    background-color: #263358; 
+    transition: background-color 0.3s 
+}
+
+.match-card.match-lose {
+    background-color: #64336a; 
+    transition: background-color 0.3s ease; 
+}
+
+.match-card.match-win:hover {
+    background-color: #1e2a48; 
+}
+
+.match-card.match-lose:hover {
+    background-color: #4e2855; 
+}
+
+
+
 .match-btn.match-win {
-    background-color: #4b6bc3
+    background-color: #4b6bc37e; 
+    transition: background-color 0.3s ease;
 }
 .match-btn.match-lose {
-    background-color: #f46bf483;
+    background-color: #f46bf447; 
+    transition: background-color 0.3s ease;
 }
+
+
+
 .queue.match-lose{
     color:  #f46bf483;
     font-weight: 800;
@@ -315,6 +328,7 @@ hr {
     font-size: 14px;
 }
 .champ-kda {
+    color: #e7e7e7;
     font-size: 14px;
     font-weight: 700;
 }
@@ -343,6 +357,9 @@ hr {
     display:flex;
     flex-direction: column;
     align-items: end;
+}
+.total {
+    color: #87888a;
 }
 
 .champs-text {
@@ -464,4 +481,7 @@ hr {
 
 .excellent-stat {
     color: #f1f165
+}
+.death-color {
+    color: #ff4e50
 }

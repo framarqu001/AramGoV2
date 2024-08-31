@@ -17,7 +17,7 @@
                 <div class="winrate {% if stats.winrate|to_float > 80 %}excellent-stat{% elif stats.winrate|to_float > 70 %}great-stat{% elif stats.winrate|to_float > 60 %}good-stat{% endif %}">
                     {{stats.winrate}}%
                 </div>
-                <div class="total-played">{{stats.total_played}} games</div>
+                <div class="total">{{stats.total_played}} games</div>
             </div>
         </div>
     </div>

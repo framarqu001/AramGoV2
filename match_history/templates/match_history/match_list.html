@@ -74,7 +74,7 @@
             </div>
         </div>
         <div class="stat-section stats-text">
-            <div class="kda">{{main_participant.kills}} / {{main_participant.deaths}} / {{main_participant.assists}}</div>
+            <div class="kda">{{main_participant.kills}} / <span class ="death-color">{{main_participant.deaths}}</span> / {{main_participant.assists}}</div>
             <div class="calculated-kda sub-text">KDA: {{main_stats.kda}}</div>
             <div class="cs sub-text">{{main_participant.creep_score}} CS ({{main_stats.cs_min}})</div>
         </div>

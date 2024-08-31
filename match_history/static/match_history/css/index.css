@@ -5,15 +5,19 @@
     position: relative;
     top: 33%
 }
+
+
+
 h1 {
+    font-family: "Mulish", sans-serif;
     color: white;
-    font-size: 50px;
+    font-size: 80px;
 }
 #nav-search {
     display: none;
 }
 #main-search {
-    width: 500px;
+    width: 600px;
     padding: .5rem 1.5rem;
     border-radius: 12px;
     border: 1px solid lightgray;

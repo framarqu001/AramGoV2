@@ -63,8 +63,18 @@
   .nav-list {
     list-style: None;
     display: flex;
-    gap: 1rem;
+    gap: 2rem;
   }
+.nav-link {
+    padding: 6px;
+    transition: box-shadow 0.3s ease;
+    border-radius: 12px
+}
+.nav-link:hover {
+  transform: scale(1.05);
+  background-color: #222433
+}
+
 
   .wrapper {
     min-height: 100vh;
@@ -103,12 +113,12 @@
     height: 100%;
     display: flex;
     align-items: center;
-    padding: 2rem;
+    padding: 2rem 3rem;
     justify-content: space-between;
     min-width: var(--max-width);
-    background-color: var(--primary-color);
     z-index: 999;
 
+    background-color: var(--primary-color);
   }
   #nav-search {
     width: 300px;

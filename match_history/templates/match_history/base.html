@@ -18,16 +18,15 @@
     <div class="wrapper">
         <div class="header">
             <ul class="nav-list">
-                <li><a href = "{% url 'match_history:home'%}">Home</a></li>
-                <li><a href="{% url "match_history:champions" %}">Champions</a></li>
+                <li class ="nav-link"><a href = "{% url 'match_history:home'%}">Home</a></li>
+                <li class ="nav-link"><a href="{% url "match_history:champions" %}">Champions</a></li>
             </ul>
             <form  action="{% url 'match_history:summoner' %}" method="post">
                 {% csrf_token %}
                 <input id = "nav-search" type="search" id="game_name" name="full_name" required placeholder ="Game Name + #Tag">
             </form>
             <ul class="nav-list">
-                <li>About</li>
-                <li>Updates</li>
+                <li class ="nav-link">About</li>
             </ul>
         </div>
         <div class="content-wrapper">
