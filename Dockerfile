@@ -19,8 +19,11 @@ RUN python -m venv /py && \
     mkdir -p /vol/web/static && \
     mkdir -p /vol/web/media && \
     chown -R app:app /vol && \
+    chown -R app:app /code && \
     chmod -R 755 /vol && \
+    chmod -R 755 /code && \
     chmod -R +x /scripts
+
 
 
 ENV PATH="/scripts:/py/bin:$PATH"
