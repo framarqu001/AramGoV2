@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <p>Error</p>
-</body>
-</html>
+{% extends "match_history/base.html" %}
+{% load static  %}
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'match_history/css/404.css' %}">
+{% endblock %}
+{% block content %}
+
+<p>404 error</p>
+{% endblock %}
