@@ -271,7 +271,7 @@ def _get_recent(summoner, matches_queryset):
             'participant': participant[0],
             'total_wins': participant[1]['wins'],
             'total_losses': total_loses,
-            'winrate': f"{int(round(win_rate))}%",
+            'winrate': int(round(win_rate)),
         }
         recent_stats.append(stats)
     return games_played, recent_stats
@@ -292,7 +292,7 @@ def _get_champion_stats_data(summoner, summoner_champion_stats):
             "total_played": stat.total_played,
             "total_wins": stat.total_wins,
             "total_losses": stat.total_losses,
-            "winrate": f"{int(round(win_rate))}%",
+            "winrate": int(round(win_rate)),
             "kills": f"{average_kills:.1f}".rstrip('0').rstrip('.'),
             "deaths": f"{average_deaths:.1f}".rstrip('0').rstrip('.'),
             "assists": f"{average_assists:.1f}".rstrip('0').rstrip('.'),
@@ -316,7 +316,7 @@ def _get_account_stats(summoner):
         "total_played": account_stats.total_played,
         "total_wins": account_stats.total_wins,
         "total_losses": account_stats.total_losses,
-        "winrate": f"{int(round(win_rate))}%",
+        "winrate": int(round(win_rate)),
         "kills": f"{average_kills:.1f}".rstrip('0').rstrip('.'),
         "deaths": f"{average_deaths:.1f}".rstrip('0').rstrip('.'),
         "assists": f"{average_assists:.1f}".rstrip('0').rstrip('.'),

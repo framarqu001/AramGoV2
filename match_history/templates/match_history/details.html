@@ -1,12 +1,14 @@
 
 {% extends "match_history/base.html" %}
 {% load static  %}
+{% load custom_filters %}
 {% block extra_styles %}
     <link rel="stylesheet" href="{% static 'match_history/css/details.css' %}">
 {% endblock %}
 
 
 {% block content %}
+
 <div class="summoner-header" style="background-image: url('{{ main_champ.get_splash_url }}');">
 
     <div class="summoner-card">

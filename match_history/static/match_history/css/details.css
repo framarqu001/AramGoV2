@@ -153,6 +153,11 @@ hr {
     border-radius: 5px;
 }
 
+.match-card .stat-section.stats-text{
+    position: relative;
+    top: 3px
+}
+
 .match-card.match-win {
     background-color: #263358;
 }
@@ -165,7 +170,10 @@ hr {
 .match-lose:hover {
  
 }
-
+.match-result.sub-text{
+    font-family: "Mulish", sans-serif;
+    font-weight: 800;
+}
 .match-section-container {
     width: 100%;
     display: grid;
@@ -271,8 +279,9 @@ hr {
     font-weight: 500;
     
 }
-.highlight{
-    background-color: yellow;
+.game-name.highlight{
+    color: white;
+    font-weight: 1000;
 }
 .team-blue,
 .team-red {
@@ -288,7 +297,7 @@ hr {
 .sub-text {
 
     font-weight: 400;
-    font-size: 11px;
+    font-size: 12px;
     color: #87888a
 }
 .stat-text {
@@ -444,3 +453,15 @@ hr {
  .icon {
     width: 25px;
  }
+
+ .good-stat{
+    color: #07e964
+ }
+ 
+.great-stat {
+    color:#d57a66
+}
+
+.excellent-stat {
+    color: #f1f165
+}

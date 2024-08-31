@@ -1,3 +1,4 @@
+
 {% for participant in recent_list.1 %}
     <div class="recent-card">
         <div class="recent-info">
@@ -12,8 +13,8 @@
         <div class="recent-stats stat-section">
             <div class="win-loss">{{participant.total_wins}}W / {{participant.total_losses}}L</div>
         </div>
-        <div class="recent-wr">
-            {{participant.winrate}}
+        <div class="recent-wr {% if participant.winrate > 79 %}excellent-stat {% elif participant.winrate > 69 %}great-stat {% elif participant.winrate > 59 %}good-stat {% endif %}">
+            {{ participant.winrate }}%
         </div>
     </div>
 {% endfor %}

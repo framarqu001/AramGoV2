@@ -1,3 +1,4 @@
+{% load custom_filters%}
 {% for champ, stats in champion_stats%}
     <div class="champ-card">
         <div class="icon-med">
@@ -6,11 +7,16 @@
         <div class="champs-text">
             <div class="champ-text">{{champ.name}}</div>
             <div class="stat-section stats-text sub-text">
-                <div class="champ-kda">{{stats.kda}}:KDA</div>
+                <div class="champ-kda {% if stats.kda|to_float > 5 %}excellent-stat{% elif stats.kda|to_float > 4 %}great-stat{% elif stats.kda|to_float > 3 %}good-stat{% endif %}">
+                    {{ stats.kda }}:KDA
+                </div>
+
                 <div class="kda">{{stats.kills}} / {{stats.deaths}} / {{stats.assists}}</div>
             </div>
             <div class=" total-played">
-                <div class="winrate">{{stats.winrate}}</div>
+                <div class="winrate {% if stats.winrate|to_float > 80 %}excellent-stat{% elif stats.winrate|to_float > 70 %}great-stat{% elif stats.winrate|to_float > 60 %}good-stat{% endif %}">
+                    {{stats.winrate}}%
+                </div>
                 <div class="total-played">{{stats.total_played}} games</div>
             </div>
         </div>
