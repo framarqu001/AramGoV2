@@ -28,12 +28,15 @@ def about(request):
 def handlerException(request, exception=None):
     print(exception)
     message = ""
+    strType = ''
     if isinstance(exception, Http404):
         message = "This Page Does Not Exist"
+        strType = "404"
     elif isinstance(exception, HttpResponseBadRequest):
         message = "Bad Request"
+        strType = "400"
     context = {
-        'type': type(exception),
+        'type': strType,
         'error': message
     }
     response = render(request, "match_history/exception.html", context)
