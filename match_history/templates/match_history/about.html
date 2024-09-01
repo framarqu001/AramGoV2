@@ -14,6 +14,15 @@
         <h1>How It Works</h1>
         <p>When a summoner's profile is first accessed, AramGo fully parses their ARAM match history. After the initial parsing, a match-history crawler and an update button ensure the profile remains up-to-date. Match data is stored in a database to minimize dependency on the Riot Games API, allowing for quick access to results and the aggregation of data into meaningful statistics.</p>
     </div>
+
+    <div class="section">
+        <h1>Why can't I see my Match History?</h1>
+        <ul class="bullet">
+            <li class="list">Full summoner parsing on first visit is disabled for summoners already in the database until access to a production key</li>
+            <li class="list">If stuck on processing matches, their may be a queue of profiles to be parsed.</li>
+            <li class="list">The riot api key needs to be regenerated</li>
+        </ul>
+    </div>
     
     <div class="section">
         <h1>Future Plans</h1>
