@@ -161,7 +161,7 @@ CELERY_RESULT_BACKEND = os.getenv('CELERY_BACKEND_URL')
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
-CELERY_WORKER_CONCURRENCY = 1
+CELERY_WORKER_CONCURRENCY = 8
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

@@ -6,7 +6,12 @@
     top: 33%
 }
 
-
+/* .wrapper {
+    background-image: url(../icons/test.webp);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+} */
 h1 {
     font-family: "Mulish", sans-serif;
     color: white;
@@ -43,6 +48,8 @@ button {
     position: relative;
     right: 45px
 }
-.icon {
 
+
+.header {
+    background-color: transparent;
 }

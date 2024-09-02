@@ -78,9 +78,9 @@ input:-webkit-autofill:focus {
     padding: 0 40px
   }
 .nav-link {
-    padding: 6px;
+    padding: 6px 12px;
     transition: box-shadow 0.3s ease;
-    border-radius: 12px;
+
     color: #87888a
 }
 .nav-link:hover {
@@ -97,20 +97,21 @@ input:-webkit-autofill:focus {
 .right {
   justify-self: end;
 }
+.background-wrapper {
+}
+.wrapper {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: 4rem auto;
+  background-color: var(--primary-color);
+  color: white;
+  min-width: var(--max-width);
+  font-family: "Space Mono", monospace;
+  font-weight: 400;
+  font-style: normal;
+  gap: 40px;
+}
 
-  .wrapper {
-    min-height: 100vh;
-    display: grid;
-    grid-template-rows: 4rem auto;
-    background-color: var(--primary-color);
-    color: white;
-    min-width: var(--max-width);
-    font-family: "Space Mono", monospace;
-    font-weight: 400;
-    font-style: normal;
-    gap: 40px
-    
-  }
   .test {
     margin: auto;
     width: 60ch;

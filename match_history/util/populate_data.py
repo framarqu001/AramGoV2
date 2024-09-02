@@ -1,5 +1,4 @@
 import os
-from time import sleep
 
 import django
 from datetime import datetime as dt
@@ -321,8 +320,8 @@ if __name__ == "__main__":
     summonertest = summonerBuilder.create_summoner("kittykatmarco", 'na1')
     matchBuilder = MatchManager("americas", "na1", summonertest)
     matchBuilder.process_matches()
-    # summoners = Summoner.objects.all()
-    # for i in range(35):
-    #     matchMaker = MatchManager("americas", "na1", summoners[i])
-    #     matchMaker.process_matches()
-    #     print("hey")
+    summoners = Summoner.objects.all()
+    for i in range(35):
+        matchMaker = MatchManager("americas", "na1", summoners[i])
+        matchMaker.process_matches()
+        print("hey")

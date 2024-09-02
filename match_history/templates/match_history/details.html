@@ -2,6 +2,10 @@
 {% extends "match_history/base.html" %}
 {% load static  %}
 {% load custom_filters %}
+{% block title %}
+    {{summoner.game_name}} Match History
+{% endblock %}
+
 {% block extra_styles %}
     <link rel="stylesheet" href="{% static 'match_history/css/details.css' %}">
 {% endblock %}

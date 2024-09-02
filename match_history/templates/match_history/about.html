@@ -3,6 +3,10 @@
 {% block extra_styles %}
     <link rel="stylesheet" href="{% static 'match_history/css/about.css' %}">
 {% endblock %}
+{% block title %}
+    About
+{% endblock %}
+
 {% block content %}
 <style>
     .about {
@@ -25,7 +29,7 @@
     <div class="section">
         <h1>Why can't I see my Match History?</h1>
         <ul class="bullet">
-            <li class="list">Full summoner parsing on first visit is disabled for summoners already in the database until access to a production key</li>
+            <li class="li st">Full summoner parsing on first visit is disabled for summoners already in the database until access to a production key</li>
             <li class="list">If stuck on processing matches, their may be a queue of profiles to be parsed.</li>
             <li class="list">The riot api key needs to be regenerated</li>
         </ul>

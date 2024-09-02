@@ -3,6 +3,10 @@
 {% block extra_styles %}
     <link rel="stylesheet" href="{% static 'match_history/css/exception.css' %}">
 {% endblock %}
+{% block title %}
+    {{type}}
+{% endblock %}
+
 {% block content %}
 
 <div class="error">
