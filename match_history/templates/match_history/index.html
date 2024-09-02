@@ -4,7 +4,12 @@
     <link rel="stylesheet" href="{% static 'match_history/css/index.css' %}">
 {% endblock %}
 {% block content %}
-
+<style>
+    .home {
+        color: white;
+        background-color: #222433;
+    }
+</style>
 <div class="search-container">
     <h1>ARAMGO</h1>
     <form action="{% url 'match_history:summoner' %}" method="post">

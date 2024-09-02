@@ -80,7 +80,8 @@ input:-webkit-autofill:focus {
 .nav-link {
     padding: 6px;
     transition: box-shadow 0.3s ease;
-    border-radius: 12px
+    border-radius: 12px;
+    color: #87888a
 }
 .nav-link:hover {
   transform: scale(1.05);

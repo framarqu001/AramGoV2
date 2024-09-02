@@ -8,7 +8,6 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
-
 from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
@@ -18,12 +17,15 @@ from django.core.paginator import Paginator
 from collections import defaultdict
 from .tasks import *
 
+patch = "14.17"
 
 def home(request):
     return render(request, 'match_history/index.html')
 
+
 def about(request):
     return render(request, "match_history/about.html")
+
 
 def handlerException(request, exception=None):
     print(exception)
@@ -127,7 +129,6 @@ def details(request, game_name: str, tag: str):
         else:
             return HttpResponse(status=204)
 
-
     context = {
         "summoner": summoner,
         "matches": _get_match_data(summoner, page_obj),
@@ -138,7 +139,6 @@ def details(request, game_name: str, tag: str):
     }
 
     return render(request, 'match_history/details.html', context)
-
 
 
 def summoner(request):
@@ -169,10 +169,8 @@ def summoner(request):
     return HttpResponseRedirect(reverse("match_history:details", args=[summoner_name, tag]))
 
 
-
-
 def champions(request):
-    champion_query = ChampionStatsPatch.objects.filter(patch__iexact="14.16").prefetch_related('champion')
+    champion_query = ChampionStatsPatch.objects.filter(patch__iexact=patch).prefetch_related('champion')
     champion_data = []
 
     for champion_stat in champion_query:
@@ -183,8 +181,8 @@ def champions(request):
             champion_stat.total_losses,
         )
         champion_data.append((champion_stat.champion.name, champion_stat_tuple))
-
     context = {'champion_query': champion_data}
+    print(f"here and {context}")
     return render(request, 'match_history/champions.html', context)
 
 
