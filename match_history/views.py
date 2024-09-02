@@ -19,6 +19,7 @@ from .tasks import *
 
 patch = "14.17"
 
+
 def home(request):
     return render(request, 'match_history/index.html')
 
@@ -89,40 +90,20 @@ def details(request, game_name: str, tag: str):
             "task_id": summoner.task_id,
             "summoner": summoner
         }
-
         return render(request, 'match_history/details.html', context)
-    matches_queryset = Match.objects.filter(participants__summoner=summoner).prefetch_related(
-        Prefetch('participants', queryset=Participant.objects.select_related(
-            'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", "item1", "item2", "item3",
-            'item4', 'item5', 'item6', 'summoner__profile_icon'),
-                 to_attr='all_participants')
-    )
-    summoner_champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by(
-        '-total_played')[:7].prefetch_related('champion')
-    first_stats = summoner_champion_stats[0]
-    main_champ = first_stats.champion
 
+    matches_queryset = _get_match_queryset(summoner)
     matches_per_page = 10
     paginator = Paginator(matches_queryset, matches_per_page)
-    page_number = request.GET.get('page', 1)
+    page_number = request.GET.get('page', 1)  #defaults to 1
     page_obj = paginator.get_page(page_number)
 
-    if request.GET.get('section') == 'update' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        account_stats = _get_account_stats(summoner)
-        data = {
-            'account_summary': render_to_string('match_history/account_summary.html',
-                                                {'account_stats': account_stats}),
-            'snowballs': render_to_string('match_history/snowballs.html', {'account_stats': account_stats}),
-            'champion_list': render_to_string('match_history/champ_list.html',
-                                              {'champion_stats': _get_champion_stats_data(summoner,
-                                                                                          summoner_champion_stats)}),
-            'recent_list': render_to_string('match_history/recent_list.html',
-                                            {'recent_list': _get_recent(summoner, matches_queryset)}),
-            'match_list': render_to_string('match_history/match_list.html', {'matches': _get_new_match_data(summoner)})
-        }
-        return JsonResponse(data)
+    summoner_champion_stats = _get_champions_queryset(summoner)
+    main_champ = summoner_champion_stats[0].champion
 
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    if request.GET.get('section') == 'update' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        update_page(summoner)
+    elif request.GET.get('section') == 'paginate' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         if int(page_number) <= paginator.num_pages:
             context = {"matches": _get_match_data(summoner, page_obj)}
             return render(request, 'match_history/match_list.html', context)
@@ -134,11 +115,12 @@ def details(request, game_name: str, tag: str):
         "matches": _get_match_data(summoner, page_obj),
         "account_stats": _get_account_stats(summoner),
         "champion_stats": _get_champion_stats_data(summoner, summoner_champion_stats),
-        "recent_list": _get_recent(summoner, matches_queryset),
+        "recent_list": _get_recent(summoner),
         "main_champ": main_champ,
     }
 
     return render(request, 'match_history/details.html', context)
+
 
 
 def summoner(request):
@@ -187,6 +169,20 @@ def champions(request):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+def update_page(summoner):
+    data = {
+        'account_summary': render_to_string('match_history/account_summary.html',
+                                            {'account_stats': _get_account_stats(summoner)}),
+        'snowballs': render_to_string('match_history/snowballs.html', {'account_stats': _get_account_stats(summoner)}),
+        'champion_list': render_to_string('match_history/champ_list.html',
+                                          {'champion_stats': _get_champion_stats_data(summoner,
+                                                                                      _get_champions_queryset(summoner))}),
+        'recent_list': render_to_string('match_history/recent_list.html',
+                                        {'recent_list': _get_recent(summoner)}),
+        'match_list': render_to_string('match_history/match_list.html', {'matches': _get_new_match_data(summoner)})
+    }
+    return JsonResponse(data)
+
 def _validate_summoner(game_name, tag):
     game_name, tag = game_name.replace(" ", "").lower(), tag.lower().replace(" ", "").lower()
     try:
@@ -262,7 +258,8 @@ def _get_match_data(summoner, page_obj):
     return match_data
 
 
-def _get_recent(summoner, matches_queryset):
+def _get_recent(summoner):
+    matches_queryset = _get_match_queryset(summoner)
     counter = defaultdict(lambda: {'count': 0, 'wins': 0})
     matches = matches_queryset[:50]
     games_played = len(matches)
@@ -303,7 +300,6 @@ def _get_champion_stats_data(summoner, summoner_champion_stats):
     if not summoner_champion_stats:
         return
     champion_stats_data = []
-    main_champ = summoner_champion_stats[0].champion
     for stat in summoner_champion_stats:
         win_rate = (stat.total_wins / stat.total_played * 100) if stat.total_played > 0 else 0
         average_kills = stat.total_kills / stat.total_played
@@ -347,3 +343,24 @@ def _get_account_stats(summoner):
         'snowballs_thrown': account_stats.snowballs_thrown
     }
     return account_stats
+
+
+def _get_match_queryset(summoner):
+    matches_queryset = Match.objects.filter(participants__summoner=summoner).prefetch_related(
+        Prefetch('participants', queryset=Participant.objects.select_related(
+            'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", "item1", "item2", "item3",
+            'item4', 'item5', 'item6', 'summoner__profile_icon'),
+                 to_attr='all_participants')
+    )
+    return matches_queryset
+
+
+def _get_champions_queryset(summoner):
+    summoner_champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by(
+        '-total_played')[:7].prefetch_related('champion')
+    return summoner_champion_stats
+
+
+def _get_main_champ(summoner):
+    queryset = _get_champions_queryset(summoner)
+    return queryset.first().champion

@@ -422,6 +422,16 @@ hr {
     width: 31px;
 }
 
+.section-wrapper {
+    display: flex;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+.section-wrapper .sub-text{
+    font-weight: 1000;
+    font-size: 14px;
+}
+
 .recent-card {
     padding: 12px 12px;
     display: grid;

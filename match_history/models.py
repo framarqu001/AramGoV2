@@ -4,7 +4,6 @@ from django.db import connection
 from django.urls import reverse
 from django import template
 from django.core.cache import cache
-patch = "14.16.1"
 
 
 class Champion(models.Model):
@@ -15,6 +14,7 @@ class Champion(models.Model):
     splash_image_path = models.CharField(max_length=100)
 
     def get_url(self):
+        patch = cache.get("PATCH")
         return f"https://ddragon.leagueoflegends.com/cdn/{patch}/img/champion/{self.image_path}"
 
     def get_splash_url(self):
@@ -30,6 +30,7 @@ class Item(models.Model):
     image_path = models.CharField(max_length=255)
 
     def get_url(self):
+        patch = cache.get("PATCH")
         return f"https://ddragon.leagueoflegends.com/cdn/{patch}/img/item/{self.image_path}"
 
     def __str__(self):
@@ -41,6 +42,9 @@ class ProfileIcon(models.Model):
     image_path = models.CharField(max_length=100)
 
     def get_url(self):
+        patch = cache.get("PATCH")
+        print("here")
+        print(patch)
         return f"https://ddragon.leagueoflegends.com/cdn/{patch}/img/profileicon/{self.image_path}"
 
     def __str__(self):
@@ -53,6 +57,7 @@ class SummonerSpell(models.Model):
     image_path = models.CharField(max_length=100)
 
     def get_url(self):
+        patch = cache.get("PATCH")
         return f"https://ddragon.leagueoflegends.com/cdn/{patch}/img/spell/{self.image_path}"
 
     def __str__(self):

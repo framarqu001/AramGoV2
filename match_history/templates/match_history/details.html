@@ -40,7 +40,10 @@
         <div class="account-container section">
             <div class="section-header">
                 <img class="icon" src="{%static 'match_history/icons/account.svg'%}" alt="">
-                <div class="title">Account Summary</div>
+                <div class="section-wrapper">
+                    <div class="title">Account</div>
+                    <div class="sub-text">2024</div>
+                </div>
             </div>
             <div class="account-card">
                 {% include 'match_history/account_summary.html' %}
@@ -50,7 +53,10 @@
         <div class="snowball-container section">
             <div class="section-header">
                 <img class="icon" src="{%static 'match_history/icons/snowflake.svg'%}" alt="">
-                <div class="title">Snowballs</div>
+                <div class="section-wrapper">
+                    <div class="title">Snowballs</div>
+                    <div class="sub-text">2024</div>
+                </div>
             </div>
             <div class="snowball-content">
                 {% include 'match_history/snowballs.html' %}
@@ -61,7 +67,10 @@
             <div class="section-header">
                 <img class="icon" src="{%static 'match_history/icons/sword.svg'%}" alt="">
 
-                <div class="title">Champions Played</div>
+                <div class="section-wrapper">
+                    <div class="title">Champions</div>
+                    <div class="sub-text">2024</div>
+                </div>
             </div>
             <div class="champ-list">
                 {% include 'match_history/champ_list.html' %}
@@ -157,7 +166,8 @@
                 $.ajax({
                     url: window.location.href,
                     data: {
-                        'page': page
+                        'page': page,
+                        'section': 'paginate'
                     },
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'

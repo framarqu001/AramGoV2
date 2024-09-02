@@ -8,7 +8,7 @@
             <div class="champ-text">{{champ.name}}</div>
             <div class="stat-section stats-text sub-text">
                 <div class="champ-kda {% if stats.kda|to_float > 5 %}excellent-stat{% elif stats.kda|to_float > 4 %}great-stat{% elif stats.kda|to_float > 3 %}good-stat{% endif %}">
-                    {{ stats.kda }}:KDA
+                    {{ stats.kda }} KDA
                 </div>
 
                 <div class="kda">{{stats.kills}} / {{stats.deaths}} / {{stats.assists}}</div>

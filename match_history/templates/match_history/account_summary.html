@@ -1,11 +1,16 @@
-
+{% load custom_filters%}
+    
     <div class="account-aram">ARAM</div>
     <div class="stat-section stats-text sub-text">
-        <div class="champ-kda"> {{account_stats.kda}} </div>
+        <div class="champ-kda {% if account_stats.kda|to_float > 5 %}excellent-stat{% elif account_stats.kda|to_float > 4 %}great-stat{% elif account_stats.kda|to_float > 3 %}good-stat{% endif %}">
+            {{account_stats.kda}} KDA 
+        </div>
         <div class="kda"> {{account_stats.kills}} / {{account_stats.deaths}} / {{account_stats.assists}} </div>
     </div>
     <div class=" total-played">
-        <div class="winrate">{{account_stats.winrate}}%</div>
+        <div class="winrate {% if account_stats.winrate|to_float > 80 %}excellent-stat{% elif account_stats.winrate|to_float > 70 %}great-stat{% elif account_stats.winrate|to_float > 60 %}good-stat{% endif %}">
+            {{account_stats.winrate}}%
+        </div>
         <div class="total-played">{{account_stats.total_played}} games</div>
     </div>
 

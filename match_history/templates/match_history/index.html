@@ -19,7 +19,7 @@
         {% csrf_token %}
         <div class="input-wrapper">
             <input id = "main-search" type="search" id="game_name" name="full_name" required placeholder ="Game Name + #Tag">
-            <div class="search-icon"><img class="icon" src="{%static 'match_history/icons/magnify.svg'%}" alt=""></div>
+            <button type ="submit" class="search-icon"><img class="icon" src="{%static 'match_history/icons/magnify.svg'%}" alt=""></div>
         </div>
     </form>
 </div>

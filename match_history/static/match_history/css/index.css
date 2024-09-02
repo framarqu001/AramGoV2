@@ -28,8 +28,8 @@ h1 {
 }
 
 input[type="search"]:focus {
-    outline: none;
-   
+    outline: none; 
+    background-color: white;
     border: 1px solid #ccc;
     box-shadow: none;
 }
@@ -42,11 +42,12 @@ button {
     align-items: center;
 }
 .search-icon {
-    background-color: white;
     width: 30px;
     height: 30px;
     position: relative;
-    right: 45px
+    right: 45px;
+    background-color: white;
+    border: none
 }
 
 
