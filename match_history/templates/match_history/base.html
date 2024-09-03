@@ -18,9 +18,7 @@
     <div class="wrapper">
         <div class="header">
             <ul class="nav-list left">
-                {% comment %} <li class ="nav-link"><a href = "{% url 'match_history:home'%}">Home</a></li>
-                <li class ="nav-link"><a href="{% url "match_history:champions" %}">Champions</a></li>
-                <li class ="nav-link"><a href="{% url "match_history:about" %}">About</a></li> {% endcomment %}
+                <li class ="nav-link home"><a href = "{% url 'match_history:home'%}">Home</a></li>
             </ul>
             <form class="header-form" action="{% url 'match_history:summoner' %}" method="post">
                 {% csrf_token %}
@@ -28,7 +26,6 @@
             </form>
             <ul class="nav-list right">
                 {% comment %} <li class ="nav-link"><a href="{% url "match_history:about" %}">About</a></li> {% endcomment %}
-                <li class ="nav-link home"><a href = "{% url 'match_history:home'%}">Home</a></li>
                 <li class ="nav-link champions"><a href="{% url "match_history:champions" %}">Champions</a></li>
                 <li class ="nav-link about"><a href="{% url "match_history:about" %}">About</a></li>
             </ul>
@@ -39,7 +36,11 @@
                 {% block content %}
                 {% endblock  %}
             </div>
+        <div class="footer">
+            <div class="footer-text">AramGo is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc</div>
+        </div>
     </div>
+    
     {% block extra_scripts %}
     {% endblock %}
 </body>

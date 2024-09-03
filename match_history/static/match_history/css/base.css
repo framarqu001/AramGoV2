@@ -27,6 +27,7 @@
     4. Improve text rendering
   */
   body {
+    background-color: var(--primary-color);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
@@ -102,7 +103,7 @@ input:-webkit-autofill:focus {
 .wrapper {
   min-height: 100vh;
   display: grid;
-  grid-template-rows: 4rem auto;
+  grid-template-rows: 4rem auto 5rem;
   background-color: var(--primary-color);
   color: white;
   min-width: var(--max-width);
@@ -110,6 +111,12 @@ input:-webkit-autofill:focus {
   font-weight: 400;
   font-style: normal;
   gap: 40px;
+}
+.footer {
+  margin-top: 20px;
+  background-color: var(--primary-color);
+  display: flex;
+  justify-content: center;
 }
 
   .test {
@@ -141,7 +148,13 @@ input:-webkit-autofill:focus {
     min-width: var(--max-width);
     z-index: 999;
     background-color: var(--primary-color);
+  }
 
+  .footer-text {
+    width: 900px;
+    font-size: 10px;
+    text-align: center;
+    color: #87888a
   }
   #nav-search {
     width: 300px;
