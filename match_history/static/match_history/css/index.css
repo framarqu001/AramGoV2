@@ -15,7 +15,7 @@
 h1 {
     font-family: "Mulish", sans-serif;
     color: white;
-    font-size: 100px;
+    font-size: 80px;
 }
 #nav-search {
     display: none;
@@ -34,11 +34,12 @@ input[type="search"]:focus {
     box-shadow: none;
 }
 
-span {
-    font-family: "Space Mono", monospace;
-    color: var(--secondary-color);
-    font-weight: 100;
+span{
+    color: #3655ab;
+
+
 }
+
 
 button {
     display: block;
