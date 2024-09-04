@@ -35,7 +35,7 @@ input[type="search"]:focus {
 }
 
 span{
-    color: #3655ab;
+    color: #4b6bc37e;;
     font-family: "Space Mono", monospace;
 
 
@@ -62,3 +62,41 @@ button {
 .header {
     background-color: transparent;
 }
+
+
+
+
+
+
+
+.walking-container {
+    margin-bottom: 30px;
+    position: fixed;
+    bottom: 0;
+    left: -100px; 
+    width: 300px; 
+    overflow: hidden; 
+    animation: walkAcross 23s linear infinite; /* Adjust duration as needed */
+    user-select: none; /* Disable text selection */
+    -webkit-user-select: none; /* For Safari */
+    -moz-user-select: none; /* For Firefox */
+    -ms-user-select: none; /* For older Internet Explorer */
+}
+
+#walking-gif {
+    width: 100%; 
+    height: auto; 
+}
+
+@keyframes walkAcross {
+    0% {
+        left: -100px; 
+    }
+    66% {
+        left: calc(100% + 100px); 
+    }
+    100% {
+        left: calc(100% + 100px); 
+    }
+}
+

@@ -69,6 +69,13 @@ input:-webkit-autofill:focus {
     --primary-color: #10131a;
     --max-width: 1080px;
     --secondary-color: #222433;
+    --blue-color: #4b6bc37e;
+    --purple-color: #f46bf447;
+    --green-color: #07e964;
+    --orange-color: #d57a66;
+    --red-color: #ff4e50;
+    --yellow-color: #f1f165;
+
   }
 
   .nav-list {
@@ -100,10 +107,11 @@ input:-webkit-autofill:focus {
 }
 .background-wrapper {
 }
+
 .wrapper {
   min-height: 100vh;
   display: grid;
-  grid-template-rows: 4rem auto 5rem;
+  grid-template-rows: 4rem 1fr 5rem;
   background-color: var(--primary-color);
   color: white;
   min-width: var(--max-width);
@@ -112,11 +120,12 @@ input:-webkit-autofill:focus {
   font-style: normal;
   gap: 40px;
 }
+
 .footer {
-  margin-top: 20px;
   background-color: var(--primary-color);
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
   .test {
@@ -127,8 +136,7 @@ input:-webkit-autofill:focus {
     height: 100%;
   }
   .content {
-    height: 100%
-  }
+    height: 100%  }
 
   a {
     text-decoration: none;
@@ -149,7 +157,9 @@ input:-webkit-autofill:focus {
     z-index: 999;
     background-color: var(--primary-color);
   }
-
+  .footer{
+    grid-row: 3;
+  }
   .footer-text {
     width: 900px;
     font-size: 10px;
