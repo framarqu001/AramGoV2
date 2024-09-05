@@ -28,7 +28,6 @@ class SummonerManager():
     def _get_puid(self, summoner_name, tag):
         try:
             account_info = self._riotWatcher.account.by_riot_id(self._platform, summoner_name, tag)
-            print(account_info)
             return account_info
         except ApiError as err:
             raise ApiError(f"Error fetching PUUID for {summoner_name}#{tag}: {err}")
@@ -61,10 +60,6 @@ class SummonerManager():
                 'being_parsed': True
             }
         )
-        if created:
-            print(f"{summoner} created")
-        else:
-            print(f"{summoner} already exists")
         return summoner
 
 
@@ -93,7 +88,6 @@ class MatchManager():
                 new_matches = self._watcher.match.matchlist_by_puuid(self._region, self._summoner.puuid, queue=QUEUE,
                                                                      count=COUNT, start=start)
                 match_list += new_matches
-                print(f"Matches: {len(new_matches)}")
                 if len(new_matches) != COUNT:
                     break
                 start += COUNT
@@ -135,10 +129,7 @@ class MatchManager():
                 "new_match": new
             }
         )
-        if created:
-            print(f"{match} created")
-        else:
-            print(f"{match} already exists")
+
         return match, created
 
     def create_summoner_match(self, info_dict, game_creation):
@@ -146,11 +137,10 @@ class MatchManager():
         try:
             icon = ProfileIcon.objects.get(profile_id=icon_id)
         except ProfileIcon.DoesNotExist:
-            print("Profile icon {icon_id} does not exist")
+
             icon = None
         summoner_exist = Summoner.objects.filter(puuid=info_dict["puuid"])
         if summoner_exist and summoner_exist[0].last_updated and game_creation < summoner_exist[0].last_updated:
-            print(f"Do not need to update {summoner_exist[0]}")
             return summoner_exist[0]
         summoner, created = Summoner.objects.update_or_create(
             puuid=info_dict["puuid"],
@@ -166,10 +156,6 @@ class MatchManager():
                 'being_parsed': False
             }
         )
-        if created:
-            print(f"{summoner} created")
-        else:
-            print(f"{summoner} already exists")
         return summoner
 
     def _add_items(self, participant, participant_data):
@@ -181,7 +167,7 @@ class MatchManager():
                     setattr(participant, f"item{j}", item)
                     participant.save()
                 except Item.DoesNotExist:
-                    print(f"Item with ID {item_id} does not exist.")
+                    print('ok')
 
     def _increment_models(self, participant, match, snowballs):
         patch = match.get_patch()
@@ -192,13 +178,11 @@ class MatchManager():
             year=year
         )
         summoner_champ_stats.update_stats(participant, match)
-        print(f"{summoner_champ_stats} created") if createad else print(f"{summoner_champ_stats} already exists")
 
         account_stats, created = AccountStats.objects.update_or_create(
             summoner=participant.summoner,
             year=year
         )
-        print(f"{account_stats} created") if created else print(f"{account_stats} already exists")
         account_stats.update_stats(participant, snowballs)
 
         champ_stats_patch, created = ChampionStatsPatch.objects.update_or_create(
@@ -206,7 +190,6 @@ class MatchManager():
             patch=patch
         )
         champ_stats_patch.update_stats(participant)
-        print(f"{champ_stats_patch} created") if created else print(f"{champ_stats_patch} already exists")
 
     def _create_participants(self, match_info: dict, match: Match):
         participants_puid = match_info["metadata"]["participants"]
@@ -255,10 +238,6 @@ class MatchManager():
             snowball_hits = participant_data["challenges"]['snowballsHit']
             snowballs = (snowball_hits, total_snowballs)
 
-            if created:
-                print(f"{participant} added to match {match}")
-            else:
-                print(f"{participant} already exists ERORR!!!!")
             self._add_items(participant, participant_data)
 
             self._increment_models(participant, match, snowballs)
@@ -277,14 +256,12 @@ class MatchManager():
                     match_info = self._get_match_info(match)
                     match_model, created = self._create_match(match, match_info["info"])
                     self._create_participants(match_info, match_model)
-                else:
-                    print(f"{match} already exists")
+
                 self._processed_matches += 1
                 self._summoner.parsed_matches += 1;
-                print(f"{self._processed_matches} matches processed")
+
                 if progress_recorder:
-                    print(i)
-                    print(f"{total_matches} total")
+
                     progress_recorder.set_progress(
                         self._summoner.parsed_matches,
                         self._summoner.total_matches,
@@ -300,15 +277,11 @@ class MatchManager():
         total_matches = len(self._matches)
 
         for i, match in enumerate(self._matches):
-            print("here")
             with transaction.atomic():
                 if not Match.objects.filter(match_id=match).exists():
                     match_info = self._get_match_info(match)
                     match_model, created = self._create_match(match, match_info["info"], new=True)
                     self._create_participants(match_info, match_model)
-                else:
-                    print(f"{match} already exists")
-                print(f"{i} matches processed")
                 if progress_recorder:
                     progress_recorder.set_progress(i,total_matches,description="matches processed")
 
@@ -324,4 +297,3 @@ if __name__ == "__main__":
     for i in range(35):
         matchMaker = MatchManager("americas", "na1", summoners[i])
         matchMaker.process_matches()
-        print("hey")
