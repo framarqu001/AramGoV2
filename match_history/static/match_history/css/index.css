@@ -63,11 +63,20 @@ button {
     background-color: transparent;
 }
 
+.logo {
+    position: relative;
+}
+
+#home-poro{
+    position: absolute;
+    height: 130px;
+    right: 300px
+}
 
 
-
-
-
+.main-search {
+    margin-top: -10px;
+}
 
 .walking-container {
     margin-bottom: 30px;

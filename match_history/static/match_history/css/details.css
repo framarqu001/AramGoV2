@@ -475,15 +475,15 @@ hr {
  }
 
  .good-stat{
-    color: #07e964
+    color: var(--blue-color)
  }
  
 .great-stat {
-    color:#d57a66
+    color:var(--purple-color)
 }
 
 .excellent-stat {
-    color: #f1f165
+    color: var(--red-color)
 }
 .death-color {
     color: #ff4e50
