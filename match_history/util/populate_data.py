@@ -63,12 +63,14 @@ class SummonerManager():
         return summoner
 
 
+
 def _convert_stamp(unix_timestamp):
     unix_timestamp = unix_timestamp / 1000
     utc_datetime = dt.utcfromtimestamp(unix_timestamp)
-    est_timezone = pytz.timezone('America/New_York')
-    est_datetime = utc_datetime.replace(tzinfo=pytz.utc).astimezone(est_timezone)
-    return est_datetime
+    pst_timezone = pytz.timezone('America/Los_Angeles')
+    pst_datetime = utc_datetime.astimezone(pst_timezone)
+    return pst_datetime
+
 
 
 class MatchManager():
@@ -172,6 +174,9 @@ class MatchManager():
     def _increment_models(self, participant, match, snowballs):
         patch = match.get_patch()
         year = match.game_start.year
+        if participant.game_name.lower() == 'highkeysavage':
+            print(f"{participant.champion} on {match.game_start} year: {year} on site: {match.get_time_diff()}")
+
         summoner_champ_stats, createad = SummonerChampionStats.objects.update_or_create(
             summoner=participant.summoner,
             champion=participant.champion,

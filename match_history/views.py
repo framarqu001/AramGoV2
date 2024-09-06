@@ -164,7 +164,6 @@ def champions(request):
         )
         champion_data.append((champion_stat.champion.name, champion_stat_tuple))
     context = {'champion_query': champion_data}
-    print(f"here and {context}")
     return render(request, 'match_history/champions.html', context)
 
 
@@ -322,7 +321,7 @@ def _get_champion_stats_data(summoner, summoner_champion_stats):
 
 
 def _get_account_stats(summoner):
-    account_stats = AccountStats.objects.filter(summoner=summoner).first()
+    account_stats = AccountStats.objects.filter(summoner=summoner, year=2024).first()
     if not account_stats:
         return
     win_rate = (account_stats.total_wins / account_stats.total_played * 100) if account_stats.total_played > 0 else 0
