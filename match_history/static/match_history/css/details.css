@@ -315,9 +315,9 @@ hr {
 /* ----------------------------------------------- */
 .champ-text {
     text-overflow: ellipsis;
-    white-space: no-wrap;
+    white-space: nowrap;
     overflow: hidden;
-    font-family: "Space Mono", monospace;
+    font-family: "Mulish", sans-serif;
     font-size: 14px;
 }
 .champ-kda {
@@ -395,9 +395,8 @@ hr {
 .account-card {
     padding: 8px 12px;
     display: grid;
-
     align-items: center;
-    gap: 10x;
+    gap: 10px;
     grid-template-columns: 1fr 2fr 1fr;
 }
 .account-aram {

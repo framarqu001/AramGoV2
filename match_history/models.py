@@ -88,9 +88,7 @@ class Summoner(models.Model):
     parsed_matches = models.IntegerField(default=False)
     total_matches = models.IntegerField(default=0)
 
-    # Get all matches in which a summoner was a participant in.
     def get_matches_queryset(self):
-        # Returning a QuerySet instead of a list
         return Match.objects.filter(participants__summoner=self)
 
     def get_url(self):

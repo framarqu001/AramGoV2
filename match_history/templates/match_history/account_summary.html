@@ -7,10 +7,10 @@
         </div>
         <div class="kda"> {{account_stats.kills}} / {{account_stats.deaths}} / {{account_stats.assists}} </div>
     </div>
-    <div class=" total-played">
+    <div class="total-played">
         <div class="winrate {% if account_stats.winrate|to_float > 80 %}excellent-stat{% elif account_stats.winrate|to_float > 70 %}great-stat{% elif account_stats.winrate|to_float > 60 %}good-stat{% endif %}">
             {{account_stats.winrate}}%
         </div>
-        <div class="total-played">{{account_stats.total_played}} games</div>
+        <div class="total">{{account_stats.total_played}} games</div>
     </div>
 
