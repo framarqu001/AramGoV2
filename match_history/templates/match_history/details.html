@@ -22,7 +22,9 @@
         </div>
         <div class="summoner-name">
             <p class="large-text">{{summoner.game_name}} <span id="tag">#{{summoner.tag_line}}</span></p>
+            {% if not summoner.being_parsed %}
             <button id = "update">Update</button>
+            {% endif %}
         </div>
     </div>
 </div>
