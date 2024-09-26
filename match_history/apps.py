@@ -10,7 +10,7 @@ class MatchHistoryConfig(AppConfig):
     def ready(self):
         patch = get_patch()
         if patch:
-            cache.set('PATCH', patch, timeout=120000)
+            cache.set('PATCH', patch, timeout=604800)
             print(f"{patch} cache successfully")
         else:
             print("Patch could not be retrieved")
