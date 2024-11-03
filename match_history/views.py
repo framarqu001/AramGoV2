@@ -80,6 +80,7 @@ def update(request):
 
 def details(request, game_name: str, tag: str):
     print("hey there")
+    print(request.GET)
     try:
         summoner = _validate_summoner(game_name, tag)
     except Http404 as e:

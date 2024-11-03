@@ -1,3 +1,4 @@
+import pytz
 from django.db import models
 from django.utils import timezone
 from django.db import connection
@@ -135,8 +136,12 @@ class Match(models.Model):
         return self.participants.select_related("match").all()
 
     def get_time_diff(self):
-        now = timezone.now()
-        difference = now - self.game_start
+        la_timezone = pytz.timezone('America/Los_Angeles')
+
+        now = timezone.now().astimezone(la_timezone)
+        game_start_la = self.game_start.astimezone(la_timezone)
+
+        difference = now - game_start_la
         seconds = difference.total_seconds()
         minutes = seconds // 60
         hours = seconds // 3600
