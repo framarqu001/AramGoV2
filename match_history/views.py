@@ -94,6 +94,8 @@ def details(request, game_name: str, tag: str):
         return render(request, 'match_history/details.html', context)
 
     matches_queryset = _get_match_queryset(summoner)
+    if matches_queryset is None:
+        raise Http404("This page does not exist.")
     matches_per_page = 10
     paginator = Paginator(matches_queryset, matches_per_page)
     page_number = request.GET.get('page', 1)  #defaults to 1
@@ -147,7 +149,7 @@ def summoner(request):
             newSummoner.task_id = task.task_id
             newSummoner.save()
         except ApiError as e:
-            print(f"{full_name} not found in db or Riot servers")
+            print(f"{full_name}  ot found in db or Riot servers")
             raise Http404("This Page Does Not Exist")
     return HttpResponseRedirect(reverse("match_history:details", args=[summoner_name, tag]))
 
