@@ -2,6 +2,11 @@
     <img src="https://ddragon.leagueoflegends.com/cdn/14.16.1/img/spell/SummonerSnowball.png" alt="" class="champ-img">
 </div>
 <div class="snowball-wrapper">
+    {% if account_stats %}
     <div class="snowballs">{{account_stats.snowballs_hitrate}} hit rate </div>
     <div class="thrown">{{account_stats.snowballs_thrown}} thrown</div>
+    {% else %}
+    <div class="snowballs">0% hit rate </div>
+    <div class="thrown">0 thrown</div>
+    {% endif %}
 </div>

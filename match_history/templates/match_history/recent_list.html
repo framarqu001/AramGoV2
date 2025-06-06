@@ -1,20 +1,29 @@
-
-{% for participant in recent_list.1 %}
+{% if recent_list.0 > 0 %}
+    {% for participant in recent_list.1 %}
+        <div class="recent-card">
+            <div class="recent-info">
+                <div class="icon-med">
+                    <img class="champ-img" src="{{participant.participant.profile_icon.get_url}}" alt="">
+                </div>
+                <div class="account-info">
+                    <div class="recent-name"><a href ="{{participant.participant.get_url}}">{{participant.participant.get_full_name}}</a></div>
+                    <div class="recent-level sub-text">level {{participant.participant.summoner_level}}</div>
+                </div>
+            </div>
+            <div class="recent-stats stat-section">
+                <div class="win-loss">{{participant.total_wins}}W / {{participant.total_losses}}L</div>
+            </div>
+            <div class="recent-wr {% if participant.winrate > 79 %}excellent-stat {% elif participant.winrate > 69 %}great-stat {% elif participant.winrate > 59 %}good-stat {% endif %}">
+                {{ participant.winrate }}%
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
     <div class="recent-card">
         <div class="recent-info">
-            <div class="icon-med">
-                <img class="champ-img" src="{{participant.participant.profile_icon.get_url}}" alt="">
-            </div>
             <div class="account-info">
-                <div class="recent-name"><a href ="{{participant.participant.get_url}}">{{participant.participant.get_full_name}}</a></div>
-                <div class="recent-level sub-text">level {{participant.participant.summoner_level}}</div>
+                <div class="recent-name">No recent games with other players</div>
             </div>
-        </div>
-        <div class="recent-stats stat-section">
-            <div class="win-loss">{{participant.total_wins}}W / {{participant.total_losses}}L</div>
-        </div>
-        <div class="recent-wr {% if participant.winrate > 79 %}excellent-stat {% elif participant.winrate > 69 %}great-stat {% elif participant.winrate > 59 %}good-stat {% endif %}">
-            {{ participant.winrate }}%
         </div>
     </div>
-{% endfor %}
+{% endif %}

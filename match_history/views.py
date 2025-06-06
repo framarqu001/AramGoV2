@@ -94,15 +94,28 @@ def details(request, game_name: str, tag: str):
         return render(request, 'match_history/details.html', context)
 
     matches_queryset = _get_match_queryset(summoner)
-    if matches_queryset is None:
-        raise Http404("This page does not exist.")
+    
+    # Handle case when there are no matches
+    if not matches_queryset:
+        context = {
+            "summoner": summoner,
+            "matches": [],
+            "account_stats": None,
+            "champion_stats": None,
+            "recent_list": (0, []),
+            "main_champ": None,
+        }
+        return render(request, 'match_history/details.html', context)
+        
     matches_per_page = 10
     paginator = Paginator(matches_queryset, matches_per_page)
     page_number = request.GET.get('page', 1)  #defaults to 1
     page_obj = paginator.get_page(page_number)
 
     summoner_champion_stats = _get_champions_queryset(summoner)
-    main_champ = summoner_champion_stats[0].champion
+    main_champ = None
+    if summoner_champion_stats:
+        main_champ = summoner_champion_stats[0].champion if summoner_champion_stats else None
 
     if request.GET.get('section') == 'update' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         update_page(summoner)
@@ -236,10 +249,15 @@ def _get_new_match_data(summoner):
 
 def _get_match_data(summoner, page_obj):
     match_data = []
+    
+    if not page_obj:
+        return match_data
 
     for match in page_obj:
         blue_team_list = []
         red_team_list = []
+        main_participant = None
+        
         for participant in match.all_participants:
             if participant.summoner == summoner:
                 main_participant = participant
@@ -247,9 +265,12 @@ def _get_match_data(summoner, page_obj):
                 blue_team_list.append(participant)
             else:
                 red_team_list.append(participant)
-
+        
+        if not main_participant:
+            continue
+            
         kda = (
-                      main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
+                  main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
         main_stats = {
@@ -263,8 +284,16 @@ def _get_match_data(summoner, page_obj):
 def _get_recent(summoner):
     matches_queryset = _get_match_queryset(summoner)
     counter = defaultdict(lambda: {'count': 0, 'wins': 0})
+    
+    if not matches_queryset:
+        return 0, []
+        
     matches = matches_queryset[:50]
     games_played = len(matches)
+    
+    if games_played == 0:
+        return 0, []
+        
     main_team = None
     for match in matches:
         for participant in match.all_participants:
@@ -365,4 +394,7 @@ def _get_champions_queryset(summoner):
 
 def _get_main_champ(summoner):
     queryset = _get_champions_queryset(summoner)
-    return queryset.first().champion
+    first_champion = queryset.first()
+    if first_champion:
+        return first_champion.champion
+    return None

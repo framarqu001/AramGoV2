@@ -14,11 +14,15 @@
 {% block content %}
 
 
-<div class="summoner-header" style="background-image: url('{{ main_champ.get_splash_url }}');">
+<div class="summoner-header" {% if main_champ %}style="background-image: url('{{ main_champ.get_splash_url }}')"{% endif %}>
 
     <div class="summoner-card">
         <div class="profile-icon-container">
+            {% if summoner.profile_icon %}
             <img class="main-icon" src="{{summoner.profile_icon.get_url}}" alt="" >
+            {% else %}
+            <img class="main-icon" src="{% static 'match_history/icons/account.svg' %}" alt="" >
+            {% endif %}
         </div>
         <div class="summoner-name">
             <p class="large-text">{{summoner.game_name}} <span id="tag">#{{summoner.tag_line}}</span></p>
