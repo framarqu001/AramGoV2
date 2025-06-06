@@ -1,6 +1,7 @@
-from django.test import TransactionTestCase, TestCase
+from django.test import TransactionTestCase, TestCase, Client
 from django.core.cache import cache
-from unittest.mock import patch
+from django.urls import reverse
+from unittest.mock import patch, MagicMock
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
@@ -98,3 +99,51 @@ class PatchVersionCacheTest(TestCase):
         
         # Verify that the mock was called
         mock_get_patch.assert_called_once()
+
+
+class ProfileViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.profile_icon = ProfileIcon.objects.create(
+            profile_id='1',
+            image_path='1.png'
+        )
+        self.summoner = Summoner.objects.create(
+            puuid='test-summoner-id',
+            game_name='TestSummoner',
+            normalized_game_name='testsummoner',
+            tag_line='NA1',
+            normalized_tag_line='na1',
+            summoner_level=30,
+            profile_icon=self.profile_icon
+        )
+        
+    def test_profile_with_no_matches(self):
+        """Test that a profile with no matches doesn't cause a 500 error"""
+        url = reverse('match_history:details', args=[self.summoner.game_name, self.summoner.tag_line])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        
+    @patch('match_history.views._get_match_queryset')
+    def test_profile_with_none_queryset(self, mock_get_match_queryset):
+        """Test that a profile with None queryset doesn't cause a 500 error"""
+        mock_get_match_queryset.return_value = None
+        url = reverse('match_history:details', args=[self.summoner.game_name, self.summoner.tag_line])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        
+    def test_profile_with_missing_tag_line(self):
+        """Test that a profile with missing tag_line in create_summoner_match doesn't cause a 500 error"""
+        # Create a summoner with missing tag_line
+        summoner_no_tag = Summoner.objects.create(
+            puuid='test-summoner-no-tag',
+            game_name='NoTag',
+            normalized_game_name='notag',
+            tag_line='',
+            normalized_tag_line='',
+            summoner_level=30,
+            profile_icon=self.profile_icon
+        )
+        url = reverse('match_history:details', args=[summoner_no_tag.game_name, summoner_no_tag.tag_line])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)

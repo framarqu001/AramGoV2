@@ -1,6 +1,7 @@
 {% load custom_filters%}
     
     <div class="account-aram">ARAM</div>
+    {% if account_stats %}
     <div class="stat-section stats-text sub-text">
         <div class="champ-kda {% if account_stats.kda|to_float > 5 %}excellent-stat{% elif account_stats.kda|to_float > 4 %}great-stat{% elif account_stats.kda|to_float > 3 %}good-stat{% endif %}">
             {{account_stats.kda}} KDA 
@@ -13,4 +14,13 @@
         </div>
         <div class="total">{{account_stats.total_played}} games</div>
     </div>
-
+    {% else %}
+    <div class="stat-section stats-text sub-text">
+        <div class="champ-kda">
+            No stats available
+        </div>
+    </div>
+    <div class="total-played">
+        <div class="total">0 games</div>
+    </div>
+    {% endif %}
