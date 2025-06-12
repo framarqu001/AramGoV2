@@ -36,7 +36,14 @@ class TodoListViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Create 10 todos for pagination tests
-        test_user = User.objects.create_user(username='testuser', password='12345')
+def setUpTestData(cls):
+        # Create 10 todos for pagination tests
+        # Import os to access environment variables for secure credential storage
+        import os
+        test_user = User.objects.create_user(username='testuser', password=os.getenv("TEST_USER_PASSWORD"))
+        
+        for todo_id in range(10):
+            Todo.objects.create(
         
         for todo_id in range(10):
             Todo.objects.create(
