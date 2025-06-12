@@ -62,7 +62,12 @@ class TodoListViewTest(TestCase):
 class TodoCreateViewTest(TestCase):
     def setUp(self):
         # Create a user
-        test_user = User.objects.create_user(username='testuser', password='12345')
+def setUp(self):
+        # Import os to access environment variables
+        import os
+        # Create a user
+        test_user = User.objects.create_user(username='testuser', password=os.getenv("TEST_USER_PASSWORD"))
+        test_user.save()
         test_user.save()
     
     def test_redirect_if_not_logged_in(self):
