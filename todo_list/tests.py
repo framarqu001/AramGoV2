@@ -8,7 +8,14 @@ class TodoModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Create a user
-        test_user = User.objects.create_user(username='testuser', password='12345')
+def setUpTestData(cls):
+        # Import os to access environment variables
+        import os
+        # Create a user
+        test_user = User.objects.create_user(username='testuser', password=os.getenv("TEST_USER_PASSWORD"))
+        
+        # Create a todo item
+        Todo.objects.create(
         
         # Create a todo item
         Todo.objects.create(
