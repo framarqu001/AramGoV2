@@ -1,0 +1,114 @@
+{% extends 'todo_list/base.html' %}
+
+{% block title %}My Todo List{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>My Todo List</h1>
+            <a href="{% url 'todo_list:create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add New Todo
+            </a>
+        </div>
+        
+        {% if todos %}
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">Task</h5>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <h5 class="mb-0">Due Date</h5>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <h5 class="mb-0">Status</h5>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <h5 class="mb-0">Actions</h5>
+                        </div>
+                    </div>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for todo in todos %}
+                        <li class="list-group-item todo-item {% if todo.completed %}completed{% endif %}">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h5 class="mb-1">{{ todo.title }}</h5>
+                                    <p class="mb-0 text-muted">{{ todo.description|truncatechars:100 }}</p>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    {% if todo.due_date %}
+                                        <span class="due-date {% if todo.due_date < now and not todo.completed %}overdue{% endif %}">
+                                            {{ todo.due_date|date:"M d, Y" }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">No due date</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <form method="post" action="{% url 'todo_list:toggle' todo.id %}" class="toggle-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm {% if todo.completed %}btn-success{% else %}btn-outline-success{% endif %}">
+                                            {% if todo.completed %}
+                                                Completed
+                                            {% else %}
+                                                Mark Complete
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'todo_list:detail' todo.id %}" class="btn btn-sm btn-info">View</a>
+                                        <a href="{% url 'todo_list:update' todo.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                        <a href="{% url 'todo_list:delete' todo.id %}" class="btn btn-sm btn-danger">Delete</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <p class="mb-0">You don't have any todo items yet. <a href="{% url 'todo_list:create' %}">Create one now</a>!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        $('.toggle-form').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                success: function(response) {
+                    if (response.status === 'success') {
+                        const todoItem = form.closest('.todo-item');
+                        const button = form.find('button');
+                        
+                        if (response.completed) {
+                            todoItem.addClass('completed');
+                            button.removeClass('btn-outline-success').addClass('btn-success');
+                            button.text('Completed');
+                        } else {
+                            todoItem.removeClass('completed');
+                            button.removeClass('btn-success').addClass('btn-outline-success');
+                            button.text('Mark Complete');
+                        }
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

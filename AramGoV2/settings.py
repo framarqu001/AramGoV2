@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'livereload',
     'django.contrib.staticfiles',
     "match_history.apps.MatchHistoryConfig",
+    "todo_list.apps.TodoListConfig",
     "debug_toolbar",
     'django_celery_results',
     'celery_progress'

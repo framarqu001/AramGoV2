@@ -26,6 +26,7 @@ handler400 = 'match_history.views.handlerException'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("match_history.urls")),
+    path('todo/', include("todo_list.urls")),
     path('celery-progress/', include('celery_progress.urls')),
 ]
 if not settings.TESTING:
