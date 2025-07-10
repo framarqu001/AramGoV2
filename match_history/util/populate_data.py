@@ -1,66 +1,126 @@
 import os
+import logging
 
 import django
 from datetime import datetime as dt
 import pytz
-from riotwatcher import LolWatcher, RiotWatcher, ApiError
+from riotwatcher import ApiError
 
 from AramGoV2 import settings
+from AramGoV2.util.riot_api import RiotAPIClient
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
 
-RIOT_API_KEY = settings.RIOT_API_KEY
 QUEUE = 450  # Aram
 COUNT = 100
 from django.db import transaction
 
+logger = logging.getLogger(__name__)
+
 
 class SummonerManager():
     def __init__(self, platform=None, region=None):
-        self._lolWatcher = LolWatcher(RIOT_API_KEY)
-        self._riotWatcher = RiotWatcher(RIOT_API_KEY)
+        """
+        Initialize the SummonerManager.
+        
+        Args:
+            platform: The regional route (e.g., 'americas')
+            region: The platform (e.g., 'na1')
+        """
         self._platform = platform
         self._region = region
-        self._base_url = f"https://{platform}.api.riotgames.com"
+        
+        # Map region code to the format expected by RiotAPIClient
+        region_map = {
+            'na1': 'na',
+            'euw1': 'euw',
+            'eun1': 'eune',
+            'kr': 'kr',
+            'br1': 'br',
+            'jp1': 'jp',
+            'ru': 'ru',
+            'oc1': 'oce',
+            'tr1': 'tr',
+            'la1': 'lan',
+            'la2': 'las',
+        }
+        
+        client_region = region_map.get(region, 'na')
+        self._api_client = RiotAPIClient(region=client_region)
+        logger.info(f"Initialized SummonerManager for platform {platform}, region {region}")
 
     def _get_puid(self, summoner_name, tag):
+        """
+        Get PUUID for a summoner by Riot ID.
+        
+        Args:
+            summoner_name: The summoner's game name
+            tag: The summoner's tag line
+            
+        Returns:
+            Dict containing account information
+            
+        Raises:
+            ApiError: If the API request fails
+        """
         try:
-            account_info = self._riotWatcher.account.by_riot_id(self._platform, summoner_name, tag)
+            account_info = self._api_client.get_summoner_by_riot_id(summoner_name, tag)
             return account_info
         except ApiError as err:
+            logger.error(f"Error fetching PUUID for {summoner_name}#{tag}: {err}")
             raise ApiError(f"Error fetching PUUID for {summoner_name}#{tag}: {err}")
 
-    def _get_account_info(self, puid):
-        try:
-            account_info = self._lolWatcher.summoner.by_puuid(self._region, puid)
-            return account_info
-        except ApiError as err:
-            raise ApiError(f"Failed to fetch account info for PUUID {puid}: {err}")
-
     def create_summoner(self, summoner_name, tag):
+        """
+        Create or update a summoner in the database.
+        
+        Args:
+            summoner_name: The summoner's game name
+            tag: The summoner's tag line
+            
+        Returns:
+            Summoner object
+            
+        Raises:
+            ApiError: If the API request fails
+        """
         try:
-            account_names = self._get_puid(summoner_name, tag)
-            account_info = self._get_account_info(account_names["puuid"])
+            account_info = self._get_puid(summoner_name, tag)
+            
+            # Account info now contains all the data we need
+            level = account_info["summonerLevel"]
+            icon_id = account_info["profileIconId"]
+            
+            try:
+                icon = ProfileIcon.objects.get(profile_id=icon_id)
+            except ProfileIcon.DoesNotExist:
+                logger.warning(f"Profile icon {icon_id} not found in database")
+                icon = None
+                
+            summoner, created = Summoner.objects.update_or_create(
+                puuid=account_info["puuid"],
+                defaults={
+                    'game_name': account_info["gameName"],
+                    'normalized_game_name': account_info["gameName"].replace(" ", "").lower(),
+                    'tag_line': account_info["tagLine"],
+                    'normalized_tag_line': account_info["tagLine"].replace(" ", "").lower(),
+                    'summoner_level': level,
+                    'profile_icon': icon,
+                    'being_parsed': True
+                }
+            )
+            
+            if created:
+                logger.info(f"Created new summoner: {account_info['gameName']}#{account_info['tagLine']}")
+            else:
+                logger.info(f"Updated existing summoner: {account_info['gameName']}#{account_info['tagLine']}")
+                
+            return summoner
         except ApiError as err:
+            logger.error(f"Error during summoner creation for {summoner_name}#{tag}: {err}")
             raise ApiError(f"Error during summoner creation for {summoner_name}#{tag}: {err}") from err
-        level = account_info["summonerLevel"]
-        icon_id = account_info["profileIconId"]
-        icon = ProfileIcon.objects.get(profile_id=icon_id)
-        summoner, created = Summoner.objects.update_or_create(
-            puuid=account_info["puuid"],
-            defaults={
-                'game_name': account_names["gameName"],
-                'normalized_game_name': account_names["gameName"].replace(" ", "").lower(),
-                'tag_line': account_names["tagLine"],
-                'normalized_tag_line': account_names["tagLine"].replace(" ", "").lower(),
-                'summoner_level': level,
-                'profile_icon': icon,
-                'being_parsed': True
-            }
-        )
-        return summoner
 
 
 
@@ -75,45 +135,80 @@ def _convert_stamp(unix_timestamp):
 
 class MatchManager():
     def __init__(self, platform, region, summoner: Summoner):
-        self._watcher = LolWatcher(RIOT_API_KEY)
+        """
+        Initialize the MatchManager.
+        
+        Args:
+            platform: The regional route (e.g., 'americas')
+            region: The platform (e.g., 'na1')
+            summoner: The Summoner object
+        """
         self._platform = platform
         self._region = region
         self._summoner = summoner
         self._matches = []
         self._processed_matches = 0
+        
+        # Map region code to the format expected by RiotAPIClient
+        region_map = {
+            'na1': 'na',
+            'euw1': 'euw',
+            'eun1': 'eune',
+            'kr': 'kr',
+            'br1': 'br',
+            'jp1': 'jp',
+            'ru': 'ru',
+            'oc1': 'oce',
+            'tr1': 'tr',
+            'la1': 'lan',
+            'la2': 'las',
+        }
+        
+        client_region = region_map.get(region, 'na')
+        self._api_client = RiotAPIClient(region=client_region)
+        logger.info(f"Initialized MatchManager for summoner {summoner.game_name}#{summoner.tag_line}")
 
     def _get_all(self):
+        """
+        Get all matches for the summoner.
+        
+        Returns:
+            List of match IDs
+        """
         try:
-            match_list = []
-            start = 0
-            while True:
-                new_matches = self._watcher.match.matchlist_by_puuid(self._region, self._summoner.puuid, queue=QUEUE,
-                                                                     count=COUNT, start=start)
-                match_list += new_matches
-                if len(new_matches) != COUNT:
-                    break
-                start += COUNT
-            return match_list
+            return self._api_client.get_all_matches(self._summoner.puuid, queue=QUEUE)
         except ApiError as err:
-            print(f"API Error: {err}")
+            logger.error(f"API Error getting all matches: {err}")
+            return []
 
     def _get_20(self):
-        match_list = []
+        """
+        Get the 20 most recent matches for the summoner.
+        
+        Returns:
+            List of match IDs
+        """
         try:
-            start = 0
-            new_matches = self._watcher.match.matchlist_by_puuid(self._region, self._summoner.puuid, queue=QUEUE,count=20, start=start)
-            match_list += new_matches
-
-            return match_list
+            return self._api_client.get_match_list(self._summoner.puuid, queue=QUEUE, count=20, start=0)
         except ApiError as err:
-            print(f"API Error: {err}")
+            logger.error(f"API Error getting recent matches: {err}")
+            return []
 
     def _get_match_info(self, match_id):
+        """
+        Get detailed information about a match.
+        
+        Args:
+            match_id: The match ID
+            
+        Returns:
+            Dict containing match details
+        """
         try:
-            match_details = self._watcher.match.by_id(self._region, match_id)
-            return match_details
+            return self._api_client.get_match_details(match_id)
         except ApiError as err:
-            print(f"Error fetching match info for match ID {match_id}: {err}")
+            logger.error(f"Error fetching match info for match ID {match_id}: {err}")
+            return None
 
     def _create_match(self, match_id: str, match_info: dict, new=False):
 
