@@ -36,6 +36,8 @@ DEBUG = os.environ.get('DEBUG', '0') == '1'
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
 
 RIOT_API_KEY = os.getenv('RIOT_API_KEY')
+DEFAULT_REGION = os.getenv('DEFAULT_REGION', 'na1')
+DEFAULT_PLATFORM = os.getenv('DEFAULT_PLATFORM', 'americas')
 
 CSRF_TRUSTED_ORIGINS = ["https://aram-go.com", "https://www.aram-go.com"]
 SESSION_COOKIE_SECURE = True

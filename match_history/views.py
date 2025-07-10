@@ -1,4 +1,5 @@
 import time
+import logging
 
 from django.core.cache import cache
 from django.db.models import Prefetch
@@ -8,14 +9,15 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
-from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
+from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch, Summoner
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-from match_history.util.populate_data import SummonerManager
 from riotwatcher import ApiError
 from django.core.paginator import Paginator
 from collections import defaultdict
 from .tasks import *
+
+logger = logging.getLogger(__name__)
 
 patch = "14.17"
 
@@ -138,18 +140,29 @@ def summoner(request):
         raise Http404("This Page Does Not Exist")
 
     try:
-        print(f"Trying to retrieve {full_name} from db")
+        logger.info(f"Trying to retrieve {full_name} from db")
         Summoner.objects.get(normalized_game_name=summoner_name, normalized_tag_line=tag)
     except Summoner.DoesNotExist:
-        print(f"Summoner not found, trying Riot servers for {full_name}")
+        logger.info(f"Summoner not found, trying Riot servers for {full_name}")
         try:
-            summonerBuilder = SummonerManager("americas", "na1")
-            newSummoner = summonerBuilder.create_summoner(summoner_name, tag)
-            task = process_matches.delay(newSummoner.puuid)
-            newSummoner.task_id = task.task_id
-            newSummoner.save()
-        except ApiError as e:
-            print(f"{full_name}  ot found in db or Riot servers")
+            from match_history.services.riot_api.summoner import SummonerAPIClient
+            from django.conf import settings
+            
+            # Create the summoner API client
+            summoner_client = SummonerAPIClient(
+                region=settings.DEFAULT_REGION,
+                platform=settings.DEFAULT_PLATFORM
+            )
+            
+            # Create or update the summoner
+            new_summoner = summoner_client.create_or_update_summoner(summoner_name, tag)
+            
+            # Start processing matches
+            task = process_matches.delay(new_summoner.puuid)
+            new_summoner.task_id = task.task_id
+            new_summoner.save()
+        except Exception as e:
+            logger.error(f"Error creating summoner {full_name}: {e}")
             raise Http404("This Page Does Not Exist")
     return HttpResponseRedirect(reverse("match_history:details", args=[summoner_name, tag]))
 
@@ -191,13 +204,20 @@ def _validate_summoner(game_name, tag):
         summoner = get_object_or_404(Summoner, normalized_game_name=game_name, normalized_tag_line=tag)
     except Http404:
         try:
-            summoner_manager = SummonerManager("americas", "na1")
-            puuid = summoner_manager._get_puid(game_name, tag)
-            Summoner.objects.update_or_create(
-                game_name=game_name, tag_line=tag, defaults={'puuid': puuid}
+            from match_history.services.riot_api.summoner import SummonerAPIClient
+            from django.conf import settings
+            
+            # Create the summoner API client
+            summoner_client = SummonerAPIClient(
+                region=settings.DEFAULT_REGION,
+                platform=settings.DEFAULT_PLATFORM
             )
-        except ApiError:
-            raise Http404(f"Summoner with game name {game_name} and tag {tag} could not be found and API call failed.")
+            
+            # Create or update the summoner
+            summoner = summoner_client.create_or_update_summoner(game_name, tag)
+        except Exception as e:
+            logger.error(f"Error validating summoner {game_name}#{tag}: {e}")
+            raise Http404(f"Summoner with game name {game_name} and tag {tag} could not be found.")
     return summoner
 
 
