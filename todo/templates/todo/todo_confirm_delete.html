@@ -1,0 +1,46 @@
+{% extends "todo/base.html" %}
+
+{% block todo_content %}
+<div class="mb-3">
+    <a href="{% url 'todo:detail' object.pk %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i> Back to Task
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-danger text-white">
+        <h4 class="mb-0">Delete Task</h4>
+    </div>
+    <div class="card-body">
+        <p class="lead">Are you sure you want to delete the task "<strong>{{ object.title }}</strong>"?</p>
+        
+        {% if object.subtasks.exists %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i> Warning: This task has {{ object.subtasks.count }} subtask(s) that will also be deleted.
+            </div>
+        {% endif %}
+        
+        {% if object.attachments.exists %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i> Warning: This task has {{ object.attachments.count }} attachment(s) that will also be deleted.
+            </div>
+        {% endif %}
+        
+        {% if object.comments.exists %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i> Warning: This task has {{ object.comments.count }} comment(s) that will also be deleted.
+            </div>
+        {% endif %}
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{% url 'todo:detail' object.pk %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash me-2"></i> Delete Task
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
