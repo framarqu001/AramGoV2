@@ -1,0 +1,97 @@
+{% extends "todo/base.html" %}
+
+{% block todo_content %}
+<div class="mb-3">
+    <a href="{% url 'todo:list' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i> Back to List
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="mb-0">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Category</h4>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Please correct the following errors:</strong>
+                    {{ form.errors }}
+                </div>
+            {% endif %}
+            
+            <div class="mb-3">
+                <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
+                <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" class="form-control" value="{{ form.name.value|default:'' }}">
+                {% if form.name.errors %}
+                    <div class="text-danger">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.color.id_for_label }}" class="form-label">Color</label>
+                <input type="color" name="{{ form.color.name }}" id="{{ form.color.id_for_label }}" class="form-control form-control-color" value="{{ form.color.value|default:'#3498db' }}">
+                {% if form.color.errors %}
+                    <div class="text-danger">{{ form.color.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.icon.id_for_label }}" class="form-label">Icon (Font Awesome icon name)</label>
+                <input type="text" name="{{ form.icon.name }}" id="{{ form.icon.id_for_label }}" class="form-control" value="{{ form.icon.value|default:'' }}" placeholder="e.g., tasks, calendar, home">
+                <small class="form-text text-muted">Enter a Font Awesome icon name without the "fa-" prefix. <a href="https://fontawesome.com/icons" target="_blank">Browse icons</a></small>
+                {% if form.icon.errors %}
+                    <div class="text-danger">{{ form.icon.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label>Preview</label>
+                <div class="p-3 border rounded">
+                    <span id="category-preview" class="category-badge" style="background-color: {{ form.color.value|default:'#3498db' }}">
+                        <i id="icon-preview" class="fas fa-{{ form.icon.value|default:'folder' }} me-1"></i>
+                        <span id="name-preview">{{ form.name.value|default:'Category Name' }}</span>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{% url 'todo:list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    {% if form.instance.pk %}Update{% else %}Create{% endif %} Category
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const nameInput = document.getElementById('{{ form.name.id_for_label }}');
+        const colorInput = document.getElementById('{{ form.color.id_for_label }}');
+        const iconInput = document.getElementById('{{ form.icon.id_for_label }}');
+        
+        const namePreview = document.getElementById('name-preview');
+        const categoryPreview = document.getElementById('category-preview');
+        const iconPreview = document.getElementById('icon-preview');
+        
+        // Update preview when inputs change
+        nameInput.addEventListener('input', function() {
+            namePreview.textContent = this.value || 'Category Name';
+        });
+        
+        colorInput.addEventListener('input', function() {
+            categoryPreview.style.backgroundColor = this.value;
+        });
+        
+        iconInput.addEventListener('input', function() {
+            iconPreview.className = 'fas fa-' + (this.value || 'folder') + ' me-1';
+        });
+    });
+</script>
+{% endblock %}

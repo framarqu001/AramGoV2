@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'livereload',
     'django.contrib.staticfiles',
     "match_history.apps.MatchHistoryConfig",
+    "todo.apps.TodoConfig",
     "debug_toolbar",
     'django_celery_results',
     'celery_progress'
@@ -173,3 +174,7 @@ TESTING = "AramGoV2" in sys.argv
 if TESTING:
     INSTALLED_APPS.remove("debug_toolbar")
     MIDDLEWARE.remove("debug_toolbar.middleware.DebugToolbarMiddleware")
+
+# Base URL for absolute URLs (used in emails)
+BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@example.com')

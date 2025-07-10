@@ -1,0 +1,165 @@
+{% extends "todo/base.html" %}
+
+{% block todo_content %}
+<div class="mb-3">
+    <a href="{% url 'todo:list' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i> Back to List
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="mb-0">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Todo Item</h4>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Please correct the following errors:</strong>
+                    {{ form.errors }}
+                </div>
+            {% endif %}
+            
+            <div class="mb-3">
+                <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="text-danger">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="text-danger">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                        <div class="text-danger">{{ form.category.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.priority.id_for_label }}" class="form-label">Priority</label>
+                    {{ form.priority }}
+                    {% if form.priority.errors %}
+                        <div class="text-danger">{{ form.priority.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                        <div class="text-danger">{{ form.status.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.parent.id_for_label }}" class="form-label">Parent Task</label>
+                    {{ form.parent }}
+                    {% if form.parent.errors %}
+                        <div class="text-danger">{{ form.parent.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.due_date.id_for_label }}" class="form-label">Due Date</label>
+                    {{ form.due_date }}
+                    {% if form.due_date.errors %}
+                        <div class="text-danger">{{ form.due_date.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.reminder_datetime.id_for_label }}" class="form-label">Reminder</label>
+                    {{ form.reminder_datetime }}
+                    {% if form.reminder_datetime.errors %}
+                        <div class="text-danger">{{ form.reminder_datetime.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.tags.id_for_label }}" class="form-label">Tags</label>
+                {{ form.tags }}
+                {% if form.tags.errors %}
+                    <div class="text-danger">{{ form.tags.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.new_tags.id_for_label }}" class="form-label">New Tags (comma separated)</label>
+                {{ form.new_tags }}
+                {% if form.new_tags.errors %}
+                    <div class="text-danger">{{ form.new_tags.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <div class="form-check">
+                    {{ form.is_recurring }}
+                    <label class="form-check-label" for="{{ form.is_recurring.id_for_label }}">
+                        Recurring Task
+                    </label>
+                </div>
+                {% if form.is_recurring.errors %}
+                    <div class="text-danger">{{ form.is_recurring.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3" id="recurrence-options">
+                <label for="{{ form.recurrence_pattern.id_for_label }}" class="form-label">Recurrence Pattern</label>
+                {{ form.recurrence_pattern }}
+                {% if form.recurrence_pattern.errors %}
+                    <div class="text-danger">{{ form.recurrence_pattern.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{% url 'todo:list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    {% if form.instance.pk %}Update{% else %}Create{% endif %} Task
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show/hide recurrence options based on is_recurring checkbox
+        const isRecurringCheckbox = document.getElementById('{{ form.is_recurring.id_for_label }}');
+        const recurrenceOptions = document.getElementById('recurrence-options');
+        
+        function toggleRecurrenceOptions() {
+            if (isRecurringCheckbox.checked) {
+                recurrenceOptions.style.display = 'block';
+            } else {
+                recurrenceOptions.style.display = 'none';
+            }
+        }
+        
+        // Initial state
+        toggleRecurrenceOptions();
+        
+        // Listen for changes
+        isRecurringCheckbox.addEventListener('change', toggleRecurrenceOptions);
+    });
+</script>
+{% endblock %}

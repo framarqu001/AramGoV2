@@ -1,0 +1,207 @@
+{% extends "todo/base.html" %}
+
+{% block todo_content %}
+<div class="mb-3">
+    <a href="{% url 'todo:list' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i> Back to List
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">{{ todo_item.title }}</h4>
+        <div>
+            <span class="badge {% if todo_item.status == 'pending' %}bg-warning{% elif todo_item.status == 'in_progress' %}bg-info{% elif todo_item.status == 'completed' %}bg-success{% elif todo_item.status == 'deferred' %}bg-secondary{% elif todo_item.status == 'cancelled' %}bg-danger{% endif %} me-2">
+                {{ todo_item.get_status_display }}
+            </span>
+            <span class="badge {% if todo_item.priority == 1 %}bg-success{% elif todo_item.priority == 2 %}bg-info{% elif todo_item.priority == 3 %}bg-warning{% elif todo_item.priority == 4 %}bg-danger{% endif %}">
+                {{ todo_item.get_priority_display }} Priority
+            </span>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                {% if todo_item.description %}
+                    <h5>Description</h5>
+                    <p>{{ todo_item.description|linebreaks }}</p>
+                {% else %}
+                    <p class="text-muted">No description provided.</p>
+                {% endif %}
+                
+                {% if todo_item.category %}
+                    <div class="mb-3">
+                        <h5>Category</h5>
+                        <span class="category-badge" style="background-color: {{ todo_item.category.color }}">
+                            {% if todo_item.category.icon %}<i class="fas fa-{{ todo_item.category.icon }} me-1"></i>{% endif %}
+                            {{ todo_item.category.name }}
+                        </span>
+                    </div>
+                {% endif %}
+                
+                {% if todo_item.tags.exists %}
+                    <div class="mb-3">
+                        <h5>Tags</h5>
+                        {% for tag in todo_item.tags.all %}
+                            <span class="tag-badge">{{ tag.name }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                {% if todo_item.parent %}
+                    <div class="mb-3">
+                        <h5>Parent Task</h5>
+                        <a href="{% url 'todo:detail' todo_item.parent.pk %}">{{ todo_item.parent.title }}</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5>Details</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <strong><i class="far fa-calendar-plus me-2"></i>Created:</strong>
+                                {{ todo_item.created_date|date:"M d, Y H:i" }}
+                            </li>
+                            <li class="mb-2">
+                                <strong><i class="far fa-calendar-alt me-2"></i>Due Date:</strong>
+                                {% if todo_item.due_date %}
+                                    {% if todo_item.is_overdue %}
+                                        <span class="overdue">{{ todo_item.due_date|date:"M d, Y H:i" }}</span>
+                                    {% else %}
+                                        {{ todo_item.due_date|date:"M d, Y H:i" }}
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">Not set</span>
+                                {% endif %}
+                            </li>
+                            {% if todo_item.completed_date %}
+                                <li class="mb-2">
+                                    <strong><i class="far fa-calendar-check me-2"></i>Completed:</strong>
+                                    {{ todo_item.completed_date|date:"M d, Y H:i" }}
+                                </li>
+                            {% endif %}
+                            {% if todo_item.is_recurring %}
+                                <li class="mb-2">
+                                    <strong><i class="fas fa-sync me-2"></i>Recurrence:</strong>
+                                    {{ todo_item.recurrence_pattern|title }}
+                                </li>
+                            {% endif %}
+                            {% if todo_item.reminder_datetime %}
+                                <li class="mb-2">
+                                    <strong><i class="far fa-bell me-2"></i>Reminder:</strong>
+                                    {{ todo_item.reminder_datetime|date:"M d, Y H:i" }}
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="d-flex gap-2 mb-4">
+            {% if todo_item.status != 'completed' %}
+                <a href="{% url 'todo:complete' todo_item.pk %}" class="btn btn-success">
+                    <i class="fas fa-check me-2"></i> Mark as Completed
+                </a>
+                <a href="{% url 'todo:toggle_status' todo_item.pk %}" class="btn btn-info">
+                    <i class="fas {% if todo_item.status == 'pending' %}fa-play{% else %}fa-pause{% endif %} me-2"></i>
+                    {% if todo_item.status == 'pending' %}Start Progress{% else %}Pause Progress{% endif %}
+                </a>
+            {% endif %}
+            <a href="{% url 'todo:update' todo_item.pk %}" class="btn btn-primary">
+                <i class="fas fa-edit me-2"></i> Edit
+            </a>
+            <a href="{% url 'todo:delete' todo_item.pk %}" class="btn btn-danger">
+                <i class="fas fa-trash me-2"></i> Delete
+            </a>
+        </div>
+        
+        <!-- Subtasks -->
+        {% if subtasks %}
+            <div class="mb-4">
+                <h5>Subtasks</h5>
+                <div class="list-group">
+                    {% for subtask in subtasks %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{% url 'todo:detail' subtask.pk %}">{{ subtask.title }}</a>
+                                <span class="badge {% if subtask.status == 'pending' %}bg-warning{% elif subtask.status == 'in_progress' %}bg-info{% elif subtask.status == 'completed' %}bg-success{% elif subtask.status == 'deferred' %}bg-secondary{% elif subtask.status == 'cancelled' %}bg-danger{% endif %} ms-2">
+                                    {{ subtask.get_status_display }}
+                                </span>
+                            </div>
+                            <div>
+                                {% if subtask.status != 'completed' %}
+                                    <a href="{% url 'todo:complete' subtask.pk %}" class="btn btn-sm btn-success">
+                                        <i class="fas fa-check"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Attachments -->
+        <div class="mb-4">
+            <h5>Attachments</h5>
+            {% if todo_item.attachments.exists %}
+                <div class="list-group mb-3">
+                    {% for attachment in todo_item.attachments.all %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-paperclip me-2"></i>
+                                <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.filename }}</a>
+                                <small class="text-muted ms-2">{{ attachment.uploaded_at|date:"M d, Y H:i" }}</small>
+                            </div>
+                            <a href="{% url 'todo:delete_attachment' attachment.pk %}" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No attachments yet.</p>
+            {% endif %}
+            
+            <form method="post" action="{% url 'todo:add_attachment' todo_item.pk %}" enctype="multipart/form-data" class="mt-3">
+                {% csrf_token %}
+                <div class="input-group">
+                    {{ attachment_form.file }}
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Comments -->
+        <div>
+            <h5>Comments</h5>
+            {% if todo_item.comments.exists %}
+                <div class="list-group mb-3">
+                    {% for comment in todo_item.comments.all %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <h6>{{ comment.user.username }}</h6>
+                                <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+                            </div>
+                            <p class="mb-0">{{ comment.text|linebreaks }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No comments yet.</p>
+            {% endif %}
+            
+            <form method="post" action="{% url 'todo:add_comment' todo_item.pk %}" class="mt-3">
+                {% csrf_token %}
+                {{ comment_form.text }}
+                <button type="submit" class="btn btn-primary mt-2">Add Comment</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
