@@ -113,4 +113,152 @@
     </button>
 
 </div>
+
+<!-- Match Details Table - Initially Hidden -->
+<div class="match-details-table-container {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" style="display: none;">
+    <div class="match-details-table-wrapper">
+        <div class="match-details-team-header">Blue Team</div>
+        <table class="match-details-table">
+            <thead>
+                <tr>
+                    <th>Champion</th>
+                    <th>Player</th>
+                    <th>KDA</th>
+                    <th>Damage</th>
+                    <th>CS</th>
+                    <th>Items</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for participant in blue_team %}
+                <tr class="{% if participant == main_participant %}highlight-row{% endif %}">
+                    <td class="champion-cell">
+                        <div class="champion-icon-med">
+                            <img class="champ-img" src="{{participant.champion.get_url}}" alt="{{participant.champion.name}}">
+                        </div>
+                    </td>
+                    <td class="player-name">
+                        <a href="{{participant.summoner.get_url}}">{{participant.game_name}}</a>
+                    </td>
+                    <td class="kda-cell">
+                        {{participant.kills}} / <span class="death-color">{{participant.deaths}}</span> / {{participant.assists}}
+                    </td>
+                    <td class="damage-cell">
+                        {{participant.total_damage_dealt_to_champions}}
+                    </td>
+                    <td class="cs-cell">
+                        {{participant.creep_score}}
+                    </td>
+                    <td class="items-cell">
+                        <div class="items-grid">
+                            {% if participant.item1 %}
+                            <div class="item-icon {% if participant.win%}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{participant.item1.get_url}}" alt="">
+                            </div>
+                            {% endif %}
+                            {% if participant.item2 %}
+                            <div class="item-icon {% if participant.win%}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{participant.item2.get_url}}" alt="">
+                            </div>
+                            {% endif %}
+                            {% if participant.item3 %}
+                            <div class="item-icon {% if participant.win%}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{participant.item3.get_url}}" alt="">
+                            </div>
+                            {% endif %}
+                            {% if participant.item4 %}
+                            <div class="item-icon {% if participant.win%}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{participant.item4.get_url}}" alt="">
+                            </div>
+                            {% endif %}
+                            {% if participant.item5 %}
+                            <div class="item-icon {% if participant.win%}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{participant.item5.get_url}}" alt="">
+                            </div>
+                            {% endif %}
+                            {% if participant.item6 %}
+                            <div class="item-icon {% if participant.win%}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{participant.item6.get_url}}" alt="">
+                            </div>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="match-details-team-header">Red Team</div>
+        <table class="match-details-table">
+            <thead>
+                <tr>
+                    <th>Champion</th>
+                    <th>Player</th>
+                    <th>KDA</th>
+                    <th>Damage</th>
+                    <th>CS</th>
+                    <th>Items</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for participant in red_team %}
+                <tr class="{% if participant == main_participant %}highlight-row{% endif %}">
+                    <td class="champion-cell">
+                        <div class="champion-icon-med">
+                            <img class="champ-img" src="{{participant.champion.get_url}}" alt="{{participant.champion.name}}">
+                        </div>
+                    </td>
+                    <td class="player-name">
+                        <a href="{{participant.summoner.get_url}}">{{participant.game_name}}</a>
+                    </td>
+                    <td class="kda-cell">
+                        {{participant.kills}} / <span class="death-color">{{participant.deaths}}</span> / {{participant.assists}}
+                    </td>
+                    <td class="damage-cell">
+                        {{participant.total_damage_dealt_to_champions}}
+                    </td>
+                    <td class="cs-cell">
+                        {{participant.creep_score}}
+                    </td>
+                    <td class="items-cell">
+                        <div class="items-grid">
+                            {% if participant.item1 %}
+                            <div class="item-icon {% if participant.win%}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{participant.item1.get_url}}" alt="">
+                            </div>
+                            {% endif %}
+                            {% if participant.item2 %}
+                            <div class="item-icon {% if participant.win%}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{participant.item2.get_url}}" alt="">
+                            </div>
+                            {% endif %}
+                            {% if participant.item3 %}
+                            <div class="item-icon {% if participant.win%}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{participant.item3.get_url}}" alt="">
+                            </div>
+                            {% endif %}
+                            {% if participant.item4 %}
+                            <div class="item-icon {% if participant.win%}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{participant.item4.get_url}}" alt="">
+                            </div>
+                            {% endif %}
+                            {% if participant.item5 %}
+                            <div class="item-icon {% if participant.win%}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{participant.item5.get_url}}" alt="">
+                            </div>
+                            {% endif %}
+                            {% if participant.item6 %}
+                            <div class="item-icon {% if participant.win%}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{participant.item6.get_url}}" alt="">
+                            </div>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
 {% endfor %}
