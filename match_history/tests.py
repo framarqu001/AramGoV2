@@ -1,9 +1,11 @@
-from django.test import TransactionTestCase, TestCase
+from django.test import TransactionTestCase, TestCase, Client
 from django.core.cache import cache
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+from django.urls import reverse
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
+import datetime
 
 
 class MatchParticipantDBTest(TransactionTestCase):
@@ -98,3 +100,154 @@ class PatchVersionCacheTest(TestCase):
         
         # Verify that the mock was called
         mock_get_patch.assert_called_once()
+
+
+class ChampionStatsPatchTest(TestCase):
+    def setUp(self):
+        # Create test data
+        self.champion1 = Champion.objects.create(
+            champion_id='Aatrox',
+            name='Aatrox',
+            title='The Darkin Blade',
+            image_path='Aatrox.png',
+            splash_image_path='Aatrox_0.jpg'
+        )
+        self.champion2 = Champion.objects.create(
+            champion_id='Ahri',
+            name='Ahri',
+            title='The Nine-Tailed Fox',
+            image_path='Ahri.png',
+            splash_image_path='Ahri_0.jpg'
+        )
+        
+        self.patch = '14.17'
+        
+        # Create matches for the patch
+        self.match1 = Match.objects.create(
+            match_id='match_001',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='ARAM',
+            game_version=f'{self.patch}.1',
+            winner=100
+        )
+        self.match2 = Match.objects.create(
+            match_id='match_002',
+            game_start=datetime.datetime.now(),
+            game_duration=1500,
+            game_mode='ARAM',
+            game_version=f'{self.patch}.2',
+            winner=200
+        )
+        
+        # Create champion stats for the patch
+        self.stats1 = ChampionStatsPatch.objects.create(
+            champion=self.champion1,
+            patch=self.patch,
+            total_played=100,
+            total_wins=60,
+            total_losses=40
+        )
+        self.stats2 = ChampionStatsPatch.objects.create(
+            champion=self.champion2,
+            patch=self.patch,
+            total_played=80,
+            total_wins=30,
+            total_losses=50
+        )
+        
+        # Clear cache
+        cache.clear()
+    
+    def test_win_rate_calculation(self):
+        """Test that win_rate method correctly calculates the win rate."""
+        self.assertEqual(self.stats1.win_rate(), 60.0)
+        self.assertEqual(self.stats2.win_rate(), 37.5)
+        
+        # Test edge case with no games played
+        empty_stats = ChampionStatsPatch.objects.create(
+            champion=self.champion1,
+            patch='14.18',
+            total_played=0,
+            total_wins=0,
+            total_losses=0
+        )
+        self.assertEqual(empty_stats.win_rate(), 0)
+    
+    @patch('match_history.models.cache.get')
+    @patch('match_history.models.cache.set')
+    @patch('match_history.models.Match.objects.filter')
+    def test_pick_rate_calculation(self, mock_filter, mock_cache_set, mock_cache_get):
+        """Test that pick_rate method correctly calculates the pick rate."""
+        # Mock cache miss
+        mock_cache_get.return_value = None
+        
+        # Mock match count
+        mock_filter_instance = MagicMock()
+        mock_filter_instance.count.return_value = 200
+        mock_filter.return_value = mock_filter_instance
+        
+        # Calculate pick rate
+        pick_rate1 = self.stats1.pick_rate()
+        
+        # Verify calculations
+        self.assertEqual(pick_rate1, 50.0)  # 100/200 * 100
+        
+        # Verify cache was set
+        mock_cache_set.assert_called_once_with(
+            f"total_matches_{self.patch}", 200, timeout=3600
+        )
+        
+        # Test with cached value
+        mock_cache_get.return_value = 200
+        pick_rate2 = self.stats2.pick_rate()
+        self.assertEqual(pick_rate2, 40.0)  # 80/200 * 100
+    
+    def test_get_stats_for_patch(self):
+        """Test that get_stats_for_patch returns the correct queryset."""
+        stats = ChampionStatsPatch.get_stats_for_patch(self.patch)
+        self.assertEqual(stats.count(), 2)
+        self.assertIn(self.stats1, stats)
+        self.assertIn(self.stats2, stats)
+        
+        # Test with non-existent patch
+        stats = ChampionStatsPatch.get_stats_for_patch('99.99')
+        self.assertEqual(stats.count(), 0)
+    
+    def test_update_stats(self):
+        """Test that update_stats correctly updates the statistics."""
+        summoner = Summoner.objects.create(
+            puuid='test-puuid',
+            game_name='TestPlayer',
+            tag_line='NA1'
+        )
+        
+        participant = Participant.objects.create(
+            match=self.match1,
+            summoner=summoner,
+            champion=self.champion1,
+            kills=5,
+            deaths=3,
+            assists=10,
+            creep_score=50,
+            team=100,
+            win=True,
+            game_name='TestPlayer'
+        )
+        
+        # Initial values
+        initial_played = self.stats1.total_played
+        initial_wins = self.stats1.total_wins
+        
+        # Update stats
+        self.stats1.update_stats(participant)
+        
+        # Verify updates
+        self.assertEqual(self.stats1.total_played, initial_played + 1)
+        self.assertEqual(self.stats1.total_wins, initial_wins + 1)
+        
+        # Test with losing participant
+        participant.win = False
+        initial_losses = self.stats1.total_losses
+        self.stats1.update_stats(participant)
+        self.assertEqual(self.stats1.total_losses, initial_losses + 1)
