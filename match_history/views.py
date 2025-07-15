@@ -154,19 +154,81 @@ def summoner(request):
     return HttpResponseRedirect(reverse("match_history:details", args=[summoner_name, tag]))
 
 
-def champions(request):
-    champion_query = ChampionStatsPatch.objects.filter(patch__iexact=patch).prefetch_related('champion')
-    champion_data = []
+def _get_champion_stats_for_patch(patch):
+    """
+    Helper function to retrieve champion statistics for a specific patch.
+    Includes caching and error handling for invalid patch values.
+    
+    Args:
+        patch (str): The patch version to retrieve statistics for.
+        
+    Returns:
+        list: A list of tuples containing champion and their statistics.
+        None: If no statistics are found for the given patch.
+    """
+    # Check if the patch is valid
+    if not patch or not isinstance(patch, str):
+        return None
+    
+    # Try to get cached data first
+    cache_key = f'champion_stats_{patch}'
+    champion_data = cache.get(cache_key)
+    
+    if champion_data is None:
+        # Get champion statistics from database
+        champion_stats = ChampionStatsPatch.get_stats_for_patch(patch)
+        
+        if not champion_stats.exists():
+            return None
+            
+        # Calculate total matches for this patch (needed for pick rate)
+        total_matches_key = f"total_matches_{patch}"
+        total_matches = cache.get(total_matches_key)
+        if total_matches is None:
+            total_matches = Match.objects.filter(game_version__startswith=patch).count()
+            cache.set(total_matches_key, total_matches, timeout=3600)  # Cache for 1 hour
+        
+        # Process champion statistics
+        champion_data = []
+        for champion_stat in champion_stats:
+            win_rate = champion_stat.win_rate()
+            pick_rate = champion_stat.pick_rate()
+            
+            stats = {
+                'patch': champion_stat.patch,
+                'total_played': champion_stat.total_played,
+                'total_wins': champion_stat.total_wins,
+                'total_losses': champion_stat.total_losses,
+                'win_rate': round(win_rate, 2),
+                'pick_rate': round(pick_rate, 2)
+            }
+            champion_data.append((champion_stat.champion, stats))
+        
+        # Cache the processed data
+        cache.set(cache_key, champion_data, timeout=3600)  # Cache for 1 hour
+    
+    return champion_data
 
-    for champion_stat in champion_query:
-        champion_stat_tuple = (
-            champion_stat.patch,
-            champion_stat.total_played,
-            champion_stat.total_wins,
-            champion_stat.total_losses,
-        )
-        champion_data.append((champion_stat.champion.name, champion_stat_tuple))
-    context = {'champion_query': champion_data}
+def champions(request):
+    requested_patch = request.GET.get('patch', patch)
+    
+    try:
+        champion_data = _get_champion_stats_for_patch(requested_patch)
+        if champion_data is None:
+            # If no data for requested patch, fall back to default patch
+            if requested_patch != patch:
+                champion_data = _get_champion_stats_for_patch(patch)
+                if champion_data is None:
+                    # If still no data, return empty context
+                    return render(request, 'match_history/champions.html', {'error': 'No champion statistics available'})
+            else:
+                return render(request, 'match_history/champions.html', {'error': 'No champion statistics available'})
+    except Exception as e:
+        # Log the error
+        print(f"Error retrieving champion statistics: {e}")
+        return render(request, 'match_history/champions.html', {'error': 'An error occurred while retrieving champion statistics'})
+    
+    context = {'champion_query': champion_data, 'current_patch': requested_patch}
     return render(request, 'match_history/champions.html', context)
 
 
