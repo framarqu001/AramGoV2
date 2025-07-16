@@ -2,7 +2,8 @@ import os
 
 from celery import shared_task
 
-from match_history.util.populate_data import Summoner, MatchManager
+from match_history.models import Summoner
+from match_history.util.populate_data import MatchManager
 from celery_progress.backend import ProgressRecorder
 
 
