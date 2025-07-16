@@ -112,5 +112,44 @@
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
+    <!-- Expanded content section -->
+    <div class="match-card__expanded-content {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+        <div class="match-card__expanded-section">
+            <div>
+                <div class="match-card__expanded-title">Performance</div>
+                <div class="match-card__expanded-stats">
+                    <div class="match-card__expanded-stat">
+                        <div class="match-card__expanded-stat-value">{{main_participant.total_damage_dealt_to_champions | floatformat:0}}</div>
+                        <div class="match-card__expanded-stat-label">Damage</div>
+                    </div>
+                    <div class="match-card__expanded-stat">
+                        <div class="match-card__expanded-stat-value">{{main_participant.total_damage_taken | floatformat:0}}</div>
+                        <div class="match-card__expanded-stat-label">Damage Taken</div>
+                    </div>
+                    <div class="match-card__expanded-stat">
+                        <div class="match-card__expanded-stat-value">{{main_participant.gold_earned | floatformat:0}}</div>
+                        <div class="match-card__expanded-stat-label">Gold</div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="match-card__expanded-title">Additional Stats</div>
+                <div class="match-card__expanded-stats">
+                    <div class="match-card__expanded-stat">
+                        <div class="match-card__expanded-stat-value">{{main_participant.vision_score}}</div>
+                        <div class="match-card__expanded-stat-label">Vision</div>
+                    </div>
+                    <div class="match-card__expanded-stat">
+                        <div class="match-card__expanded-stat-value">{{main_participant.total_heal}}</div>
+                        <div class="match-card__expanded-stat-label">Healing</div>
+                    </div>
+                    <div class="match-card__expanded-stat">
+                        <div class="match-card__expanded-stat-value">{{main_participant.largest_killing_spree}}</div>
+                        <div class="match-card__expanded-stat-label">Killing Spree</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endfor %}
