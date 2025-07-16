@@ -161,6 +161,19 @@
             return;
         }
 
+        // Initialize match card expand/collapse functionality
+        function initMatchCardExpand() {
+            $('.match-btn').off('click').on('click', function(e) {
+                e.preventDefault();
+                const matchCard = $(this).closest('.match-card');
+                matchCard.toggleClass('expanded');
+                $(this).toggleClass('expanded');
+            });
+        }
+
+        // Initialize on page load
+        initMatchCardExpand();
+
         $(window).scroll(function() {
             if (!loading && !noMorePages && $(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
                 loading = true;
@@ -181,6 +194,8 @@
                         } else {
                             $('#match-list').append(data);
                             page += 1;
+                            // Re-initialize expand/collapse for newly loaded cards
+                            initMatchCardExpand();
                         }
                         loading = false;
                     },
