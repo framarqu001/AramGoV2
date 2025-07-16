@@ -94,6 +94,7 @@ class PatchVersionCacheTest(TestCase):
         
         # Check the timeout value (this requires accessing internal cache details)
         # We can't directly check the timeout, but we can verify the patch is cached
+        # The timeout is set to 3 weeks (1814400 seconds) in apps.py
         self.assertIsNotNone(cached_patch)
         
         # Verify that the mock was called
