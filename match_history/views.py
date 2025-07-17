@@ -227,7 +227,10 @@ def _get_new_match_data(summoner):
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "vision_score": main_participant.vision_score,
+            "damage_dealt": f"{main_participant.damage_dealt:,}",
+            "damage_taken": f"{main_participant.damage_taken:,}"
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
@@ -254,7 +257,10 @@ def _get_match_data(summoner, page_obj):
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "vision_score": main_participant.vision_score,
+            "damage_dealt": f"{main_participant.damage_dealt:,}",
+            "damage_taken": f"{main_participant.damage_taken:,}"
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data
