@@ -8,7 +8,7 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
-from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
+from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch, TeamComposition
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from match_history.util.populate_data import SummonerManager
@@ -229,9 +229,36 @@ def _get_new_match_data(summoner):
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
-        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+        
+        # Get team composition data
+        team_composition = _get_team_composition_data(match)
+        
+        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats, team_composition))
     matches_queryset.update(new_match=False)
     return match_data
+
+
+def _get_team_composition_data(match):
+    """Get team composition data for a match"""
+    compositions = match.get_team_compositions()
+    
+    blue_comp = compositions.get(Match.BLUE_TEAM)
+    red_comp = compositions.get(Match.RED_TEAM)
+    
+    return {
+        'blue': {
+            'roles': blue_comp.get_role_distribution_formatted() if blue_comp else {},
+            'damage': blue_comp.get_damage_distribution_formatted() if blue_comp else {},
+            'synergy_score': blue_comp.synergy_score if blue_comp else 0,
+            'synergy_description': blue_comp.get_synergy_description() if blue_comp else ""
+        },
+        'red': {
+            'roles': red_comp.get_role_distribution_formatted() if red_comp else {},
+            'damage': red_comp.get_damage_distribution_formatted() if red_comp else {},
+            'synergy_score': red_comp.synergy_score if red_comp else 0,
+            'synergy_description': red_comp.get_synergy_description() if red_comp else ""
+        }
+    }
 
 
 def _get_match_data(summoner, page_obj):
@@ -256,7 +283,11 @@ def _get_match_data(summoner, page_obj):
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
-        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+        
+        # Get team composition data
+        team_composition = _get_team_composition_data(match)
+        
+        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats, team_composition))
     return match_data
 
 

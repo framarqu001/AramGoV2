@@ -292,6 +292,34 @@
     
 </script>
 
+<script>
+    $(document).ready(function() {
+        // Match card expansion toggle
+        $(document).on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            matchCard.toggleClass('expanded');
+            
+            // Adjust height for smooth animation
+            if (matchCard.hasClass('expanded')) {
+                const originalHeight = matchCard.height();
+                const compositionSection = matchCard.find('.team-composition-section');
+                
+                // Show temporarily to calculate height
+                compositionSection.css('display', 'block');
+                const expandedHeight = originalHeight + compositionSection.outerHeight();
+                
+                // Set initial height and animate
+                matchCard.css('height', originalHeight + 'px');
+                setTimeout(() => {
+                    matchCard.css('height', expandedHeight + 'px');
+                }, 10);
+            } else {
+                // Reset to default height
+                matchCard.css('height', '100px');
+            }
+        });
+    });
+</script>
 
 
 {% endblock %}

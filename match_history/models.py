@@ -5,14 +5,46 @@ from django.db import connection
 from django.urls import reverse
 from django import template
 from django.core.cache import cache
+from collections import Counter
 
 
 class Champion(models.Model):
+    # Champion role constants
+    TANK = 'tank'
+    FIGHTER = 'fighter'
+    MAGE = 'mage'
+    ASSASSIN = 'assassin'
+    MARKSMAN = 'marksman'
+    SUPPORT = 'support'
+    
+    ROLE_CHOICES = [
+        (TANK, 'Tank'),
+        (FIGHTER, 'Fighter'),
+        (MAGE, 'Mage'),
+        (ASSASSIN, 'Assassin'),
+        (MARKSMAN, 'Marksman'),
+        (SUPPORT, 'Support'),
+    ]
+    
+    # Damage type constants
+    PHYSICAL = 'physical'
+    MAGICAL = 'magical'
+    MIXED = 'mixed'
+    
+    DAMAGE_TYPE_CHOICES = [
+        (PHYSICAL, 'Physical'),
+        (MAGICAL, 'Magical'),
+        (MIXED, 'Mixed'),
+    ]
+    
     champion_id = models.CharField(primary_key=True, max_length=100)
     name = models.CharField(max_length=100)
     title = models.CharField(max_length=200)
     image_path = models.CharField(max_length=100)
     splash_image_path = models.CharField(max_length=100)
+    primary_role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=FIGHTER)
+    secondary_role = models.CharField(max_length=20, choices=ROLE_CHOICES, null=True, blank=True)
+    damage_type = models.CharField(max_length=20, choices=DAMAGE_TYPE_CHOICES, default=PHYSICAL)
 
     def get_url(self):
         patch = cache.get("PATCH")
@@ -20,9 +52,140 @@ class Champion(models.Model):
 
     def get_splash_url(self):
         return f"https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{self.splash_image_path}"
+        
+    def get_role_display_name(self):
+        return dict(self.ROLE_CHOICES).get(self.primary_role, self.primary_role)
+        
+    def get_damage_type_display_name(self):
+        return dict(self.DAMAGE_TYPE_CHOICES).get(self.damage_type, self.damage_type)
 
     def __str__(self):
         return self.name
+
+
+class TeamComposition(models.Model):
+    match = models.ForeignKey('Match', on_delete=models.CASCADE, related_name='team_compositions')
+    team = models.IntegerField(choices=[(100, 'Blue Team'), (200, 'Red Team')])
+    
+    # Cached composition data
+    role_distribution = models.JSONField(default=dict)
+    damage_distribution = models.JSONField(default=dict)
+    synergy_score = models.IntegerField(default=0)
+    
+    class Meta:
+        unique_together = ('match', 'team')
+    
+    def __str__(self):
+        return f"Team Composition for {self.match} - Team {self.team}"
+    
+    @classmethod
+    def calculate_for_match(cls, match):
+        """Calculate team compositions for both teams in a match"""
+        blue_team = []
+        red_team = []
+        
+        for participant in match.participants.select_related('champion').all():
+            if participant.team == 100:  # Blue team
+                blue_team.append(participant)
+            else:  # Red team
+                red_team.append(participant)
+        
+        # Calculate and save compositions for both teams
+        blue_comp = cls._calculate_composition(match, 100, blue_team)
+        red_comp = cls._calculate_composition(match, 200, red_team)
+        
+        return blue_comp, red_comp
+    
+    @classmethod
+    def _calculate_composition(cls, match, team_id, participants):
+        """Calculate composition data for a team"""
+        # Get or create team composition
+        team_comp, created = cls.objects.get_or_create(
+            match=match,
+            team=team_id
+        )
+        
+        # Calculate role distribution
+        roles = []
+        for participant in participants:
+            roles.append(participant.champion.primary_role)
+            if participant.champion.secondary_role:
+                roles.append(participant.champion.secondary_role)
+        
+        role_counter = Counter(roles)
+        total_roles = len(roles)
+        role_distribution = {role: count / total_roles * 100 for role, count in role_counter.items()}
+        
+        # Calculate damage distribution
+        damage_types = [p.champion.damage_type for p in participants]
+        damage_counter = Counter(damage_types)
+        total_champions = len(participants)
+        damage_distribution = {dtype: count / total_champions * 100 for dtype, count in damage_counter.items()}
+        
+        # Calculate synergy score
+        synergy_score = cls._calculate_synergy_score(role_counter, damage_counter)
+        
+        # Update team composition
+        team_comp.role_distribution = role_distribution
+        team_comp.damage_distribution = damage_distribution
+        team_comp.synergy_score = synergy_score
+        team_comp.save()
+        
+        return team_comp
+    
+    @staticmethod
+    def _calculate_synergy_score(role_counter, damage_counter):
+        """Calculate team synergy score based on role and damage distribution"""
+        score = 0
+        
+        # Ideal team has at least one tank
+        if role_counter.get(Champion.TANK, 0) >= 1:
+            score += 20
+        
+        # Ideal team has at least one support
+        if role_counter.get(Champion.SUPPORT, 0) >= 1:
+            score += 20
+        
+        # Ideal team has at least one marksman or mage for consistent damage
+        if role_counter.get(Champion.MARKSMAN, 0) >= 1 or role_counter.get(Champion.MAGE, 0) >= 1:
+            score += 20
+        
+        # Balanced damage types (both physical and magical)
+        if damage_counter.get(Champion.PHYSICAL, 0) >= 1 and damage_counter.get(Champion.MAGICAL, 0) >= 1:
+            score += 20
+        
+        # Avoid too many of the same role
+        if max(role_counter.values()) <= 2:
+            score += 20
+            
+        return score
+    
+    def get_role_distribution_formatted(self):
+        """Return role distribution as a formatted dictionary"""
+        result = {}
+        for role, percentage in self.role_distribution.items():
+            role_name = dict(Champion.ROLE_CHOICES).get(role, role)
+            result[role_name] = round(percentage)
+        return result
+    
+    def get_damage_distribution_formatted(self):
+        """Return damage distribution as a formatted dictionary"""
+        result = {}
+        for damage_type, percentage in self.damage_distribution.items():
+            damage_name = dict(Champion.DAMAGE_TYPE_CHOICES).get(damage_type, damage_type)
+            result[damage_name] = round(percentage)
+        return result
+    
+    def get_synergy_description(self):
+        """Return a description of the team synergy based on the score"""
+        if self.synergy_score >= 80:
+            return "Excellent team composition with great balance and synergy."
+        elif self.synergy_score >= 60:
+            return "Good team composition with decent balance."
+        elif self.synergy_score >= 40:
+            return "Average team composition with some imbalances."
+        else:
+            return "Suboptimal team composition with significant imbalances."
 
 
 class Item(models.Model):
@@ -134,6 +297,18 @@ class Match(models.Model):
 
     def get_participants(self):
         return self.participants.select_related("match").all()
+        
+    def get_team_compositions(self):
+        """Get or calculate team compositions for this match"""
+        compositions = self.team_compositions.all()
+        if compositions.count() < 2:
+            # Calculate compositions if they don't exist
+            compositions = TeamComposition.calculate_for_match(self)
+        else:
+            compositions = list(compositions)
+            
+        # Return as a dictionary with team IDs as keys
+        return {comp.team: comp for comp in compositions}
 
     def get_time_diff(self):
         la_timezone = pytz.timezone('America/Los_Angeles')
