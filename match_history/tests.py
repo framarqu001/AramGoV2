@@ -4,6 +4,7 @@ from unittest.mock import patch
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
+from match_history.views import _calculate_damage_stats, _calculate_vision_stats
 
 
 class MatchParticipantDBTest(TransactionTestCase):
@@ -69,6 +70,26 @@ class MatchParticipantTest(TestCase):
     def test_cascade_delete_with_champion(self):
         self.champion.delete()
         self.assertFalse(Participant.objects.filter(pk=self.participant.pk).exists())
+
+    def test_damage_stats_calculation(self):
+        # Test the damage stats calculation
+        damage_stats = _calculate_damage_stats(self.participant)
+        
+        # Expected values based on our calculation formula
+        expected_damage = (self.participant.kills * 1000) + (self.participant.assists * 500)
+        expected_damage_per_minute = expected_damage / (self.match.game_duration / 60)
+        
+        self.assertEqual(damage_stats["total_damage"], f"{expected_damage:,}")
+        self.assertEqual(damage_stats["damage_per_minute"], f"{expected_damage_per_minute:.1f}")
+
+    def test_vision_stats_calculation(self):
+        # Test the vision stats calculation
+        vision_stats = _calculate_vision_stats(self.participant)
+        
+        # Expected values based on our calculation formula
+        expected_vision_score = self.match.game_duration / 60 * 1.5
+        
+        self.assertEqual(vision_stats["vision_score"], f"{expected_vision_score:.1f}")
 
 
     ##AramGoV2 if user changes there name
