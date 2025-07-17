@@ -77,6 +77,15 @@
             <div class="kda">{{main_participant.kills}} / <span class ="death-color">{{main_participant.deaths}}</span> / {{main_participant.assists}}</div>
             <div class="calculated-kda sub-text">KDA: {{main_stats.kda}}</div>
             <div class="cs sub-text">{{main_participant.creep_score}} CS ({{main_stats.cs_min}})</div>
+            <div class="damage sub-text" title="Total damage dealt to champions">
+                <span class="stat-icon">⚔️</span> {{main_stats.damage_dealt}}
+            </div>
+            <div class="gold sub-text" title="Total gold earned">
+                <span class="stat-icon">💰</span> {{main_stats.gold_earned}}
+            </div>
+            <div class="vision sub-text" title="Vision score - Wards placed and destroyed">
+                <span class="stat-icon">👁️</span> {{main_stats.vision_score}}
+            </div>
         </div>
         <div class="participant-section">
 
