@@ -1,4 +1,4 @@
-{% for match, main_participant, blue_team, red_team, main_stats in matches%}
+{% for match, main_participant, blue_team, red_team, main_stats, team_composition in matches%}
 
 <div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
 
@@ -111,6 +111,93 @@
     <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
+    
+    <!-- Team Composition Analysis Section -->
+    <div class="team-composition-section">
+        <div class="composition-header">Team Composition Analysis</div>
+        
+        <div class="composition-container">
+            <!-- Blue Team Composition -->
+            <div class="team-composition blue-team-comp">
+                <div class="comp-team-header">Blue Team</div>
+                
+                <div class="comp-section">
+                    <div class="comp-section-title">Role Distribution</div>
+                    <div class="role-distribution">
+                        {% for role, percentage in team_composition.blue.roles.items %}
+                            <div class="role-item">
+                                <div class="role-name">{{ role }}</div>
+                                <div class="role-bar-container">
+                                    <div class="role-bar" style="width: {{ percentage }}%"></div>
+                                    <div class="role-percentage">{{ percentage }}%</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="comp-section">
+                    <div class="comp-section-title">Damage Type</div>
+                    <div class="damage-distribution">
+                        {% for damage_type, percentage in team_composition.blue.damage.items %}
+                            <div class="damage-item {{ damage_type|lower }}">
+                                <div class="damage-name">{{ damage_type }}</div>
+                                <div class="damage-percentage">{{ percentage }}%</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="comp-section">
+                    <div class="comp-section-title">Team Synergy</div>
+                    <div class="synergy-score">
+                        <div class="synergy-value">{{ team_composition.blue.synergy_score }}/100</div>
+                        <div class="synergy-description">{{ team_composition.blue.synergy_description }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Red Team Composition -->
+            <div class="team-composition red-team-comp">
+                <div class="comp-team-header">Red Team</div>
+                
+                <div class="comp-section">
+                    <div class="comp-section-title">Role Distribution</div>
+                    <div class="role-distribution">
+                        {% for role, percentage in team_composition.red.roles.items %}
+                            <div class="role-item">
+                                <div class="role-name">{{ role }}</div>
+                                <div class="role-bar-container">
+                                    <div class="role-bar" style="width: {{ percentage }}%"></div>
+                                    <div class="role-percentage">{{ percentage }}%</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="comp-section">
+                    <div class="comp-section-title">Damage Type</div>
+                    <div class="damage-distribution">
+                        {% for damage_type, percentage in team_composition.red.damage.items %}
+                            <div class="damage-item {{ damage_type|lower }}">
+                                <div class="damage-name">{{ damage_type }}</div>
+                                <div class="damage-percentage">{{ percentage }}%</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="comp-section">
+                    <div class="comp-section-title">Team Synergy</div>
+                    <div class="synergy-score">
+                        <div class="synergy-value">{{ team_composition.red.synergy_score }}/100</div>
+                        <div class="synergy-description">{{ team_composition.red.synergy_description }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 {% endfor %}
