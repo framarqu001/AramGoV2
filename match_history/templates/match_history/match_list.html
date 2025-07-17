@@ -108,9 +108,57 @@
             </div>
         </div>
     </div>
-    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
-        <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
+    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" aria-label="Expand match details">
+        <svg class="drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
+    <!-- Expandable details section -->
+    <div class="match-details-expanded">
+        <div class="match-details-container">
+            <div class="match-details-section">
+                <h4>Performance Stats</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Damage Dealt</div>
+                        <div class="stat-value">{{main_participant.total_damage_dealt_to_champions}}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Damage Taken</div>
+                        <div class="stat-value">{{main_participant.total_damage_taken}}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Gold Earned</div>
+                        <div class="stat-value">{{main_participant.gold_earned}}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Vision Score</div>
+                        <div class="stat-value">{{main_participant.vision_score}}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="match-details-section">
+                <h4>Combat Stats</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Largest Killing Spree</div>
+                        <div class="stat-value">{{main_participant.largest_killing_spree}}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Largest Multi Kill</div>
+                        <div class="stat-value">{{main_participant.largest_multi_kill}}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Healing Done</div>
+                        <div class="stat-value">{{main_participant.total_heal}}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">CC Time</div>
+                        <div class="stat-value">{{main_participant.time_ccing_others}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endfor %}
