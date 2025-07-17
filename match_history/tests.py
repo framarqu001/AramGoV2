@@ -46,7 +46,10 @@ class MatchParticipantTest(TestCase):
             kills=10,
             deaths=2,
             assists=8,
-            creep_score=150
+            creep_score=150,
+            vision_score=25,
+            damage_dealt=15000,
+            gold_earned=12000
         )
 
     def test_participant_relationships(self):
@@ -55,8 +58,17 @@ class MatchParticipantTest(TestCase):
         self.assertEqual(self.participant.champion, self.champion)
         self.assertIn(self.participant, self.match.participants.all())
 
+    def test_participant_stats(self):
+        self.assertEqual(self.participant.kills, 10)
+        self.assertEqual(self.participant.deaths, 2)
+        self.assertEqual(self.participant.assists, 8)
+        self.assertEqual(self.participant.creep_score, 150)
+        self.assertEqual(self.participant.vision_score, 25)
+        self.assertEqual(self.participant.damage_dealt, 15000)
+        self.assertEqual(self.participant.gold_earned, 12000)
+        
     def test_participant_string_representation(self):
-        self.assertEqual(str(self.participant), 'testSummoner#NA1 playing Aatrox in match match_001')
+        self.assertEqual(str(self.participant), f"{self.participant.game_name} playing {self.participant.champion} in match {self.participant.match}")
 
     def test_cascade_delete_with_match(self):
         self.match.delete()

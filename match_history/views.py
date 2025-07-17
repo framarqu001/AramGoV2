@@ -221,13 +221,25 @@ def _get_new_match_data(summoner):
             else:
                 red_team_list.append(participant)
 
+        # Calculate KDA
         kda = (
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        
+        # Calculate kill participation percentage
+        team_kills = 0
+        for teammate in blue_team_list if main_participant.team == 100 else red_team_list:
+            team_kills += teammate.kills
+        
+        kill_participation = ((main_participant.kills + main_participant.assists) / team_kills * 100) if team_kills > 0 else 0
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "vision_score": main_participant.vision_score,
+            "damage_dealt": f"{main_participant.damage_dealt:,}",
+            "gold_earned": f"{main_participant.gold_earned:,}",
+            "kill_participation": f"{kill_participation:.0f}%"
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
@@ -248,13 +260,25 @@ def _get_match_data(summoner, page_obj):
             else:
                 red_team_list.append(participant)
 
+        # Calculate KDA
         kda = (
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        
+        # Calculate kill participation percentage
+        team_kills = 0
+        for teammate in blue_team_list if main_participant.team == 100 else red_team_list:
+            team_kills += teammate.kills
+        
+        kill_participation = ((main_participant.kills + main_participant.assists) / team_kills * 100) if team_kills > 0 else 0
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "vision_score": main_participant.vision_score,
+            "damage_dealt": f"{main_participant.damage_dealt:,}",
+            "gold_earned": f"{main_participant.gold_earned:,}",
+            "kill_participation": f"{kill_participation:.0f}%"
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data
