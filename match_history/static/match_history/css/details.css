@@ -142,7 +142,7 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: 140px;
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
@@ -164,6 +164,7 @@ hr {
     grid-template-columns: .6fr 1fr 1fr 1fr;
     padding: 0 .5rem;
     place-items: center;
+    height: 100%;
 }
 .result-section {
     justify-self: start;
@@ -214,12 +215,26 @@ hr {
     display: flex;
     align-items: center;
     flex-direction: column;
+    justify-content: center;
+}
+
+.additional-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5px;
+    gap: 2px;
+}
+
+.damage, .gold, .vision {
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .match-btn {
     display: flex;
     flex-direction: column;
-    justify-content: end;
+    justify-content: center;
     align-items: center;
     width: 40px;
     border: 0;
@@ -274,6 +289,7 @@ hr {
     display: flex;
     color: #e6e6e6;
     gap: 5px;
+    align-self: center;
 }
 .participant-entry {
     display: flex;

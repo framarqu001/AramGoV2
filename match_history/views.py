@@ -8,10 +8,10 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
-from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
+from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch, Summoner
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-from match_history.util.populate_data import SummonerManager
+from match_history.util.populate_data import SummonerManager, MatchManager
 from riotwatcher import ApiError
 from django.core.paginator import Paginator
 from collections import defaultdict
@@ -224,10 +224,34 @@ def _get_new_match_data(summoner):
         kda = (
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        
+        # Get match details from Riot API to extract additional statistics
+        try:
+            match_info = MatchManager("americas", "na1", summoner)._get_match_info(match.match_id)
+            participant_data = None
+            
+            # Find the participant data for the main participant
+            for p in match_info["info"]["participants"]:
+                if p.get("puuid") == summoner.puuid:
+                    participant_data = p
+                    break
+            
+            # Extract additional statistics
+            damage_dealt = participant_data.get("totalDamageDealtToChampions", 0) if participant_data else 0
+            gold_earned = participant_data.get("goldEarned", 0) if participant_data else 0
+            vision_score = participant_data.get("visionScore", 0) if participant_data else 0
+        except Exception as e:
+            # If there's an error fetching the data, use default values
+            damage_dealt = 0
+            gold_earned = 0
+            vision_score = 0
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "damage_dealt": f"{damage_dealt:,}",
+            "gold_earned": f"{gold_earned:,}",
+            "vision_score": f"{vision_score}"
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
@@ -252,9 +276,33 @@ def _get_match_data(summoner, page_obj):
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
+        # Get match details from Riot API to extract additional statistics
+        try:
+            match_info = MatchManager("americas", "na1", summoner)._get_match_info(match.match_id)
+            participant_data = None
+            
+            # Find the participant data for the main participant
+            for p in match_info["info"]["participants"]:
+                if p.get("puuid") == summoner.puuid:
+                    participant_data = p
+                    break
+            
+            # Extract additional statistics
+            damage_dealt = participant_data.get("totalDamageDealtToChampions", 0) if participant_data else 0
+            gold_earned = participant_data.get("goldEarned", 0) if participant_data else 0
+            vision_score = participant_data.get("visionScore", 0) if participant_data else 0
+        except Exception as e:
+            # If there's an error fetching the data, use default values
+            damage_dealt = 0
+            gold_earned = 0
+            vision_score = 0
+
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "damage_dealt": f"{damage_dealt:,}",
+            "gold_earned": f"{gold_earned:,}",
+            "vision_score": f"{vision_score}"
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data
