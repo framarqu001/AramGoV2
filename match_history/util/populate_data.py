@@ -233,6 +233,12 @@ class MatchManager():
                     "spell2": spell2,
                     "rune1": rune1,
                     "rune2": rune2,
+                    # New stats fields
+                    "total_damage_dealt": participant_data["totalDamageDealt"],
+                    "total_damage_taken": participant_data["totalDamageTaken"],
+                    "vision_score": participant_data["visionScore"],
+                    "gold_earned": participant_data["goldEarned"],
+                    "largest_killing_spree": participant_data["largestKillingSpree"],
                 }
             )
             total_snowballs = 0

@@ -77,6 +77,9 @@
             <div class="kda">{{main_participant.kills}} / <span class ="death-color">{{main_participant.deaths}}</span> / {{main_participant.assists}}</div>
             <div class="calculated-kda sub-text">KDA: {{main_stats.kda}}</div>
             <div class="cs sub-text">{{main_participant.creep_score}} CS ({{main_stats.cs_min}})</div>
+            <div class="detailed-stats-toggle">
+                <button class="stats-toggle-btn">Show Details</button>
+            </div>
         </div>
         <div class="participant-section">
 
@@ -111,6 +114,38 @@
     <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
+    
+    <!-- Detailed Stats Section -->
+    <div class="detailed-stats-section {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" style="display: none;">
+        <div class="detailed-stats-container">
+            <div class="stats-column">
+                <div class="stats-item">
+                    <div class="stats-label">Damage Dealt</div>
+                    <div class="stats-value">{{main_participant.get_damage_dealt_formatted}}</div>
+                </div>
+                <div class="stats-item">
+                    <div class="stats-label">Damage Taken</div>
+                    <div class="stats-value">{{main_participant.get_damage_taken_formatted}}</div>
+                </div>
+            </div>
+            <div class="stats-column">
+                <div class="stats-item">
+                    <div class="stats-label">Vision Score</div>
+                    <div class="stats-value">{{main_participant.vision_score}}</div>
+                </div>
+                <div class="stats-item">
+                    <div class="stats-label">Gold Earned</div>
+                    <div class="stats-value">{{main_participant.gold_earned}}</div>
+                </div>
+            </div>
+            <div class="stats-column">
+                <div class="stats-item">
+                    <div class="stats-label">Largest Killing Spree</div>
+                    <div class="stats-value">{{main_participant.largest_killing_spree}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 {% endfor %}
