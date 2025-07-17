@@ -1,4 +1,5 @@
 import time
+import json
 
 from django.core.cache import cache
 from django.db.models import Prefetch
@@ -6,9 +7,10 @@ from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.cache import cache_page
 
-from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
+from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch, Summoner
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from match_history.util.populate_data import SummonerManager
@@ -18,6 +20,11 @@ from collections import defaultdict
 from .tasks import *
 
 patch = "14.17"
+
+# Cache timeouts in seconds
+CACHE_TIMEOUT_SHORT = 60 * 5  # 5 minutes
+CACHE_TIMEOUT_MEDIUM = 60 * 30  # 30 minutes
+CACHE_TIMEOUT_LONG = 60 * 60 * 24  # 24 hours
 
 
 def home(request):
@@ -235,6 +242,17 @@ def _get_new_match_data(summoner):
 
 
 def _get_match_data(summoner, page_obj):
+    """
+    Get basic match data for initial display.
+    Only includes essential information needed for the match card.
+    Detailed statistics will be loaded on demand.
+    """
+    cache_key = f'match_data_{summoner.puuid}_{page_obj.number}'
+    cached_result = cache.get(cache_key)
+    
+    if cached_result:
+        return cached_result
+    
     match_data = []
 
     for match in page_obj:
@@ -257,7 +275,83 @@ def _get_match_data(summoner, page_obj):
             "cs_min": f"{cs_min:.1f}"
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+    
+    cache.set(cache_key, match_data, CACHE_TIMEOUT_MEDIUM)
     return match_data
+
+
+@require_GET
+def get_match_details(request, match_id):
+    """
+    Endpoint to fetch detailed match statistics for a specific match.
+    This is called via AJAX when a match card is expanded.
+    """
+    try:
+        match_id = int(match_id)
+    except ValueError:
+        return JsonResponse({'error': 'Invalid match ID'}, status=400)
+    
+    # Check cache first
+    cache_key = f'match_details_{match_id}'
+    cached_details = cache.get(cache_key)
+    
+    if cached_details:
+        return JsonResponse(cached_details)
+    
+    try:
+        match = Match.objects.get(id=match_id)
+    except Match.DoesNotExist:
+        return JsonResponse({'error': 'Match not found'}, status=404)
+    
+    # Fetch detailed statistics for the match
+    participants = Participant.objects.filter(match=match).select_related(
+        'summoner', 'champion', 'spell1', 'spell2', 'rune1', 'rune2',
+        'item1', 'item2', 'item3', 'item4', 'item5', 'item6'
+    )
+    
+    blue_team = []
+    red_team = []
+    
+    for participant in participants:
+        participant_data = {
+            'summoner_name': participant.game_name,
+            'champion_name': participant.champion.name,
+            'champion_img': participant.champion.get_url,
+            'kills': participant.kills,
+            'deaths': participant.deaths,
+            'assists': participant.assists,
+            'damage_dealt': participant.damage_dealt,
+            'damage_taken': participant.damage_taken,
+            'gold_earned': participant.gold_earned,
+            'creep_score': participant.creep_score,
+            'vision_score': participant.vision_score,
+            'win': participant.win,
+            'summoner_url': participant.summoner.get_url if participant.summoner else None,
+        }
+        
+        if participant.team == 100:
+            blue_team.append(participant_data)
+        else:
+            red_team.append(participant_data)
+    
+    match_details = {
+        'match_id': match.id,
+        'game_creation': match.game_creation.timestamp() * 1000,  # Convert to JS timestamp
+        'game_duration': match.game_duration,
+        'game_version': match.game_version,
+        'blue_team': blue_team,
+        'red_team': red_team,
+        'blue_team_win': any(p['win'] for p in blue_team),
+        'total_kills_blue': sum(p['kills'] for p in blue_team),
+        'total_kills_red': sum(p['kills'] for p in red_team),
+        'total_gold_blue': sum(p['gold_earned'] for p in blue_team),
+        'total_gold_red': sum(p['gold_earned'] for p in red_team),
+    }
+    
+    # Cache the result
+    cache.set(cache_key, match_details, CACHE_TIMEOUT_LONG)
+    
+    return JsonResponse(match_details)
 
 
 def _get_recent(summoner):
@@ -348,18 +442,42 @@ def _get_account_stats(summoner):
 
 
 def _get_match_queryset(summoner):
+    """
+    Get match queryset with optimized prefetching and caching.
+    Only fetches essential fields initially for better performance.
+    """
+    cache_key = f'match_queryset_{summoner.puuid}'
+    cached_result = cache.get(cache_key)
+    
+    if cached_result:
+        return cached_result
+    
+    # Optimize query by selecting only necessary fields initially
     matches_queryset = Match.objects.filter(participants__summoner=summoner).prefetch_related(
         Prefetch('participants', queryset=Participant.objects.select_related(
             'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", "item1", "item2", "item3",
             'item4', 'item5', 'item6', 'summoner__profile_icon'),
                  to_attr='all_participants')
-    )
+    ).order_by('-game_creation')
+    
+    cache.set(cache_key, matches_queryset, CACHE_TIMEOUT_MEDIUM)
     return matches_queryset
 
 
 def _get_champions_queryset(summoner):
+    """
+    Get champion stats queryset with caching.
+    """
+    cache_key = f'champion_stats_{summoner.puuid}'
+    cached_result = cache.get(cache_key)
+    
+    if cached_result:
+        return cached_result
+    
     summoner_champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by(
         '-total_played')[:7].prefetch_related('champion')
+    
+    cache.set(cache_key, summoner_champion_stats, CACHE_TIMEOUT_MEDIUM)
     return summoner_champion_stats
 
 

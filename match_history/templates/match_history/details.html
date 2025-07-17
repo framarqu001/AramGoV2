@@ -181,6 +181,11 @@
                         } else {
                             $('#match-list').append(data);
                             page += 1;
+                            
+                            // Reinitialize card optimizer for new cards if it exists
+                            if (window.matchCardOptimizer && window.matchCardOptimizer.initialized) {
+                                window.matchCardOptimizer.attachEventListeners();
+                            }
                         }
                         loading = false;
                     },
@@ -292,6 +297,7 @@
     
 </script>
 
-
+<!-- Include the card optimizer script -->
+<script src="{% static 'match_history/js/card_optimizer.js' %}"></script>
 
 {% endblock %}
