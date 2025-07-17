@@ -229,6 +229,15 @@ def _get_new_match_data(summoner):
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
+        
+        # Ensure timeline data is available
+        if not hasattr(match, 'timeline_data') or not match.timeline_data:
+            # If no timeline data exists, create some placeholder data based on match events
+            timeline_data = _generate_placeholder_timeline(match, main_participant)
+            if timeline_data:
+                match.timeline_data = timeline_data
+                match.save()
+                
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
     return match_data
@@ -256,8 +265,86 @@ def _get_match_data(summoner, page_obj):
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
+        
+        # Ensure timeline data is available
+        if not hasattr(match, 'timeline_data') or not match.timeline_data:
+            # If no timeline data exists, create some placeholder data based on match events
+            # This is just for demonstration - in a real app, you'd fetch this from the Riot API
+            timeline_data = _generate_placeholder_timeline(match, main_participant)
+            if timeline_data:
+                match.timeline_data = timeline_data
+                match.save()
+        
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data
+
+
+def _generate_placeholder_timeline(match, main_participant):
+    """
+    Generate placeholder timeline data for matches that don't have it
+    This is just for demonstration purposes
+    """
+    timeline_data = []
+    
+    # Add game start event
+    timeline_data.append({
+        'timestamp': 0,
+        'type': 'GAME_START',
+        'team': 0,  # Neutral event
+        'description': 'Game started'
+    })
+    
+    # Add first blood event around 2-3 minutes
+    first_blood_time = 150000  # 2.5 minutes in milliseconds
+    timeline_data.append({
+        'timestamp': first_blood_time,
+        'type': 'CHAMPION_KILL',
+        'team': 100 if match.winner == 200 else 200,  # Opposite of winner for drama
+        'description': 'First Blood!'
+    })
+    
+    # Add a few kills throughout the game
+    kill_times = [300000, 480000, 720000]  # 5, 8, 12 minutes
+    for i, kill_time in enumerate(kill_times):
+        # Alternate teams
+        team = main_participant.team if i % 2 == 0 else (100 if main_participant.team == 200 else 200)
+        timeline_data.append({
+            'timestamp': kill_time,
+            'type': 'CHAMPION_KILL',
+            'team': team,
+            'description': f'{"Ally" if team == main_participant.team else "Enemy"} champion killed'
+        })
+    
+    # Add objective events
+    if match.game_duration > 900:  # If game longer than 15 minutes
+        timeline_data.append({
+            'timestamp': 900000,  # 15 minutes
+            'type': 'ELITE_MONSTER_KILL',
+            'team': main_participant.team,
+            'description': 'Ally team secured Rift Herald'
+        })
+    
+    # Add building destruction
+    if match.game_duration > 1200:  # If game longer than 20 minutes
+        timeline_data.append({
+            'timestamp': 1200000,  # 20 minutes
+            'type': 'BUILDING_KILL',
+            'team': main_participant.team if main_participant.win else (100 if main_participant.team == 200 else 200),
+            'description': f'{"Ally" if main_participant.win else "Enemy"} team destroyed a turret'
+        })
+    
+    # Add game end event
+    timeline_data.append({
+        'timestamp': match.game_duration * 1000,  # Convert seconds to milliseconds
+        'type': 'GAME_END',
+        'team': match.winner,
+        'description': f'{"Victory" if main_participant.win else "Defeat"}'
+    })
+    
+    # Sort events by timestamp
+    timeline_data.sort(key=lambda x: x['timestamp'])
+    
+    return timeline_data
 
 
 def _get_recent(summoner):

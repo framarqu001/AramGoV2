@@ -487,3 +487,95 @@ hr {
 .death-color {
     color: #ff4e50
 }
+
+/* Timeline Styles */
+.match-timeline-section {
+    width: 100%;
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.timeline-container {
+    width: 100%;
+}
+
+.timeline-header {
+    margin-bottom: 10px;
+}
+
+.timeline-header h3 {
+    font-family: "Mulish", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #e6e6e6;
+}
+
+.timeline-events {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.timeline-event {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.friendly-event {
+    border-left: 3px solid #4b6bc3;
+}
+
+.enemy-event {
+    border-left: 3px solid #f46bf4;
+}
+
+.event-time {
+    min-width: 60px;
+    font-family: "Space Mono", monospace;
+    font-size: 12px;
+    color: #87888a;
+}
+
+.event-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin: 0 10px;
+}
+
+.event-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: #e6e6e6;
+}
+
+.event-description {
+    font-family: "Mulish", sans-serif;
+    font-size: 14px;
+    color: #e6e6e6;
+}
+
+.timeline-empty {
+    padding: 20px;
+    text-align: center;
+    color: #87888a;
+    font-style: italic;
+}
+
+/* Expanded card styles */
+.match-card.expanded {
+    height: auto;
+}
+
+.match-card.expanded .match-btn .drop {
+    transform: rotate(180deg);
+}
