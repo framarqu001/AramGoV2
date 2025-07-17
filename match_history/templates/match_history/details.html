@@ -161,6 +161,55 @@
             return;
         }
 
+        // Match details expand/collapse functionality
+        function initMatchDetailsHandlers() {
+            $('.match-btn').off('click').on('click', function() {
+                const matchCard = $(this).closest('.match-card');
+                const detailsContainer = matchCard.find('.match-details-container');
+                const isExpanded = $(this).attr('aria-expanded') === 'true';
+                
+                // Toggle expanded state
+                $(this).attr('aria-expanded', !isExpanded);
+                
+                if (isExpanded) {
+                    // Collapse
+                    matchCard.removeClass('expanded');
+                } else {
+                    // Expand
+                    matchCard.addClass('expanded');
+                }
+                
+                // Store expanded state in localStorage to persist during scrolling
+                const matchId = matchCard.data('match-id');
+                const expandedMatches = JSON.parse(localStorage.getItem('expandedMatches') || '{}');
+                
+                if (isExpanded) {
+                    delete expandedMatches[matchId];
+                } else {
+                    expandedMatches[matchId] = true;
+                }
+                
+                localStorage.setItem('expandedMatches', JSON.stringify(expandedMatches));
+            });
+        }
+        
+        // Restore expanded state from localStorage
+        function restoreExpandedState() {
+            const expandedMatches = JSON.parse(localStorage.getItem('expandedMatches') || '{}');
+            
+            $('.match-card').each(function() {
+                const matchId = $(this).data('match-id');
+                if (expandedMatches[matchId]) {
+                    $(this).addClass('expanded');
+                    $(this).find('.match-btn').attr('aria-expanded', 'true');
+                }
+            });
+        }
+        
+        // Initialize handlers for current matches
+        initMatchDetailsHandlers();
+        restoreExpandedState();
+
         $(window).scroll(function() {
             if (!loading && !noMorePages && $(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
                 loading = true;
@@ -180,6 +229,9 @@
                             console.log("No more pages to load.");
                         } else {
                             $('#match-list').append(data);
+                            // Initialize handlers for newly loaded matches
+                            initMatchDetailsHandlers();
+                            restoreExpandedState();
                             page += 1;
                         }
                         loading = false;
