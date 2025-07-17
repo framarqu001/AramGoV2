@@ -142,7 +142,7 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: 140px;
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
@@ -164,10 +164,13 @@ hr {
     grid-template-columns: .6fr 1fr 1fr 1fr;
     padding: 0 .5rem;
     place-items: center;
+    align-content: center;
 }
 .result-section {
     justify-self: start;
     margin-left: 10px;
+    align-self: flex-start;
+    margin-top: 10px;
 }
 
 .build-section {
@@ -175,7 +178,9 @@ hr {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap:4px
+    gap: 4px;
+    align-self: flex-start;
+    margin-top: 10px;
 }
 .icon-2stack{
     gap:3px;
@@ -216,6 +221,12 @@ hr {
     flex-direction: column;
 }
 
+.damage.sub-text, .gold.sub-text, .vision.sub-text {
+    color: #87888a;
+    font-size: 12px;
+    font-weight: 400;
+}
+
 .match-btn {
     display: flex;
     flex-direction: column;
@@ -224,6 +235,7 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    height: 100%;
 }
 
 
@@ -274,6 +286,8 @@ hr {
     display: flex;
     color: #e6e6e6;
     gap: 5px;
+    align-self: flex-start;
+    margin-top: 10px;
 }
 .participant-entry {
     display: flex;
