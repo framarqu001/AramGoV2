@@ -14,8 +14,118 @@
         background-color: #222433;
     }
 </style>
-    <h1 style="text-align: center"> COMING SOON</h1>
-    {% for champ, stat in champion_query %}
-        <p>{{champ}}</p>
-    {% endfor %}
+<div class="champions-container">
+    <h1 class="champions-title">Champion Statistics</h1>
+    
+    <div class="champions-table-container">
+        <table class="champions-table">
+            <thead>
+                <tr>
+                    <th class="sortable" data-sort="champion">
+                        Champion
+                        <span class="sort-indicator">▼</span>
+                    </th>
+                    <th class="sortable sorted-desc" data-sort="games">
+                        Games Played
+                        <span class="sort-indicator">▼</span>
+                    </th>
+                    <th class="sortable" data-sort="winrate">
+                        Win Rate
+                        <span class="sort-indicator">▼</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for champ, stat in champion_query %}
+                <tr>
+                    <td class="champion-cell">
+                        <div class="champion-info">
+                            <img src="{{ stat.0.get_url }}" alt="{{ champ }}" class="champion-icon" 
+                                 onerror="this.onerror=null; this.src=''; this.classList.add('champion-icon-error'); this.parentNode.querySelector('.champion-icon-fallback').style.display='flex';"
+                                 onload="this.parentNode.querySelector('.champion-icon-loading').style.display='none';">
+                            <div class="champion-icon-loading"></div>
+                            <div class="champion-icon-fallback">{{ champ|slice:":1" }}</div>
+                            <span class="champion-name">{{ champ }}</span>
+                        </div>
+                    </td>
+                    <td class="games-cell">{{ stat.2 }}</td>
+                    <td class="winrate-cell">
+                        {% if stat.2 > 0 %}
+                            {% widthratio stat.3 stat.2 100 as win_rate %}
+                            <span class="{% if win_rate >= 55 %}winrate-high{% elif win_rate < 45 %}winrate-low{% endif %}">
+                                {{ win_rate }}%
+                            </span>
+                        {% else %}
+                            <span class="winrate-low">0%</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sortableHeaders = document.querySelectorAll('th.sortable');
+        const tableBody = document.querySelector('.champions-table tbody');
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
+        
+        // Default sort by games played (descending)
+        sortTable('games', false);
+        
+        sortableHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const sortBy = this.getAttribute('data-sort');
+                const sortIndicator = this.querySelector('.sort-indicator');
+                const isAscending = sortIndicator.textContent === '▲';
+                
+                // Reset all indicators
+                document.querySelectorAll('.sort-indicator').forEach(indicator => {
+                    indicator.textContent = '▼';
+                    indicator.parentElement.classList.remove('sorted-asc', 'sorted-desc');
+                });
+                
+                // Set the new sort direction
+                if (isAscending) {
+                    sortIndicator.textContent = '▼';
+                    this.classList.add('sorted-desc');
+                    sortTable(sortBy, false);
+                } else {
+                    sortIndicator.textContent = '▲';
+                    this.classList.add('sorted-asc');
+                    sortTable(sortBy, true);
+                }
+            });
+        });
+        
+        function sortTable(sortBy, ascending) {
+            rows.sort((a, b) => {
+                let valueA, valueB;
+                
+                if (sortBy === 'champion') {
+                    valueA = a.querySelector('.champion-name').textContent.trim();
+                    valueB = b.querySelector('.champion-name').textContent.trim();
+                    return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+                } else if (sortBy === 'games') {
+                    valueA = parseInt(a.querySelector('.games-cell').textContent.trim());
+                    valueB = parseInt(b.querySelector('.games-cell').textContent.trim());
+                } else if (sortBy === 'winrate') {
+                    valueA = parseFloat(a.querySelector('.winrate-cell span').textContent);
+                    valueB = parseFloat(b.querySelector('.winrate-cell span').textContent);
+                }
+                
+                if (ascending) {
+                    return valueA - valueB;
+                } else {
+                    return valueB - valueA;
+                }
+            });
+            
+            // Clear the table and append sorted rows
+            rows.forEach(row => tableBody.appendChild(row));
+        }
+    });
+</script>
 {% endblock %}
