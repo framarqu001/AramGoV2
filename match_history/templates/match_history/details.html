@@ -191,6 +191,17 @@
                 });
             }
         });
+        
+        // Match details panel toggle functionality
+        $(document).on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            matchCard.toggleClass('expanded');
+            $(this).toggleClass('expanded');
+            
+            // Update aria attributes for accessibility
+            const isExpanded = matchCard.hasClass('expanded');
+            $(this).attr('aria-expanded', isExpanded);
+        });
     });
 </script>
 <script>
