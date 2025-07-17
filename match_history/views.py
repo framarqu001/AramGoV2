@@ -224,10 +224,17 @@ def _get_new_match_data(summoner):
         kda = (
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        damage_per_min = main_participant.get_damage_per_minute()
+        gold_per_min = main_participant.get_gold_per_minute()
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "vision_score": main_participant.vision_score,
+            "damage_dealt": main_participant.damage_dealt,
+            "damage_per_min": f"{damage_per_min:.1f}",
+            "gold_earned": main_participant.gold_earned,
+            "gold_per_min": f"{gold_per_min:.1f}"
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
@@ -251,10 +258,17 @@ def _get_match_data(summoner, page_obj):
         kda = (
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        damage_per_min = main_participant.get_damage_per_minute()
+        gold_per_min = main_participant.get_gold_per_minute()
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "vision_score": main_participant.vision_score,
+            "damage_dealt": main_participant.damage_dealt,
+            "damage_per_min": f"{damage_per_min:.1f}",
+            "gold_earned": main_participant.gold_earned,
+            "gold_per_min": f"{gold_per_min:.1f}"
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data

@@ -184,6 +184,9 @@ class Participant(models.Model):
     rune1 = models.ForeignKey(Rune, on_delete=models.CASCADE, related_name='participants_rune1', blank=True, null=True)
     rune2 = models.ForeignKey(Rune, on_delete=models.CASCADE, related_name='participants_rune2', blank=True, null=True)
     creep_score = models.IntegerField()
+    vision_score = models.IntegerField(default=0)
+    damage_dealt = models.IntegerField(default=0)
+    gold_earned = models.IntegerField(default=0)
     item1 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item1")
     item2 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item2")
     item3 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item3")
@@ -198,6 +201,16 @@ class Participant(models.Model):
         if self.win:
             return "Victory"
         return "Defeat"
+        
+    def get_damage_per_minute(self):
+        if self.match.game_duration > 0:
+            return self.damage_dealt / (self.match.game_duration / 60)
+        return 0
+        
+    def get_gold_per_minute(self):
+        if self.match.game_duration > 0:
+            return self.gold_earned / (self.match.game_duration / 60)
+        return 0
 
     def __str__(self):
         return f"{self.game_name} playing {self.champion} in match {self.match}"
