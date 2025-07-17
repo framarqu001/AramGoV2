@@ -1,4 +1,6 @@
 import time
+import json
+import random
 
 from django.core.cache import cache
 from django.db.models import Prefetch
@@ -229,7 +231,12 @@ def _get_new_match_data(summoner):
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
-        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+        
+        # Get timeline data for the match
+        timeline_data = _get_match_timeline_data(match, main_participant, blue_team_list, red_team_list)
+        timeline_json = json.dumps(timeline_data)
+        
+        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats, timeline_json))
     matches_queryset.update(new_match=False)
     return match_data
 
@@ -256,7 +263,12 @@ def _get_match_data(summoner, page_obj):
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
-        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+        
+        # Get timeline data for the match
+        timeline_data = _get_match_timeline_data(match, main_participant, blue_team_list, red_team_list)
+        timeline_json = json.dumps(timeline_data)
+        
+        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats, timeline_json))
     return match_data
 
 
@@ -366,3 +378,149 @@ def _get_champions_queryset(summoner):
 def _get_main_champ(summoner):
     queryset = _get_champions_queryset(summoner)
     return queryset.first().champion
+
+
+def _get_match_timeline_data(match, main_participant, blue_team, red_team):
+    """
+    Generate timeline data for a match including key events and gold/exp differences.
+    
+    Args:
+        match: The Match object
+        main_participant: The main Participant object (the user's participant)
+        blue_team: List of Participant objects for the blue team
+        red_team: List of Participant objects for the red team
+        
+    Returns:
+        Dictionary containing timeline data
+    """
+    # In a real implementation, this data would come from the Riot API
+    # For this implementation, we'll generate mock data based on the match information
+    
+    # Basic timeline structure
+    timeline = {
+        'gameDuration': match.game_duration,
+        'events': [],
+        'goldDiff': [],
+        'expDiff': []
+    }
+    
+    # Generate mock events based on participants' kills
+    game_minutes = match.game_duration / 60
+    
+    # Generate kill events
+    for participant in blue_team + red_team:
+        # Generate random kill events based on participant's kill count
+        for _ in range(participant.kills):
+            # Random victim from opposite team
+            victim_team = red_team if participant.team == 100 else blue_team
+            if victim_team:
+                victim = random.choice(victim_team)
+                
+                # Random timestamp within game duration
+                timestamp = random.randint(30000, int(match.game_duration * 1000 - 30000))
+                
+                event = {
+                    'type': 'kill',
+                    'timestamp': timestamp,
+                    'killerName': participant.game_name,
+                    'killerChampionIcon': participant.champion.get_url(),
+                    'victimName': victim.game_name,
+                    'victimChampionIcon': victim.champion.get_url()
+                }
+                
+                timeline['events'].append(event)
+    
+    # Sort events by timestamp
+    timeline['events'].sort(key=lambda x: x['timestamp'])
+    
+    # Generate objective events (like dragon, herald, baron)
+    objective_types = ['Dragon', 'Herald', 'Baron']
+    objective_icons = {
+        'Dragon': 'https://ddragon.leagueoflegends.com/cdn/14.17.1/img/map/dragon.png',
+        'Herald': 'https://ddragon.leagueoflegends.com/cdn/14.17.1/img/map/herald.png',
+        'Baron': 'https://ddragon.leagueoflegends.com/cdn/14.17.1/img/map/baron.png'
+    }
+    
+    # Add 2-4 objective events
+    num_objectives = random.randint(2, 4)
+    for _ in range(num_objectives):
+        obj_type = random.choice(objective_types)
+        # Objectives typically happen after early game
+        timestamp = random.randint(int(match.game_duration * 0.3 * 1000), int(match.game_duration * 0.9 * 1000))
+        
+        # Determine which team got the objective
+        team = random.choice([100, 200])
+        team_name = 'Blue Team' if team == 100 else 'Red Team'
+        
+        event = {
+            'type': 'objective',
+            'timestamp': timestamp,
+            'objectiveName': obj_type,
+            'objectiveIcon': objective_icons[obj_type],
+            'teamName': team_name
+        }
+        
+        timeline['events'].append(event)
+    
+    # Add structure events (like towers)
+    structure_types = ['Outer Turret', 'Inner Turret', 'Inhibitor Turret', 'Inhibitor']
+    structure_icon = 'https://ddragon.leagueoflegends.com/cdn/14.17.1/img/map/turret.png'
+    
+    # Add 2-6 structure events
+    num_structures = random.randint(2, 6)
+    for _ in range(num_structures):
+        structure_type = random.choice(structure_types)
+        # Structures typically fall throughout the game
+        timestamp = random.randint(int(match.game_duration * 0.2 * 1000), int(match.game_duration * 0.95 * 1000))
+        
+        # Determine which team destroyed the structure
+        team = random.choice([100, 200])
+        team_name = 'Blue Team' if team == 100 else 'Red Team'
+        
+        event = {
+            'type': 'structure',
+            'timestamp': timestamp,
+            'structureName': structure_type,
+            'structureIcon': structure_icon,
+            'teamName': team_name
+        }
+        
+        timeline['events'].append(event)
+    
+    # Sort all events by timestamp
+    timeline['events'].sort(key=lambda x: x['timestamp'])
+    
+    # Generate gold difference data points
+    # Positive values mean blue team advantage, negative values mean red team advantage
+    num_data_points = min(20, int(game_minutes))
+    interval = match.game_duration / num_data_points
+    
+    # Start with no difference
+    gold_diff = 0
+    exp_diff = 0
+    
+    # Winner tends to have gold advantage
+    winner_advantage = 1 if match.winner == 100 else -1
+    
+    for i in range(num_data_points):
+        timestamp = int(i * interval * 1000)
+        
+        # Gold difference tends to increase over time in favor of the winner
+        gold_change = random.randint(-500, 500) + (winner_advantage * random.randint(0, 300))
+        gold_diff += gold_change
+        
+        # Experience difference follows similar pattern but with less variance
+        exp_change = random.randint(-300, 300) + (winner_advantage * random.randint(0, 200))
+        exp_diff += exp_change
+        
+        timeline['goldDiff'].append({
+            'timestamp': timestamp,
+            'value': gold_diff
+        })
+        
+        timeline['expDiff'].append({
+            'timestamp': timestamp,
+            'value': exp_diff
+        })
+    
+    return timeline
