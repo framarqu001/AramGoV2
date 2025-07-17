@@ -225,9 +225,45 @@ def _get_new_match_data(summoner):
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
+        # Calculate additional statistics
+        # Format large numbers with k/m suffix
+        def format_number(num):
+            if num >= 1000000:
+                return f"{num/1000000:.1f}m"
+            elif num >= 1000:
+                return f"{num/1000:.1f}k"
+            else:
+                return str(int(num))
+        
+        # Calculate team totals for percentage calculations
+        blue_team_kills = sum(p.kills for p in blue_team_list)
+        red_team_kills = sum(p.kills for p in red_team_list)
+        team_kills = blue_team_kills if main_participant.team == 100 else red_team_kills
+        
+        # Calculate kill participation
+        kill_participation = ((main_participant.kills + main_participant.assists) / team_kills * 100) if team_kills > 0 else 0
+        
+        # Calculate damage stats (using placeholder values since we don't have actual damage data)
+        # In a real implementation, these would come from the database
+        damage_dealt = main_participant.kills * 1000 + main_participant.assists * 500  # Placeholder calculation
+        damage_taken = main_participant.deaths * 800 + main_participant.assists * 200  # Placeholder calculation
+        
+        # Calculate gold (placeholder)
+        gold_earned = main_participant.kills * 300 + main_participant.assists * 150 + main_participant.creep_score * 20
+        
+        # Vision score (placeholder)
+        vision_score = main_participant.assists * 0.5 + main_participant.kills * 0.2
+
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "kill_participation": f"{kill_participation:.0f}%",
+            "damage_dealt": format_number(damage_dealt),
+            "damage_taken": format_number(damage_taken),
+            "gold_earned": format_number(gold_earned),
+            "vision_score": f"{vision_score:.1f}",
+            "team_damage_percentage": f"{(damage_dealt / (damage_dealt + 1000)):.0f}%",  # Placeholder calculation
+            "cs_per_min": f"{cs_min:.1f}",
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
@@ -251,10 +287,46 @@ def _get_match_data(summoner, page_obj):
         kda = (
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
-
+        
+        # Calculate additional statistics
+        # Format large numbers with k/m suffix
+        def format_number(num):
+            if num >= 1000000:
+                return f"{num/1000000:.1f}m"
+            elif num >= 1000:
+                return f"{num/1000:.1f}k"
+            else:
+                return str(int(num))
+        
+        # Calculate team totals for percentage calculations
+        blue_team_kills = sum(p.kills for p in blue_team_list)
+        red_team_kills = sum(p.kills for p in red_team_list)
+        team_kills = blue_team_kills if main_participant.team == 100 else red_team_kills
+        
+        # Calculate kill participation
+        kill_participation = ((main_participant.kills + main_participant.assists) / team_kills * 100) if team_kills > 0 else 0
+        
+        # Calculate damage stats (using placeholder values since we don't have actual damage data)
+        # In a real implementation, these would come from the database
+        damage_dealt = main_participant.kills * 1000 + main_participant.assists * 500  # Placeholder calculation
+        damage_taken = main_participant.deaths * 800 + main_participant.assists * 200  # Placeholder calculation
+        
+        # Calculate gold (placeholder)
+        gold_earned = main_participant.kills * 300 + main_participant.assists * 150 + main_participant.creep_score * 20
+        
+        # Vision score (placeholder)
+        vision_score = main_participant.assists * 0.5 + main_participant.kills * 0.2
+        
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "kill_participation": f"{kill_participation:.0f}%",
+            "damage_dealt": format_number(damage_dealt),
+            "damage_taken": format_number(damage_taken),
+            "gold_earned": format_number(gold_earned),
+            "vision_score": f"{vision_score:.1f}",
+            "team_damage_percentage": f"{(damage_dealt / (damage_dealt + 1000)):.0f}%",  # Placeholder calculation
+            "cs_per_min": f"{cs_min:.1f}",
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data
