@@ -171,6 +171,38 @@ class Participant(models.Model):
         (BLUE_TEAM, 'Blue Team'),
         (RED_TEAM, 'Red Team'),
     ]
+    
+    ROLE_CHOICES = [
+        ('TOP', 'Top'),
+        ('JUNGLE', 'Jungle'),
+        ('MID', 'Mid'),
+        ('BOTTOM', 'Bottom'),
+        ('SUPPORT', 'Support'),
+        ('FILL', 'Fill'),
+        ('UNSELECTED', 'Unselected'),
+    ]
+    
+    RANK_CHOICES = [
+        ('IRON', 'Iron'),
+        ('BRONZE', 'Bronze'),
+        ('SILVER', 'Silver'),
+        ('GOLD', 'Gold'),
+        ('PLATINUM', 'Platinum'),
+        ('DIAMOND', 'Diamond'),
+        ('MASTER', 'Master'),
+        ('GRANDMASTER', 'Grandmaster'),
+        ('CHALLENGER', 'Challenger'),
+        ('UNRANKED', 'Unranked'),
+    ]
+    
+    DIVISION_CHOICES = [
+        ('I', 'I'),
+        ('II', 'II'),
+        ('III', 'III'),
+        ('IV', 'IV'),
+        ('', ''),
+    ]
+    
     # A match has many participants. Participants belong to one match.
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='participants')
     # A Summoner can be a participant in multiple matches.
@@ -193,11 +225,22 @@ class Participant(models.Model):
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
     game_name = models.CharField(max_length=50)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='UNSELECTED')
+    rank = models.CharField(max_length=20, choices=RANK_CHOICES, default='UNRANKED')
+    division = models.CharField(max_length=5, choices=DIVISION_CHOICES, default='')
 
     def match_result(self):
         if self.win:
             return "Victory"
         return "Defeat"
+        
+    def get_full_rank(self):
+        if self.rank == 'UNRANKED':
+            return 'Unranked'
+        elif self.rank in ['MASTER', 'GRANDMASTER', 'CHALLENGER']:
+            return self.get_rank_display()
+        else:
+            return f"{self.get_rank_display()} {self.division}"
 
     def __str__(self):
         return f"{self.game_name} playing {self.champion} in match {self.match}"
