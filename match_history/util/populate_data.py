@@ -111,6 +111,47 @@ class MatchManager():
     def _get_match_info(self, match_id):
         try:
             match_details = self._watcher.match.by_id(self._region, match_id)
+            
+            # Get timeline data for item purchase timestamps
+            try:
+                timeline = self._watcher.match.timeline_by_match(self._region, match_id)
+                
+                # Process timeline to extract item purchase timestamps
+                item_purchases = {}
+                for frame in timeline.get('info', {}).get('frames', []):
+                    for event in frame.get('events', []):
+                        if event.get('type') == 'ITEM_PURCHASED':
+                            participant_id = event.get('participantId')
+                            if participant_id not in item_purchases:
+                                item_purchases[participant_id] = []
+                            
+                            item_purchases[participant_id].append({
+                                'itemId': event.get('itemId'),
+                                'timestamp': event.get('timestamp') // 1000  # Convert to seconds
+                            })
+                
+                # Add item purchase timestamps to participant data
+                for i, participant in enumerate(match_details['info']['participants']):
+                    participant_id = i + 1  # Participant IDs are 1-indexed
+                    if participant_id in item_purchases:
+                        participant_purchases = item_purchases[participant_id]
+                        
+                        # Create a mapping of item IDs to timestamps
+                        item_timestamps = {}
+                        for purchase in participant_purchases:
+                            for j in range(6):
+                                if participant.get(f'item{j}') == purchase['itemId']:
+                                    # Only set if not already set (to get earliest purchase)
+                                    if f'item{j}_timestamp' not in item_timestamps:
+                                        item_timestamps[f'item{j}_timestamp'] = purchase['timestamp']
+                        
+                        # Add timestamps to participant data
+                        participant['itemPurchaseTimestamps'] = item_timestamps
+                
+            except Exception as e:
+                print(f"Error fetching timeline data for match {match_id}: {e}")
+                # Continue without timeline data
+            
             return match_details
         except ApiError as err:
             print(f"Error fetching match info for match ID {match_id}: {err}")
@@ -161,12 +202,24 @@ class MatchManager():
         return summoner
 
     def _add_items(self, participant, participant_data):
+        # Get item purchase timestamps from timeline data if available
+        item_timestamps = {}
+        
+        # Check if timeline data is available in participant_data
+        if 'itemPurchaseTimestamps' in participant_data:
+            item_timestamps = participant_data['itemPurchaseTimestamps']
+        
         for j in range(6):
             item_id = participant_data[f"item{j}"]
             if item_id != 0:
                 try:
                     item = Item.objects.get(pk=participant_data[f"item{j}"])
                     setattr(participant, f"item{j}", item)
+                    
+                    # Set timestamp if available
+                    if f"item{j}_timestamp" in item_timestamps:
+                        setattr(participant, f"item{j}_timestamp", item_timestamps[f"item{j}_timestamp"])
+                    
                     participant.save()
                 except Item.DoesNotExist:
                     print('ok')

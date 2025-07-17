@@ -41,37 +41,98 @@
 
             <div class="items">
                 <div class="item1 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
-                    {% if main_participant.item1  %}
-                        <img class="small-img" src="{{main_participant.item1.get_url}}" alt="">
+                    {% if main_participant.item1 %}
+                        <div class="item-tooltip-container">
+                            <img class="small-img" src="{{main_participant.item1.get_url}}" alt="">
+                            <div class="item-tooltip">
+                                <div class="item-name">{{main_participant.item1.name}}</div>
+                                {% if main_participant.item1_timestamp %}
+                                    <div class="item-timestamp">Purchased at {{ main_participant.item1_timestamp|floatformat:"0" }}s</div>
+                                {% endif %}
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
                 <div class="item2 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                     {% if main_participant.item2 %}
-                        <img class="small-img" src="{{main_participant.item2.get_url}}" alt="">
+                        <div class="item-tooltip-container">
+                            <img class="small-img" src="{{main_participant.item2.get_url}}" alt="">
+                            <div class="item-tooltip">
+                                <div class="item-name">{{main_participant.item2.name}}</div>
+                                {% if main_participant.item2_timestamp %}
+                                    <div class="item-timestamp">Purchased at {{ main_participant.item2_timestamp|floatformat:"0" }}s</div>
+                                {% endif %}
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
                 <div class="item3 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                     {% if main_participant.item3 %}
-                        <img class="small-img" src="{{main_participant.item3.get_url}}" alt="">
+                        <div class="item-tooltip-container">
+                            <img class="small-img" src="{{main_participant.item3.get_url}}" alt="">
+                            <div class="item-tooltip">
+                                <div class="item-name">{{main_participant.item3.name}}</div>
+                                {% if main_participant.item3_timestamp %}
+                                    <div class="item-timestamp">Purchased at {{ main_participant.item3_timestamp|floatformat:"0" }}s</div>
+                                {% endif %}
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
                 <div class="item4 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                     {% if main_participant.item4 %}
-                        <img class="small-img" src="{{main_participant.item4.get_url}}" alt="">
+                        <div class="item-tooltip-container">
+                            <img class="small-img" src="{{main_participant.item4.get_url}}" alt="">
+                            <div class="item-tooltip">
+                                <div class="item-name">{{main_participant.item4.name}}</div>
+                                {% if main_participant.item4_timestamp %}
+                                    <div class="item-timestamp">Purchased at {{ main_participant.item4_timestamp|floatformat:"0" }}s</div>
+                                {% endif %}
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
                 <div class="item5 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                     {% if main_participant.item5 %}
-                        <img class="small-img" src="{{main_participant.item5.get_url}}" alt="">
+                        <div class="item-tooltip-container">
+                            <img class="small-img" src="{{main_participant.item5.get_url}}" alt="">
+                            <div class="item-tooltip">
+                                <div class="item-name">{{main_participant.item5.name}}</div>
+                                {% if main_participant.item5_timestamp %}
+                                    <div class="item-timestamp">Purchased at {{ main_participant.item5_timestamp|floatformat:"0" }}s</div>
+                                {% endif %}
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
                 <div class="item6 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                     {% if main_participant.item6 %}
-                        <img class="small-img" src="{{main_participant.item6.get_url}}" alt="">
+                        <div class="item-tooltip-container">
+                            <img class="small-img" src="{{main_participant.item6.get_url}}" alt="">
+                            <div class="item-tooltip">
+                                <div class="item-name">{{main_participant.item6.name}}</div>
+                                {% if main_participant.item6_timestamp %}
+                                    <div class="item-timestamp">Purchased at {{ main_participant.item6_timestamp|floatformat:"0" }}s</div>
+                                {% endif %}
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
                 <div class="item7"></div>
             </div>
+            
+            {% if main_stats.item_build_order %}
+            <div class="build-order">
+                <h4 style="margin: 0 0 5px 0; font-size: 12px;">Build Order</h4>
+                {% for item, timestamp in main_stats.item_build_order %}
+                <div class="build-order-item">
+                    <img src="{{ item.get_url }}" alt="{{ item.name }}">
+                    <span>{{ item.name }}</span>
+                    <span class="build-order-time">{{ timestamp|floatformat:"0" }}s</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
         <div class="stat-section stats-text">
             <div class="kda">{{main_participant.kills}} / <span class ="death-color">{{main_participant.deaths}}</span> / {{main_participant.assists}}</div>

@@ -181,6 +181,8 @@
                         } else {
                             $('#match-list').append(data);
                             page += 1;
+                            // Initialize click handlers for newly loaded match cards
+                            initMatchCardHandlers();
                         }
                         loading = false;
                     },
@@ -191,6 +193,28 @@
                 });
             }
         });
+        
+        // Initialize click handlers for match cards
+        function initMatchCardHandlers() {
+            $('.match-btn').off('click').on('click', function() {
+                const matchCard = $(this).closest('.match-card');
+                const buildOrder = matchCard.find('.build-order');
+                
+                if (buildOrder.hasClass('show')) {
+                    buildOrder.removeClass('show');
+                    matchCard.css('height', '100px');
+                } else {
+                    buildOrder.addClass('show');
+                    // Adjust height based on number of items in build order
+                    const itemCount = buildOrder.find('.build-order-item').length;
+                    const extraHeight = Math.min(itemCount * 25 + 30, 200); // 25px per item + 30px padding, max 200px
+                    matchCard.css('height', `calc(100px + ${extraHeight}px)`);
+                }
+            });
+        }
+        
+        // Initialize handlers for initial match cards
+        initMatchCardHandlers();
     });
 </script>
 <script>
