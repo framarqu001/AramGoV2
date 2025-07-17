@@ -184,6 +184,12 @@ class Participant(models.Model):
     rune1 = models.ForeignKey(Rune, on_delete=models.CASCADE, related_name='participants_rune1', blank=True, null=True)
     rune2 = models.ForeignKey(Rune, on_delete=models.CASCADE, related_name='participants_rune2', blank=True, null=True)
     creep_score = models.IntegerField()
+    # New fields for detailed player stats
+    total_damage_dealt = models.IntegerField(default=0)
+    total_damage_taken = models.IntegerField(default=0)
+    vision_score = models.IntegerField(default=0)
+    gold_earned = models.IntegerField(default=0)
+    largest_killing_spree = models.IntegerField(default=0)
     item1 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item1")
     item2 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item2")
     item3 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item3")
@@ -198,6 +204,18 @@ class Participant(models.Model):
         if self.win:
             return "Victory"
         return "Defeat"
+        
+    def format_damage(self, damage):
+        """Format damage values in K format if over 1000"""
+        if damage >= 1000:
+            return f"{damage/1000:.1f}K"
+        return str(damage)
+        
+    def get_damage_dealt_formatted(self):
+        return self.format_damage(self.total_damage_dealt)
+        
+    def get_damage_taken_formatted(self):
+        return self.format_damage(self.total_damage_taken)
 
     def __str__(self):
         return f"{self.game_name} playing {self.champion} in match {self.match}"
