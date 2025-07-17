@@ -142,10 +142,14 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: auto;
+    min-height: 100px;
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    transition: height 0.3s ease;
 }
 
 .match-card .stat-section.stats-text{
@@ -224,6 +228,15 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    cursor: pointer;
+}
+
+.match-btn .drop {
+    transition: transform 0.3s ease;
+}
+
+.match-btn.expanded .drop {
+    transform: rotate(180deg);
 }
 
 
@@ -254,6 +267,99 @@ hr {
 .match-btn.match-lose {
     background-color: #f46bf447; 
     transition: background-color 0.3s ease;
+}
+
+/* Match details container styles */
+.match-details-container {
+    width: 100%;
+    padding: 15px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.match-details-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #fff;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid #fff;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.match-details-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.match-details-team {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.match-details-team.blue {
+    border-left: 4px solid #4b6bc3;
+}
+
+.match-details-team.red {
+    border-left: 4px solid #f46bf4;
+}
+
+.match-details-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.match-details-player {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.match-details-player:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.match-details-stats {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Lazy loading observer styles */
+.match-card.observed {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.match-card:not(.observed) {
+    opacity: 0.7;
+    transform: translateY(20px);
 }
 
 
