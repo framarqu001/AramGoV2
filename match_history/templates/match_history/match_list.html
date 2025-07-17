@@ -1,6 +1,6 @@
 {% for match, main_participant, blue_team, red_team, main_stats in matches%}
 
-<div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+<div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" data-match-id="{{match.id}}">
 
     <div class="match-section-container">
         <div class="result-section">
@@ -109,8 +109,80 @@
         </div>
     </div>
     <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
-        <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
+        <svg class="drop chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
+    <!-- Expandable section for additional statistics -->
+    <div class="match-details-expanded">
+        <div class="expanded-content {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+            <div class="expanded-stats-container">
+                <div class="expanded-stats-section">
+                    <h4>Match Details</h4>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Game Duration</span>
+                            <span class="stat-value">{{match.get_duration}}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Game Mode</span>
+                            <span class="stat-value">{{match.game_mode}}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Game Version</span>
+                            <span class="stat-value">{{match.get_patch}}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Date</span>
+                            <span class="stat-value">{{match.game_start|date:"M d, Y"}}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="expanded-stats-section">
+                    <h4>Performance</h4>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">KDA</span>
+                            <span class="stat-value">{{main_stats.kda}}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">CS</span>
+                            <span class="stat-value">{{main_participant.creep_score}}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">CS per Min</span>
+                            <span class="stat-value">{{main_stats.cs_min}}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Result</span>
+                            <span class="stat-value">{{main_participant.match_result}}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="expanded-stats-section">
+                    <h4>Champion</h4>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Champion</span>
+                            <span class="stat-value">{{main_participant.champion.name}}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Summoner Name</span>
+                            <span class="stat-value">{{main_participant.game_name}}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Team</span>
+                            <span class="stat-value">{% if main_participant.team == 100 %}Blue{% else %}Red{% endif %}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Win/Loss</span>
+                            <span class="stat-value">{% if main_participant.win %}Win{% else %}Loss{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endfor %}
