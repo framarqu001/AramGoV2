@@ -1,0 +1,60 @@
+<div class="match-timeline-container">
+    <div class="timeline-header">
+        <h3>Match Timeline</h3>
+        <div class="timeline-legend">
+            <span class="legend-item"><span class="event-marker kill-marker"></span> Kill</span>
+            <span class="legend-item"><span class="event-marker death-marker"></span> Death</span>
+            <span class="legend-item"><span class="event-marker assist-marker"></span> Assist</span>
+            <span class="legend-item"><span class="event-marker item-marker"></span> Item Purchase</span>
+        </div>
+    </div>
+    
+    <div class="timeline-wrapper">
+        <div class="timeline-scale">
+            {% for minute in timeline_data.time_markers %}
+                <div class="time-marker">{{ minute }}m</div>
+            {% endfor %}
+        </div>
+        
+        <div class="timeline-track">
+            <div class="timeline-progress" style="width: 100%;"></div>
+            
+            {% for event in timeline_data.events %}
+                <div class="timeline-event {{ event.type }}-event" 
+                     style="left: {{ event.position }}%;" 
+                     data-event-type="{{ event.type }}"
+                     data-event-time="{{ event.time }}"
+                     data-event-details="{{ event.details|safe }}">
+                    <div class="event-marker {{ event.type }}-marker"></div>
+                    <div class="event-tooltip">
+                        <div class="tooltip-time">{{ event.time_display }}</div>
+                        <div class="tooltip-title">{{ event.title }}</div>
+                        <div class="tooltip-details">{{ event.details|safe }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="timeline-stats">
+            <div class="stats-graph">
+                {% for stat in timeline_data.stats %}
+                    <div class="stat-point" 
+                         style="left: {{ stat.position }}%; bottom: {{ stat.value }}%;"
+                         data-stat-time="{{ stat.time }}"
+                         data-stat-value="{{ stat.raw_value }}">
+                    </div>
+                {% endfor %}
+                
+                <svg class="stats-line" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polyline points="{{ timeline_data.stats_line }}" />
+                </svg>
+            </div>
+            
+            <div class="stats-labels">
+                <div class="stat-label">Gold</div>
+                <div class="stat-label">XP</div>
+                <div class="stat-label">KDA</div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -229,10 +229,159 @@ def _get_new_match_data(summoner):
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
-        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+        
+        # Get timeline data for the match
+        timeline_data = _get_match_timeline_data(match, main_participant)
+        
+        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats, timeline_data))
     matches_queryset.update(new_match=False)
     return match_data
 
+
+def _get_match_timeline_data(match, main_participant):
+    """
+    Generate timeline data for a match including key events and statistics progression.
+    
+    Args:
+        match: The Match object
+        main_participant: The Participant object for the main summoner
+        
+    Returns:
+        Dictionary containing timeline data
+    """
+    # Calculate match duration in minutes (rounded up)
+    match_duration_minutes = (match.game_duration + 59) // 60
+    
+    # Generate time markers every 5 minutes (or less for shorter games)
+    marker_interval = 5 if match_duration_minutes > 10 else 2
+    time_markers = list(range(0, match_duration_minutes + marker_interval, marker_interval))
+    if time_markers[-1] > match_duration_minutes:
+        time_markers[-1] = match_duration_minutes
+    
+    # Simulate events based on participant data
+    # In a real implementation, this would use actual timeline data from the API
+    events = []
+    stats = []
+    stats_line = ""
+    
+    # Generate kill events
+    kill_count = main_participant.kills
+    if kill_count > 0:
+        kill_interval = match.game_duration / (kill_count + 1)
+        for i in range(1, kill_count + 1):
+            event_time = int(i * kill_interval)
+            minute = event_time // 60
+            second = event_time % 60
+            position = (event_time / match.game_duration) * 100
+            
+            events.append({
+                'type': 'kill',
+                'time': event_time,
+                'time_display': f"{minute}:{second:02d}",
+                'position': position,
+                'title': 'Kill',
+                'details': f"{main_participant.champion.name} killed an enemy champion"
+            })
+    
+    # Generate death events
+    death_count = main_participant.deaths
+    if death_count > 0:
+        death_interval = match.game_duration / (death_count + 1)
+        for i in range(1, death_count + 1):
+            event_time = int(i * death_interval)
+            minute = event_time // 60
+            second = event_time % 60
+            position = (event_time / match.game_duration) * 100
+            
+            events.append({
+                'type': 'death',
+                'time': event_time,
+                'time_display': f"{minute}:{second:02d}",
+                'position': position,
+                'title': 'Death',
+                'details': f"{main_participant.champion.name} was killed"
+            })
+    
+    # Generate assist events
+    assist_count = main_participant.assists
+    if assist_count > 0:
+        assist_interval = match.game_duration / (assist_count + 1)
+        for i in range(1, assist_count + 1):
+            event_time = int(i * assist_interval)
+            minute = event_time // 60
+            second = event_time % 60
+            position = (event_time / match.game_duration) * 100
+            
+            events.append({
+                'type': 'assist',
+                'time': event_time,
+                'time_display': f"{minute}:{second:02d}",
+                'position': position,
+                'title': 'Assist',
+                'details': f"{main_participant.champion.name} assisted in a kill"
+            })
+    
+    # Generate item purchase events (for items 1-6)
+    items = [
+        main_participant.item1, main_participant.item2, main_participant.item3,
+        main_participant.item4, main_participant.item5, main_participant.item6
+    ]
+    
+    item_times = [
+        int(match.game_duration * 0.1),  # First item around 10% of game time
+        int(match.game_duration * 0.25), # Second item around 25% of game time
+        int(match.game_duration * 0.4),  # Third item around 40% of game time
+        int(match.game_duration * 0.6),  # Fourth item around 60% of game time
+        int(match.game_duration * 0.75), # Fifth item around 75% of game time
+        int(match.game_duration * 0.9)   # Sixth item around 90% of game time
+    ]
+    
+    for i, item in enumerate(items):
+        if item:
+            event_time = item_times[i]
+            minute = event_time // 60
+            second = event_time % 60
+            position = (event_time / match.game_duration) * 100
+            
+            events.append({
+                'type': 'item',
+                'time': event_time,
+                'time_display': f"{minute}:{second:02d}",
+                'position': position,
+                'title': 'Item Purchase',
+                'details': f"Purchased {item.name}"
+            })
+    
+    # Sort events by time
+    events.sort(key=lambda x: x['time'])
+    
+    # Generate statistics progression (gold, xp, kda)
+    # This is simulated data - in a real implementation, this would use actual timeline data
+    for i in range(0, match_duration_minutes + 1):
+        time_sec = i * 60
+        position = (time_sec / match.game_duration) * 100 if match.game_duration > 0 else 0
+        
+        # Simulate gold value (increasing over time)
+        gold_value = min(100, (i / match_duration_minutes) * 100) if match_duration_minutes > 0 else 0
+        
+        stats.append({
+            'time': time_sec,
+            'position': position,
+            'value': gold_value,
+            'raw_value': int(gold_value * 100)  # Gold in hundreds
+        })
+        
+        # Add point to stats line for SVG polyline
+        if stats_line:
+            stats_line += " "
+        stats_line += f"{position},{100 - gold_value}"
+    
+    return {
+        'time_markers': time_markers,
+        'events': events,
+        'stats': stats,
+        'stats_line': stats_line
+    }
 
 def _get_match_data(summoner, page_obj):
     match_data = []
@@ -256,7 +405,11 @@ def _get_match_data(summoner, page_obj):
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
-        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+        
+        # Get timeline data for the match
+        timeline_data = _get_match_timeline_data(match, main_participant)
+        
+        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats, timeline_data))
     return match_data
 
 
