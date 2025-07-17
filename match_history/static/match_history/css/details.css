@@ -142,7 +142,7 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: 120px;
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
@@ -214,6 +214,20 @@ hr {
     display: flex;
     align-items: center;
     flex-direction: column;
+}
+
+.additional-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-top: 4px;
+    font-size: 11px;
+    text-align: center;
+}
+
+.vision-score, .damage-dealt, .gold-earned, .kill-participation {
+    white-space: nowrap;
+    color: #e7e7e7;
 }
 
 .match-btn {
