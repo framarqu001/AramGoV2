@@ -291,7 +291,58 @@
     });
     
 </script>
-
+<script>
+    $(document).ready(function() {
+        // Function to handle toggle functionality
+        function setupToggleHandlers() {
+            $('.toggle-stats').off('click').on('click', function() {
+                const matchCard = $(this).closest('.match-card');
+                const detailedStats = matchCard.find('.detailed-stats-container');
+                const matchId = matchCard.data('match-id');
+                
+                // Toggle the detailed stats visibility
+                detailedStats.slideToggle(300);
+                
+                // Toggle the active class on the button for rotation
+                $(this).toggleClass('active');
+                
+                // Toggle the expanded class on the match card
+                matchCard.toggleClass('expanded');
+                
+                // Store the state in localStorage
+                const isExpanded = matchCard.hasClass('expanded');
+                localStorage.setItem('match-expanded-' + matchId, isExpanded);
+            });
+        }
+        
+        // Initialize toggle handlers
+        setupToggleHandlers();
+        
+        // Restore toggle states from localStorage
+        function restoreToggleStates() {
+            $('.match-card').each(function() {
+                const matchCard = $(this);
+                const matchId = matchCard.data('match-id');
+                const isExpanded = localStorage.getItem('match-expanded-' + matchId) === 'true';
+                
+                if (isExpanded) {
+                    matchCard.addClass('expanded');
+                    matchCard.find('.toggle-stats').addClass('active');
+                    matchCard.find('.detailed-stats-container').show();
+                }
+            });
+        }
+        
+        // Restore toggle states on page load
+        restoreToggleStates();
+        
+        // Set up toggle handlers for dynamically loaded content
+        $(document).ajaxSuccess(function() {
+            setupToggleHandlers();
+            restoreToggleStates();
+        });
+    });
+</script>
 
 
 {% endblock %}
