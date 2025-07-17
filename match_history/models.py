@@ -190,6 +190,13 @@ class Participant(models.Model):
     item4 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item4")
     item5 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item5")
     item6 = models.ForeignKey(Item, on_delete=models.SET_NULL, blank=True, null=True, related_name="participants_item6")
+    # Item purchase timestamps in seconds from game start
+    item1_timestamp = models.IntegerField(blank=True, null=True)
+    item2_timestamp = models.IntegerField(blank=True, null=True)
+    item3_timestamp = models.IntegerField(blank=True, null=True)
+    item4_timestamp = models.IntegerField(blank=True, null=True)
+    item5_timestamp = models.IntegerField(blank=True, null=True)
+    item6_timestamp = models.IntegerField(blank=True, null=True)
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
     game_name = models.CharField(max_length=50)
@@ -198,6 +205,18 @@ class Participant(models.Model):
         if self.win:
             return "Victory"
         return "Defeat"
+    
+    def get_items_with_timestamps(self):
+        """Return items with their purchase timestamps in order of purchase"""
+        items = []
+        for i in range(1, 7):
+            item = getattr(self, f"item{i}")
+            timestamp = getattr(self, f"item{i}_timestamp")
+            if item and timestamp is not None:
+                items.append((item, timestamp))
+        
+        # Sort by timestamp (ascending order)
+        return sorted(items, key=lambda x: x[1])
 
     def __str__(self):
         return f"{self.game_name} playing {self.champion} in match {self.match}"

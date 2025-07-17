@@ -487,3 +487,90 @@ hr {
 .death-color {
     color: #ff4e50
 }
+
+/* Item tooltip styles */
+.item-tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.item-tooltip {
+    visibility: hidden;
+    width: 180px;
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 1000;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -90px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+    font-family: "Mulish", sans-serif;
+    pointer-events: none;
+}
+
+.item-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+}
+
+.item-tooltip-container:hover .item-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.item-name {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.item-timestamp {
+    font-size: 10px;
+    color: #aaa;
+}
+
+/* Build order styles */
+.build-order {
+    display: flex;
+    flex-direction: column;
+    margin-top: 5px;
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.build-order.show {
+    max-height: 200px;
+}
+
+.build-order-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 3px;
+}
+
+.build-order-item img {
+    width: 18px;
+    height: 18px;
+    margin-right: 5px;
+}
+
+.build-order-time {
+    font-size: 10px;
+    color: #aaa;
+    margin-left: 5px;
+}
