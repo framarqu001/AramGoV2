@@ -214,6 +214,22 @@ hr {
     display: flex;
     align-items: center;
     flex-direction: column;
+    min-width: 120px; /* Ensure enough width for the new stats */
+}
+
+.vision-score, .damage-dealt, .gold-earned {
+    font-size: 0.85em;
+    margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+    .stat-section {
+        min-width: 100px;
+    }
+    
+    .vision-score, .damage-dealt, .gold-earned {
+        font-size: 0.8em;
+    }
 }
 
 .match-btn {
