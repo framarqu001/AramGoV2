@@ -110,6 +110,34 @@
 {% endblock content %}
 {% block extra_scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize detailed stats sections
+        $('.detailed-stats').hide();
+
+        // Handle match card expansion/collapse
+        $(document).on('click', '.match-btn', function() {
+            const $matchCard = $(this).closest('.match-card');
+            const $detailedStats = $matchCard.find('.detailed-stats');
+            const $chevron = $(this).find('.drop');
+            
+            // Toggle the detailed stats with animation
+            $detailedStats.slideToggle({
+                duration: 300,
+                start: function() {
+                    // Show grid layout when starting to open
+                    if ($detailedStats.is(':hidden')) {
+                        $detailedStats.css('display', 'grid');
+                    }
+                }
+            });
+            
+            // Rotate chevron and toggle expanded class
+            $chevron.toggleClass('rotated');
+            $matchCard.toggleClass('expanded');
+        });
+    });
+</script>
     {% if summoner.being_parsed %}
 
     <script src="{% static 'celery_progress/celery_progress.js' %}"></script>
