@@ -142,10 +142,16 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: auto;
     display: flex;
+    flex-direction: column;
     font-weight: 1000;
     border-radius: 5px;
+    overflow: hidden;
+}
+
+.match-section-container {
+    height: 100px;
 }
 
 .match-card .stat-section.stats-text{
@@ -224,6 +230,12 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.match-btn.expanded .drop {
+    transform: rotate(180deg);
 }
 
 
@@ -486,4 +498,120 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Match Details Panel Styles */
+.match-details-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease;
+    width: 100%;
+}
+
+.match-details-panel.expanded {
+    max-height: 500px; /* Adjust based on expected content height */
+}
+
+.match-details-container {
+    padding: 15px;
+    font-family: "Mulish", sans-serif;
+}
+
+.match-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.match-details-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.match-timestamp {
+    font-size: 14px;
+    color: #87888a;
+}
+
+.match-details-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.stats-group {
+    margin-bottom: 15px;
+}
+
+.stats-title, .timeline-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.stats-label {
+    color: #e6e6e6;
+}
+
+.stats-value {
+    font-weight: 600;
+}
+
+.timeline-content {
+    min-height: 100px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.timeline-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    color: #87888a;
+}
+
+/* Match Details Panel Theme Colors */
+.match-details-panel.match-win {
+    background-color: #1e2a48;
+}
+
+.match-details-panel.match-lose {
+    background-color: #4e2855;
+}
+
+/* Animation for the drop icon */
+.drop {
+    transition: transform 0.3s ease;
+}
+
+/* Timeline event styles */
+.timeline-event {
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+}
+
+.timeline-event:last-child {
+    border-bottom: none;
+}
+
+.timeline-time {
+    font-weight: 700;
+    margin-right: 10px;
+    min-width: 45px;
+}
+
+.timeline-description {
+    color: #e6e6e6;
 }
