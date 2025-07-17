@@ -142,10 +142,132 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: auto;
     display: flex;
+    flex-direction: column;
     font-weight: 1000;
     border-radius: 5px;
+    overflow: hidden;
+}
+
+.match-section-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: .6fr 1fr 1fr 1fr;
+    padding: 0 .5rem;
+    place-items: center;
+    min-height: 100px;
+}
+
+/* Match Details Panel Styles */
+.match-details-wrapper {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 0;
+    width: 100%;
+}
+
+.match-details-wrapper.expanded {
+    max-height: 500px;
+    opacity: 1;
+}
+
+.match-details-panel {
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.panel-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.panel-section {
+    margin-bottom: 15px;
+}
+
+.panel-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #e6e6e6;
+    font-family: "Space Mono", monospace;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #87888a;
+    font-weight: 400;
+}
+
+.stat-value {
+    font-size: 14px;
+    color: #e6e6e6;
+    font-weight: 600;
+}
+
+.team-stats-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.team-stats {
+    width: 48%;
+}
+
+.team-stats h5 {
+    font-size: 14px;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.blue-team h5 {
+    color: #4b6bc3;
+}
+
+.red-team h5 {
+    color: #f46bf4;
+}
+
+.match-id {
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Button rotation animation */
+.match-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: center;
+    width: 40px;
+    border: 0;
+    justify-self: flex-end;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.match-btn .drop {
+    transition: transform 0.3s ease;
+}
+
+.match-btn[aria-expanded="true"] .drop {
+    transform: rotate(180deg);
 }
 
 .match-card .stat-section.stats-text{
@@ -153,18 +275,11 @@ hr {
     top: 3px
 }
 
-
 .match-result.sub-text{
     font-family: "Mulish", sans-serif;
     font-weight: 800;
 }
-.match-section-container {
-    width: 100%;
-    display: grid;
-    grid-template-columns: .6fr 1fr 1fr 1fr;
-    padding: 0 .5rem;
-    place-items: center;
-}
+
 .result-section {
     justify-self: start;
     margin-left: 10px;
@@ -177,17 +292,20 @@ hr {
     justify-content: center;
     gap:4px
 }
+
 .icon-2stack{
     gap:3px;
     flex: 1;
     display: flex;
     flex-direction: column;
 }
+
 .build-container {
     align-items: center;
     display: flex;
     gap: 3px
 }
+
 .items {
     display: grid;
     grid-template-columns: repeat(6,1fr);
@@ -197,6 +315,7 @@ hr {
 .sub-rune {
     transform: scale(.8);
 }
+
 .spells-wrapper {
     border-radius: 3px;
 }
@@ -205,25 +324,17 @@ hr {
 .items .match-win {
     background-color: rgba(145,166,179,.2)
 }
+
 .items .match-lose {
     background-color: rgba(213,123,101,.2);
 }
+
 .stat-section {
     letter-spacing: -2px;
     margin-left: 5px;
     display: flex;
     align-items: center;
     flex-direction: column;
-}
-
-.match-btn {
-    display: flex;
-    flex-direction: column;
-    justify-content: end;
-    align-items: center;
-    width: 40px;
-    border: 0;
-    justify-self: flex-end;
 }
 
 
