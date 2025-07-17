@@ -77,6 +77,14 @@
             <div class="kda">{{main_participant.kills}} / <span class ="death-color">{{main_participant.deaths}}</span> / {{main_participant.assists}}</div>
             <div class="calculated-kda sub-text">KDA: {{main_stats.kda}}</div>
             <div class="cs sub-text">{{main_participant.creep_score}} CS ({{main_stats.cs_min}})</div>
+            <div class="damage-stats sub-text">
+                <div class="damage-dealt">DMG: {{main_stats.damage_dealt}}</div>
+                <div class="damage-taken">Taken: {{main_stats.damage_taken}}</div>
+            </div>
+            <div class="additional-stats sub-text">
+                <div class="gold-earned">Gold: {{main_stats.gold_earned}}</div>
+                <div class="vision-score">Vision: {{main_stats.vision_score}}</div>
+            </div>
         </div>
         <div class="participant-section">
 
