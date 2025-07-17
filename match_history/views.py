@@ -214,6 +214,26 @@ def _get_new_match_data(summoner):
         blue_team_list = []
         red_team_list = []
         for participant in match.all_participants:
+            # Add role and rank information if not already set
+            if participant.role == 'UNSELECTED' and participant.team == 100:
+                # For demonstration, assign roles based on position in team
+                # In a real app, this would come from the game data
+                roles = ['TOP', 'JUNGLE', 'MID', 'BOTTOM', 'SUPPORT']
+                participant.role = roles[min(blue_team_list.__len__(), 4)]
+            elif participant.role == 'UNSELECTED' and participant.team == 200:
+                roles = ['TOP', 'JUNGLE', 'MID', 'BOTTOM', 'SUPPORT']
+                participant.role = roles[min(red_team_list.__len__(), 4)]
+                
+            # For demonstration, assign random ranks if not set
+            # In a real app, this would come from the player's actual rank
+            if participant.rank == 'UNRANKED':
+                import random
+                ranks = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND', 'MASTER']
+                divisions = ['I', 'II', 'III', 'IV']
+                participant.rank = random.choice(ranks)
+                if participant.rank not in ['MASTER', 'GRANDMASTER', 'CHALLENGER']:
+                    participant.division = random.choice(divisions)
+                    
             if participant.summoner == summoner:
                 main_participant = participant
             if participant.team == 100:
@@ -241,6 +261,26 @@ def _get_match_data(summoner, page_obj):
         blue_team_list = []
         red_team_list = []
         for participant in match.all_participants:
+            # Add role and rank information if not already set
+            if participant.role == 'UNSELECTED' and participant.team == 100:
+                # For demonstration, assign roles based on position in team
+                # In a real app, this would come from the game data
+                roles = ['TOP', 'JUNGLE', 'MID', 'BOTTOM', 'SUPPORT']
+                participant.role = roles[min(blue_team_list.__len__(), 4)]
+            elif participant.role == 'UNSELECTED' and participant.team == 200:
+                roles = ['TOP', 'JUNGLE', 'MID', 'BOTTOM', 'SUPPORT']
+                participant.role = roles[min(red_team_list.__len__(), 4)]
+                
+            # For demonstration, assign random ranks if not set
+            # In a real app, this would come from the player's actual rank
+            if participant.rank == 'UNRANKED':
+                import random
+                ranks = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND', 'MASTER']
+                divisions = ['I', 'II', 'III', 'IV']
+                participant.rank = random.choice(ranks)
+                if participant.rank not in ['MASTER', 'GRANDMASTER', 'CHALLENGER']:
+                    participant.division = random.choice(divisions)
+            
             if participant.summoner == summoner:
                 main_participant = participant
             if participant.team == 100:
