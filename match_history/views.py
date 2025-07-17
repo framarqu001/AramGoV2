@@ -202,6 +202,8 @@ def _validate_summoner(game_name, tag):
 
 
 def _get_new_match_data(summoner):
+    from match_history.util.role_classifier import assign_roles_to_participants
+    
     matches_queryset = Match.objects.filter(participants__summoner=summoner, new_match=True).prefetch_related(
         Prefetch('participants', queryset=Participant.objects.select_related(
             'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", "item1", "item2", "item3",
@@ -213,6 +215,10 @@ def _get_new_match_data(summoner):
     for match in matches_queryset:
         blue_team_list = []
         red_team_list = []
+        
+        # Ensure all participants have roles assigned
+        assign_roles_to_participants(match)
+        
         for participant in match.all_participants:
             if participant.summoner == summoner:
                 main_participant = participant
@@ -221,25 +227,44 @@ def _get_new_match_data(summoner):
             else:
                 red_team_list.append(participant)
 
-        kda = (
-                      main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
-        cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        # Find role counterpart for the main participant
+        role_counterpart = None
+        if main_participant.role:
+            opposing_team = red_team_list if main_participant.team == 100 else blue_team_list
+            for opponent in opposing_team:
+                if opponent.role == main_participant.role:
+                    role_counterpart = opponent
+                    break
+        
+        # Calculate comparative statistics if a role counterpart is found
+        role_comparison = None
+        if role_counterpart:
+            role_comparison = main_participant.compare_stats(role_counterpart)
+
+        kda = main_participant.get_kda()
+        cs_min = main_participant.get_cs_per_min(match.game_duration)
 
         main_stats = {
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
-        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats, role_counterpart, role_comparison))
     matches_queryset.update(new_match=False)
     return match_data
 
 
 def _get_match_data(summoner, page_obj):
+    from match_history.util.role_classifier import assign_roles_to_participants
+    
     match_data = []
 
     for match in page_obj:
         blue_team_list = []
         red_team_list = []
+        
+        # Ensure all participants have roles assigned
+        assign_roles_to_participants(match)
+        
         for participant in match.all_participants:
             if participant.summoner == summoner:
                 main_participant = participant
@@ -248,15 +273,30 @@ def _get_match_data(summoner, page_obj):
             else:
                 red_team_list.append(participant)
 
-        kda = (
-                      main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
-        cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        # Find role counterpart for the main participant
+        role_counterpart = None
+        if main_participant.role:
+            opposing_team = red_team_list if main_participant.team == 100 else blue_team_list
+            for opponent in opposing_team:
+                if opponent.role == main_participant.role:
+                    role_counterpart = opponent
+                    break
+        
+        # Calculate comparative statistics if a role counterpart is found
+        role_comparison = None
+        if role_counterpart:
+            role_comparison = main_participant.compare_stats(role_counterpart)
+            
+        kda = main_participant.get_kda()
+        cs_min = main_participant.get_cs_per_min(match.game_duration)
 
         main_stats = {
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
-        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+        
+        # Add role comparison data to the match data
+        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats, role_counterpart, role_comparison))
     return match_data
 
 

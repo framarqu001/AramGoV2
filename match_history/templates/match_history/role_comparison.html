@@ -1,0 +1,115 @@
+{% if role_counterpart and role_comparison %}
+<div class="role-comparison">
+    <div class="role-comparison-header">
+        <h3>Role Comparison: {{ main_participant.role }}</h3>
+        <div class="role-players">
+            <div class="role-player">
+                <img class="champ-img" src="{{ main_participant.champion.get_url }}" alt="{{ main_participant.champion.name }}">
+                <span class="player-name">{{ main_participant.game_name }}</span>
+            </div>
+            <div class="vs">VS</div>
+            <div class="role-player">
+                <img class="champ-img" src="{{ role_counterpart.champion.get_url }}" alt="{{ role_counterpart.champion.name }}">
+                <span class="player-name">{{ role_counterpart.game_name }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="comparison-stats">
+        <div class="stat-row">
+            <div class="stat-label">Kills</div>
+            <div class="stat-value {% if role_comparison.kills_diff > 0 %}stat-better{% elif role_comparison.kills_diff < 0 %}stat-worse{% endif %}">
+                {{ main_participant.kills }} 
+                <span class="diff-indicator">
+                    {% if role_comparison.kills_diff > 0 %}
+                        (+{{ role_comparison.kills_diff }})
+                    {% elif role_comparison.kills_diff < 0 %}
+                        ({{ role_comparison.kills_diff }})
+                    {% else %}
+                        (=)
+                    {% endif %}
+                </span>
+            </div>
+            <div class="stat-value">{{ role_counterpart.kills }}</div>
+        </div>
+        
+        <div class="stat-row">
+            <div class="stat-label">Deaths</div>
+            <div class="stat-value {% if role_comparison.deaths_diff < 0 %}stat-better{% elif role_comparison.deaths_diff > 0 %}stat-worse{% endif %}">
+                {{ main_participant.deaths }} 
+                <span class="diff-indicator">
+                    {% if role_comparison.deaths_diff < 0 %}
+                        ({{ role_comparison.deaths_diff }})
+                    {% elif role_comparison.deaths_diff > 0 %}
+                        (+{{ role_comparison.deaths_diff }})
+                    {% else %}
+                        (=)
+                    {% endif %}
+                </span>
+            </div>
+            <div class="stat-value">{{ role_counterpart.deaths }}</div>
+        </div>
+        
+        <div class="stat-row">
+            <div class="stat-label">Assists</div>
+            <div class="stat-value {% if role_comparison.assists_diff > 0 %}stat-better{% elif role_comparison.assists_diff < 0 %}stat-worse{% endif %}">
+                {{ main_participant.assists }} 
+                <span class="diff-indicator">
+                    {% if role_comparison.assists_diff > 0 %}
+                        (+{{ role_comparison.assists_diff }})
+                    {% elif role_comparison.assists_diff < 0 %}
+                        ({{ role_comparison.assists_diff }})
+                    {% else %}
+                        (=)
+                    {% endif %}
+                </span>
+            </div>
+            <div class="stat-value">{{ role_counterpart.assists }}</div>
+        </div>
+        
+        <div class="stat-row">
+            <div class="stat-label">CS</div>
+            <div class="stat-value {% if role_comparison.cs_diff > 0 %}stat-better{% elif role_comparison.cs_diff < 0 %}stat-worse{% endif %}">
+                {{ main_participant.creep_score }} 
+                <span class="diff-indicator">
+                    {% if role_comparison.cs_diff > 0 %}
+                        (+{{ role_comparison.cs_diff }})
+                    {% elif role_comparison.cs_diff < 0 %}
+                        ({{ role_comparison.cs_diff }})
+                    {% else %}
+                        (=)
+                    {% endif %}
+                </span>
+            </div>
+            <div class="stat-value">{{ role_counterpart.creep_score }}</div>
+        </div>
+        
+        <div class="stat-row">
+            <div class="stat-label">KDA</div>
+            <div class="stat-value {% if role_comparison.kda_diff > 0 %}stat-better{% elif role_comparison.kda_diff < 0 %}stat-worse{% endif %}">
+                {{ main_stats.kda }} 
+                <span class="diff-indicator">
+                    {% if role_comparison.kda_diff > 0 %}
+                        (+{{ role_comparison.kda_diff|floatformat:2 }})
+                    {% elif role_comparison.kda_diff < 0 %}
+                        ({{ role_comparison.kda_diff|floatformat:2 }})
+                    {% else %}
+                        (=)
+                    {% endif %}
+                </span>
+            </div>
+            <div class="stat-value">
+                {% if role_counterpart.deaths > 0 %}
+                    {{ role_counterpart.get_kda|floatformat:2 }}
+                {% else %}
+                    Perfect
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="role-comparison no-counterpart">
+    <p>No role counterpart found for this match.</p>
+</div>
+{% endif %}
