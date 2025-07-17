@@ -487,3 +487,151 @@ hr {
 .death-color {
     color: #ff4e50
 }
+
+/* Team Composition Analysis Styles */
+.match-expanded-panel {
+    width: 100%;
+    background-color: rgba(30, 30, 40, 0.9);
+    border-radius: 0 0 5px 5px;
+    padding: 15px;
+    margin-top: -5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.team-composition-section {
+    padding: 10px 0;
+}
+
+.team-composition-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.team-comp-panel {
+    flex: 1;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: rgba(40, 40, 50, 0.7);
+}
+
+.blue-team-comp {
+    border-left: 4px solid #4b6bc3;
+}
+
+.red-team-comp {
+    border-left: 4px solid #f46bf4;
+}
+
+.team-comp-header {
+    font-family: "Space Mono", monospace;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.comp-subtitle {
+    font-family: "Mulish", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 10px 0;
+    color: #e6e6e6;
+}
+
+.role-distribution, .damage-composition, .team-synergies {
+    margin-bottom: 20px;
+}
+
+.role-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.role-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.role-name {
+    width: 80px;
+    font-size: 12px;
+    color: #e6e6e6;
+}
+
+.role-bar-wrapper {
+    flex: 1;
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.role-bar {
+    height: 100%;
+    border-radius: 6px;
+}
+
+.role-bar.blue {
+    background-color: #4b6bc3;
+}
+
+.role-bar.red {
+    background-color: #f46bf4;
+}
+
+.role-percentage {
+    width: 40px;
+    font-size: 12px;
+    text-align: right;
+    color: #e6e6e6;
+}
+
+.damage-pie-chart {
+    display: flex;
+    height: 24px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.damage-ap {
+    background-color: #8a2be2;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    padding: 0 10px;
+}
+
+.damage-ad {
+    background-color: #ff4500;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    padding: 0 10px;
+}
+
+.synergy-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.synergy-item {
+    font-size: 12px;
+    color: #e6e6e6;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.synergy-item:last-child {
+    border-bottom: none;
+}
