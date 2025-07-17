@@ -292,6 +292,104 @@
     
 </script>
 
-
+<script>
+    $(document).ready(function() {
+        // Initialize match button click handlers
+        initMatchButtonHandlers();
+        
+        // Function to initialize match button click handlers
+        function initMatchButtonHandlers() {
+            $('.match-btn').off('click').on('click', function() {
+                const matchCard = $(this).closest('.match-card');
+                const detailsPanel = matchCard.find('.match-details-panel');
+                
+                // Toggle expanded class on button and panel
+                $(this).toggleClass('expanded');
+                detailsPanel.toggleClass('expanded');
+                
+                // If panel is expanded and data hasn't been loaded yet, load it
+                if (detailsPanel.hasClass('expanded')) {
+                    loadMatchDetails(detailsPanel);
+                }
+            });
+        }
+        
+        // Function to load match details data
+        function loadMatchDetails(detailsPanel) {
+            const statsValues = detailsPanel.find('.stats-value');
+            
+            // Only load data if it hasn't been loaded yet (still shows "Loading...")
+            if (statsValues.first().text() === 'Loading...') {
+                statsValues.each(function() {
+                    const statElement = $(this);
+                    const statType = statElement.data('stat');
+                    const participantId = statElement.data('participant-id');
+                    
+                    // Simulate loading data (in a real app, this would be an AJAX call)
+                    setTimeout(function() {
+                        // Generate some random data for demonstration
+                        let value;
+                        switch(statType) {
+                            case 'damage':
+                                value = Math.floor(Math.random() * 30000) + 10000;
+                                statElement.text(value.toLocaleString());
+                                break;
+                            case 'damage_taken':
+                                value = Math.floor(Math.random() * 40000) + 15000;
+                                statElement.text(value.toLocaleString());
+                                break;
+                            case 'healing':
+                                value = Math.floor(Math.random() * 10000);
+                                statElement.text(value.toLocaleString());
+                                break;
+                            case 'turret_damage':
+                                value = Math.floor(Math.random() * 8000);
+                                statElement.text(value.toLocaleString());
+                                break;
+                            case 'vision_score':
+                                value = Math.floor(Math.random() * 30) + 5;
+                                statElement.text(value);
+                                break;
+                            default:
+                                statElement.text('N/A');
+                        }
+                    }, 500); // Simulate network delay
+                });
+                
+                // Load timeline data
+                const timelineContent = detailsPanel.find('.timeline-content');
+                const matchId = timelineContent.data('match-id');
+                
+                setTimeout(function() {
+                    timelineContent.html(`
+                        <div class="timeline-event">
+                            <span class="timeline-time">0:00</span>
+                            <span class="timeline-description">Match started</span>
+                        </div>
+                        <div class="timeline-event">
+                            <span class="timeline-time">3:45</span>
+                            <span class="timeline-description">First blood</span>
+                        </div>
+                        <div class="timeline-event">
+                            <span class="timeline-time">12:30</span>
+                            <span class="timeline-description">First tower destroyed</span>
+                        </div>
+                        <div class="timeline-event">
+                            <span class="timeline-time">18:15</span>
+                            <span class="timeline-description">Team fight at mid lane</span>
+                        </div>
+                    `);
+                }, 800); // Simulate network delay
+            }
+        }
+        
+        // Also initialize handlers for newly loaded matches from pagination
+        $(document).ajaxSuccess(function(event, xhr, settings) {
+            if (settings.url === window.location.href && settings.data && settings.data.includes('paginate')) {
+                initMatchButtonHandlers();
+            }
+        });
+    });
+</script>
 
 {% endblock %}
