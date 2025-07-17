@@ -46,7 +46,12 @@ class MatchParticipantTest(TestCase):
             kills=10,
             deaths=2,
             assists=8,
-            creep_score=150
+            creep_score=150,
+            total_damage_dealt=15000,
+            damage_to_champions=10000,
+            vision_score=20,
+            gold_earned=12000,
+            largest_killing_spree=3
         )
 
     def test_participant_relationships(self):
@@ -54,6 +59,14 @@ class MatchParticipantTest(TestCase):
         self.assertEqual(self.participant.summoner, self.summoner)
         self.assertEqual(self.participant.champion, self.champion)
         self.assertIn(self.participant, self.match.participants.all())
+
+    def test_participant_stats_fields(self):
+        # Test that the new stats fields are properly stored and retrieved
+        self.assertEqual(self.participant.total_damage_dealt, 15000)
+        self.assertEqual(self.participant.damage_to_champions, 10000)
+        self.assertEqual(self.participant.vision_score, 20)
+        self.assertEqual(self.participant.gold_earned, 12000)
+        self.assertEqual(self.participant.largest_killing_spree, 3)
 
     def test_participant_string_representation(self):
         self.assertEqual(str(self.participant), 'testSummoner#NA1 playing Aatrox in match match_001')
