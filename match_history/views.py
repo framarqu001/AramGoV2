@@ -160,6 +160,7 @@ def champions(request):
 
     for champion_stat in champion_query:
         champion_stat_tuple = (
+            champion_stat.champion,  # Include the Champion model instance
             champion_stat.patch,
             champion_stat.total_played,
             champion_stat.total_wins,
