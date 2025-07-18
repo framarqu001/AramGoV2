@@ -112,5 +112,58 @@
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
+    <!-- Expanded content section -->
+    <div class="expanded-content">
+        <div class="expanded-content-inner {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+            <div class="expanded-section">
+                <h3>Match Details</h3>
+                <div class="match-details-grid">
+                    <div class="match-detail-item">
+                        <span class="detail-label">Match ID:</span>
+                        <span class="detail-value">{{match.match_id}}</span>
+                    </div>
+                    <div class="match-detail-item">
+                        <span class="detail-label">Game Start:</span>
+                        <span class="detail-value">{{match.game_start}}</span>
+                    </div>
+                    <div class="match-detail-item">
+                        <span class="detail-label">Game Duration:</span>
+                        <span class="detail-value">{{match.get_duration}}</span>
+                    </div>
+                    <div class="match-detail-item">
+                        <span class="detail-label">Game Mode:</span>
+                        <span class="detail-value">{{match.game_mode}}</span>
+                    </div>
+                    <div class="match-detail-item">
+                        <span class="detail-label">Game Version:</span>
+                        <span class="detail-value">{{match.game_version}}</span>
+                    </div>
+                    <div class="match-detail-item">
+                        <span class="detail-label">Winner:</span>
+                        <span class="detail-value">{% if match.winner == 100 %}Blue Team{% else %}Red Team{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="expanded-section">
+                <h3>Player Performance</h3>
+                <div class="player-performance-grid">
+                    <div class="performance-stat">
+                        <span class="stat-label">KDA:</span>
+                        <span class="stat-value">{{main_stats.kda}}</span>
+                    </div>
+                    <div class="performance-stat">
+                        <span class="stat-label">CS/min:</span>
+                        <span class="stat-value">{{main_stats.cs_min}}</span>
+                    </div>
+                    <div class="performance-stat">
+                        <span class="stat-label">Total CS:</span>
+                        <span class="stat-value">{{main_participant.creep_score}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endfor %}
