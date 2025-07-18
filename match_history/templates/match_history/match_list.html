@@ -1,6 +1,7 @@
+{% load static %}
 {% for match, main_participant, blue_team, red_team, main_stats in matches%}
 
-<div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+<div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" data-match-id="{{match.id}}">
 
     <div class="match-section-container">
         <div class="result-section">
@@ -112,5 +113,79 @@
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
+    <!-- Match Details Expansion Panel -->
+    <div class="match-details-panel">
+        <div class="match-details-content">
+            <div class="details-section">
+                <h3>Detailed Statistics</h3>
+                <div class="details-stats-grid">
+                    <div class="details-stat-item">
+                        <span class="stat-label">Total Damage:</span>
+                        <span class="stat-value">{{main_participant.total_damage_dealt_to_champions}}</span>
+                    </div>
+                    <div class="details-stat-item">
+                        <span class="stat-label">Vision Score:</span>
+                        <span class="stat-value">{{main_participant.vision_score}}</span>
+                    </div>
+                    <div class="details-stat-item">
+                        <span class="stat-label">CC Score:</span>
+                        <span class="stat-value">{{main_participant.time_ccing_others}}</span>
+                    </div>
+                    <div class="details-stat-item">
+                        <span class="stat-label">Largest Killing Spree:</span>
+                        <span class="stat-value">{{main_participant.largest_killing_spree}}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="details-section">
+                <h3>Gold & Economy</h3>
+                <div class="details-stats-grid">
+                    <div class="details-stat-item">
+                        <span class="stat-label">Gold Earned:</span>
+                        <span class="stat-value">{{main_participant.gold_earned}}</span>
+                    </div>
+                    <div class="details-stat-item">
+                        <span class="stat-label">Gold Spent:</span>
+                        <span class="stat-value">{{main_participant.gold_spent}}</span>
+                    </div>
+                    <div class="details-stat-item">
+                        <span class="stat-label">Minions Killed:</span>
+                        <span class="stat-value">{{main_participant.creep_score}}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="details-section">
+                <h3>Combat Stats</h3>
+                <div class="details-stats-grid">
+                    <div class="details-stat-item">
+                        <span class="stat-label">Physical Damage:</span>
+                        <span class="stat-value">{{main_participant.physical_damage_dealt_to_champions}}</span>
+                    </div>
+                    <div class="details-stat-item">
+                        <span class="stat-label">Magic Damage:</span>
+                        <span class="stat-value">{{main_participant.magic_damage_dealt_to_champions}}</span>
+                    </div>
+                    <div class="details-stat-item">
+                        <span class="stat-label">True Damage:</span>
+                        <span class="stat-value">{{main_participant.true_damage_dealt_to_champions}}</span>
+                    </div>
+                    <div class="details-stat-item">
+                        <span class="stat-label">Damage Taken:</span>
+                        <span class="stat-value">{{main_participant.total_damage_taken}}</span>
+                    </div>
+                    <div class="details-stat-item">
+                        <span class="stat-label">Healing:</span>
+                        <span class="stat-value">{{main_participant.total_heal}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endfor %}
+
+<!-- Include the JavaScript file for match details panel functionality -->
+<script src="{% static 'match_history/js/match-details.js' %}"></script>
