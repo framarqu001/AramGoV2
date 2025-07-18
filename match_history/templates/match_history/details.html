@@ -161,6 +161,27 @@
             return;
         }
 
+        // Match expansion panel functionality
+        $(document).on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            const expansionPanel = matchCard.find('.match-expansion-panel');
+            
+            // Toggle the expanded class
+            expansionPanel.toggleClass('expanded');
+            
+            // Rotate the chevron icon
+            const chevron = $(this).find('.drop');
+            if (expansionPanel.hasClass('expanded')) {
+                chevron.css('transform', 'rotate(180deg)');
+                // Adjust the match card height to accommodate the expansion panel
+                matchCard.css('height', 'auto');
+            } else {
+                chevron.css('transform', 'rotate(0deg)');
+                // Reset the match card height
+                matchCard.css('height', '100px');
+            }
+        });
+
         $(window).scroll(function() {
             if (!loading && !noMorePages && $(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
                 loading = true;

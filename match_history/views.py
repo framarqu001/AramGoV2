@@ -252,12 +252,110 @@ def _get_match_data(summoner, page_obj):
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
+        # Generate simulated item purchase timestamps
+        item_timestamps = _generate_item_timestamps(match.game_duration, main_participant)
+
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "item_timestamps": item_timestamps
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data
+
+
+def _generate_item_timestamps(game_duration, participant):
+    """Generate simulated purchase timestamps for items based on game duration."""
+    import random
+    
+    # Convert game duration from seconds to minutes
+    game_minutes = game_duration / 60
+    
+    # Create a list to store item timestamps
+    item_timestamps = []
+    
+    # Define a list of items to check
+    items = [
+        participant.item1, 
+        participant.item2, 
+        participant.item3, 
+        participant.item4, 
+        participant.item5, 
+        participant.item6
+    ]
+    
+    # Filter out None items
+    items = [item for item in items if item]
+    
+    if not items:
+        return []
+    
+    # Distribute purchase times throughout the game with some randomness
+    # Start with early game purchases (around 15% of game time)
+    early_game = max(1, game_minutes * 0.15)
+    
+    # Mid game purchases (around 40% of game time)
+    mid_game = max(early_game + 1, game_minutes * 0.4)
+    
+    # Late game purchases (around 70% of game time)
+    late_game = max(mid_game + 1, game_minutes * 0.7)
+    
+    # Very late game purchases (around 90% of game time)
+    very_late_game = max(late_game + 1, game_minutes * 0.9)
+    
+    # Distribute timestamps based on number of items
+    num_items = len(items)
+    
+    if num_items == 1:
+        # If only one item, place it in mid-game
+        timestamp = _format_timestamp(mid_game)
+        item_timestamps.append((items[0], timestamp))
+    elif num_items == 2:
+        # If two items, place one in early game and one in late game
+        timestamp1 = _format_timestamp(early_game + random.uniform(0, 2))
+        timestamp2 = _format_timestamp(late_game + random.uniform(-2, 2))
+        item_timestamps.extend([(items[0], timestamp1), (items[1], timestamp2)])
+    else:
+        # For more items, distribute them throughout the game
+        available_times = []
+        
+        # Calculate time ranges for each phase of the game
+        if num_items >= 3:
+            available_times.extend([
+                early_game + random.uniform(0, 2),  # Early game
+                mid_game + random.uniform(-3, 3),   # Mid game
+                late_game + random.uniform(-3, 3)   # Late game
+            ])
+        
+        # Add more timestamps if needed
+        if num_items >= 4:
+            available_times.append(very_late_game + random.uniform(-2, 2))  # Very late game
+        
+        # Add more random timestamps if needed
+        while len(available_times) < num_items:
+            # Generate a random time between early and late game
+            random_time = random.uniform(early_game, very_late_game)
+            # Make sure it's not too close to existing timestamps
+            if all(abs(random_time - t) > 2 for t in available_times):
+                available_times.append(random_time)
+        
+        # Sort timestamps chronologically
+        available_times.sort()
+        
+        # Assign timestamps to items
+        for i in range(min(num_items, len(available_times))):
+            timestamp = _format_timestamp(available_times[i])
+            item_timestamps.append((items[i], timestamp))
+    
+    return item_timestamps
+
+
+def _format_timestamp(minutes):
+    """Format minutes into MM:SS format."""
+    total_seconds = int(minutes * 60)
+    minutes = total_seconds // 60
+    seconds = total_seconds % 60
+    return f"{minutes}:{seconds:02d}"
 
 
 def _get_recent(summoner):
