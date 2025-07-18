@@ -8,6 +8,7 @@
 
 {% block extra_styles %}
     <link rel="stylesheet" href="{% static 'match_history/css/details.css' %}">
+    <link rel="stylesheet" href="{% static 'match_history/css/match_card_details.css' %}">
 {% endblock %}
 
 
@@ -288,6 +289,27 @@
                 }
             }, 1000);
         }
+        
+        // Match card expansion functionality
+        $(document).on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            const detailsWrapper = matchCard.next('.match-details-wrapper');
+            
+            // Toggle the details visibility
+            if (detailsWrapper.is(':visible')) {
+                // Close the details
+                detailsWrapper.slideUp(300);
+                $(this).find('.drop').css('transform', 'rotate(0deg)');
+            } else {
+                // Close any open details first
+                $('.match-details-wrapper:visible').slideUp(300);
+                $('.match-btn').find('.drop').css('transform', 'rotate(0deg)');
+                
+                // Open this details
+                detailsWrapper.slideDown(300);
+                $(this).find('.drop').css('transform', 'rotate(180deg)');
+            }
+        });
     });
     
 </script>
