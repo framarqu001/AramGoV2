@@ -256,8 +256,138 @@ def _get_match_data(summoner, page_obj):
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
-        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+        
+        # Generate team composition analysis
+        blue_team_comp = analyze_team_composition(blue_team_list)
+        red_team_comp = analyze_team_composition(red_team_list)
+        
+        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats, blue_team_comp, red_team_comp))
     return match_data
+
+def analyze_team_composition(team_list):
+    """
+    Analyze team composition to determine damage distribution and champion synergies.
+    
+    Args:
+        team_list: List of participant objects representing a team
+        
+    Returns:
+        Dictionary containing team composition analysis
+    """
+    # Initialize damage distribution counters
+    ap_damage = 0
+    ad_damage = 0
+    true_damage = 0
+    
+    # Champion data for analysis
+    champions = []
+    champion_types = {}
+    
+    # Define champion damage types (simplified for demonstration)
+    # In a real implementation, this would come from a database or API
+    damage_types = {
+        # Mages and AP champions
+        'Ahri': 'ap', 'Annie': 'ap', 'Anivia': 'ap', 'Aurelion Sol': 'ap', 'Azir': 'ap',
+        'Brand': 'ap', 'Cassiopeia': 'ap', 'Fiddlesticks': 'ap', 'Heimerdinger': 'ap',
+        'Karma': 'ap', 'Karthus': 'ap', 'Kassadin': 'ap', 'Katarina': 'ap', 'Kennen': 'ap',
+        'LeBlanc': 'ap', 'Lissandra': 'ap', 'Lux': 'ap', 'Malzahar': 'ap', 'Morgana': 'ap',
+        'Neeko': 'ap', 'Orianna': 'ap', 'Ryze': 'ap', 'Seraphine': 'ap', 'Swain': 'ap',
+        'Syndra': 'ap', 'Taliyah': 'ap', 'Twisted Fate': 'ap', 'Veigar': 'ap', 'Vel\'Koz': 'ap',
+        'Viktor': 'ap', 'Vladimir': 'ap', 'Xerath': 'ap', 'Ziggs': 'ap', 'Zoe': 'ap', 'Zyra': 'ap',
+        'Lillia': 'ap', 'Sylas': 'ap', 'Vex': 'ap', 'Akali': 'ap', 'Diana': 'ap', 'Ekko': 'ap',
+        'Elise': 'ap', 'Evelynn': 'ap', 'Fizz': 'ap', 'Gragas': 'ap', 'Nidalee': 'ap',
+        'Rumble': 'ap', 'Shyvana': 'ap', 'Teemo': 'ap',
+        
+        # AD champions
+        'Ashe': 'ad', 'Caitlyn': 'ad', 'Corki': 'ad', 'Draven': 'ad', 'Ezreal': 'ad',
+        'Graves': 'ad', 'Jhin': 'ad', 'Jinx': 'ad', 'Kai\'Sa': 'ad', 'Kalista': 'ad',
+        'Kindred': 'ad', 'Kog\'Maw': 'ad', 'Lucian': 'ad', 'Miss Fortune': 'ad', 'Samira': 'ad',
+        'Senna': 'ad', 'Sivir': 'ad', 'Tristana': 'ad', 'Twitch': 'ad', 'Varus': 'ad',
+        'Vayne': 'ad', 'Xayah': 'ad', 'Aphelios': 'ad', 'Zeri': 'ad',
+        'Aatrox': 'ad', 'Camille': 'ad', 'Darius': 'ad', 'Fiora': 'ad', 'Gangplank': 'ad',
+        'Garen': 'ad', 'Gnar': 'ad', 'Hecarim': 'ad', 'Illaoi': 'ad', 'Irelia': 'ad',
+        'Jarvan IV': 'ad', 'Jax': 'ad', 'Jayce': 'ad', 'Kayn': 'ad', 'Kha\'Zix': 'ad',
+        'Kled': 'ad', 'Lee Sin': 'ad', 'Master Yi': 'ad', 'Nocturne': 'ad', 'Olaf': 'ad',
+        'Pantheon': 'ad', 'Pyke': 'ad', 'Qiyana': 'ad', 'Renekton': 'ad', 'Rengar': 'ad',
+        'Riven': 'ad', 'Sett': 'ad', 'Shaco': 'ad', 'Talon': 'ad', 'Tryndamere': 'ad',
+        'Urgot': 'ad', 'Vi': 'ad', 'Viego': 'ad', 'Wukong': 'ad', 'Xin Zhao': 'ad',
+        'Yasuo': 'ad', 'Yone': 'ad', 'Zed': 'ad',
+        
+        # Mixed damage or true damage champions
+        'Cho\'Gath': 'true', 'Darius': 'true', 'Fiora': 'true', 'Garen': 'true',
+        'Master Yi': 'true', 'Olaf': 'true', 'Pyke': 'true', 'Sett': 'true',
+        'Vayne': 'true', 'Vel\'Koz': 'true', 'Camille': 'true',
+    }
+    
+    # Define champion synergies (simplified for demonstration)
+    synergies = {
+        ('Yasuo', 'Yone'): 'Brother synergy',
+        ('Caitlyn', 'Vi'): 'Piltover synergy',
+        ('Garen', 'Lux'): 'Demacian synergy',
+        ('Katarina', 'Garen'): 'Romantic synergy',
+        ('Xayah', 'Rakan'): 'Lover synergy',
+        ('Lucian', 'Senna'): 'Spouse synergy',
+        ('Ashe', 'Tryndamere'): 'Freljord synergy',
+        ('Leona', 'Diana'): 'Sun and Moon synergy',
+    }
+    
+    # Analyze each champion in the team
+    for participant in team_list:
+        champion_name = participant.champion.name
+        champion_types[champion_name] = damage_types.get(champion_name, 'ad')  # Default to AD if not found
+        
+        # Count damage types
+        if champion_types[champion_name] == 'ap':
+            ap_damage += 1
+        elif champion_types[champion_name] == 'ad':
+            ad_damage += 1
+        else:
+            true_damage += 1
+        
+        # Check for synergies
+        has_synergy = False
+        synergy_description = ""
+        for synergy_pair, description in synergies.items():
+            if champion_name in synergy_pair:
+                for other_participant in team_list:
+                    other_champion = other_participant.champion.name
+                    if other_champion != champion_name and other_champion in synergy_pair:
+                        has_synergy = True
+                        synergy_description = description
+                        break
+        
+        # Add champion data
+        champions.append({
+            'name': champion_name,
+            'icon_url': participant.champion.get_url,
+            'has_synergy': has_synergy,
+            'synergy_description': synergy_description
+        })
+    
+    # Calculate damage distribution percentages
+    total_champions = len(team_list)
+    ap_percentage = int((ap_damage / total_champions) * 100) if total_champions > 0 else 0
+    ad_percentage = int((ad_damage / total_champions) * 100) if total_champions > 0 else 0
+    true_percentage = int((true_damage / total_champions) * 100) if total_champions > 0 else 0
+    
+    # Adjust percentages to ensure they sum to 100%
+    adjustment = 100 - (ap_percentage + ad_percentage + true_percentage)
+    if adjustment != 0:
+        if ap_percentage > 0:
+            ap_percentage += adjustment
+        elif ad_percentage > 0:
+            ad_percentage += adjustment
+        elif true_percentage > 0:
+            true_percentage += adjustment
+    
+    return {
+        'champions': champions,
+        'damage_distribution': {
+            'ap': ap_percentage,
+            'ad': ad_percentage,
+            'true': true_percentage
+        }
+    }
 
 
 def _get_recent(summoner):
