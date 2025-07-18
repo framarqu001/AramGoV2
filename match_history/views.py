@@ -8,7 +8,7 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
-from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
+from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch, ItemPurchase
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from match_history.util.populate_data import SummonerManager
@@ -222,12 +222,28 @@ def _get_new_match_data(summoner):
                 red_team_list.append(participant)
 
         kda = (
-                      main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
+                  main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        
+        # Calculate damage per minute
+        damage_per_min = main_participant.damage_per_minute()
+        damage_taken_per_min = main_participant.damage_taken_per_minute()
+        
+        # Get item purchase timeline
+        item_purchases = list(main_participant.item_purchases.all().select_related('item'))
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            # Add new statistics
+            "damage_dealt": main_participant.damage_dealt,
+            "damage_taken": main_participant.damage_taken,
+            "damage_per_min": f"{damage_per_min:.1f}",
+            "damage_taken_per_min": f"{damage_taken_per_min:.1f}",
+            "vision_score": main_participant.vision_score,
+            "objectives_stolen": main_participant.objectives_stolen,
+            "objectives_killed": main_participant.objectives_killed,
+            "item_purchases": item_purchases
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
@@ -249,12 +265,28 @@ def _get_match_data(summoner, page_obj):
                 red_team_list.append(participant)
 
         kda = (
-                      main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
+                  main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        
+        # Calculate damage per minute
+        damage_per_min = main_participant.damage_per_minute()
+        damage_taken_per_min = main_participant.damage_taken_per_minute()
+        
+        # Get item purchase timeline
+        item_purchases = list(main_participant.item_purchases.all().select_related('item'))
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            # Add new statistics
+            "damage_dealt": main_participant.damage_dealt,
+            "damage_taken": main_participant.damage_taken,
+            "damage_per_min": f"{damage_per_min:.1f}",
+            "damage_taken_per_min": f"{damage_taken_per_min:.1f}",
+            "vision_score": main_participant.vision_score,
+            "objectives_stolen": main_participant.objectives_stolen,
+            "objectives_killed": main_participant.objectives_killed,
+            "item_purchases": item_purchases
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data
@@ -351,7 +383,9 @@ def _get_match_queryset(summoner):
     matches_queryset = Match.objects.filter(participants__summoner=summoner).prefetch_related(
         Prefetch('participants', queryset=Participant.objects.select_related(
             'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", "item1", "item2", "item3",
-            'item4', 'item5', 'item6', 'summoner__profile_icon'),
+            'item4', 'item5', 'item6', 'summoner__profile_icon').prefetch_related(
+                Prefetch('item_purchases', queryset=ItemPurchase.objects.select_related('item'))
+            ),
                  to_attr='all_participants')
     )
     return matches_queryset
