@@ -1,0 +1,199 @@
+{% load math_filters %}
+<div class="match-comparison-panel {% if main_participant.win %}match-win-panel{% else %}match-lose-panel{% endif %}">
+    <div class="comparison-header">
+        <h3>Performance Comparison</h3>
+        <div class="comparison-tabs">
+            <button class="tab-btn active" data-tab="damage">Damage</button>
+            <button class="tab-btn" data-tab="gold">Gold</button>
+            <button class="tab-btn" data-tab="kda">KDA</button>
+            <button class="tab-btn" data-tab="cs">CS</button>
+        </div>
+        <div class="comparison-filters">
+            <select class="metric-filter">
+                <option value="total">Total</option>
+                <option value="per-minute">Per Minute</option>
+                <option value="percentage">Percentage</option>
+            </select>
+            <select class="sort-filter">
+                <option value="highest">Highest First</option>
+                <option value="lowest">Lowest First</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="comparison-content">
+        <!-- Damage Tab Content -->
+        <div class="tab-content active" id="damage-tab">
+            <div class="chart-container">
+                <canvas class="damage-chart"></canvas>
+            </div>
+            <div class="comparison-table">
+                <div class="table-header">
+                    <div class="col">Player</div>
+                    <div class="col">Champion</div>
+                    <div class="col">Total Damage</div>
+                    <div class="col">Damage/Min</div>
+                </div>
+                <div class="table-body">
+                    <!-- Blue Team -->
+                    <div class="team-section">
+                        <h4>Blue Team</h4>
+                        {% for participant in blue_team %}
+                        <div class="table-row {% if participant == main_participant %}highlight-row{% endif %}">
+                            <div class="col">{{ participant.game_name }}</div>
+                            <div class="col">{{ participant.champion.name }}</div>
+                            <div class="col">{{ participant.kills|add:participant.assists|add:participant.deaths|multiply:100 }}</div>
+                            <div class="col">{{ participant.kills|add:participant.assists|add:participant.deaths|multiply:100|divide:match.get_minutes|floatformat:1 }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Red Team -->
+                    <div class="team-section">
+                        <h4>Red Team</h4>
+                        {% for participant in red_team %}
+                        <div class="table-row {% if participant == main_participant %}highlight-row{% endif %}">
+                            <div class="col">{{ participant.game_name }}</div>
+                            <div class="col">{{ participant.champion.name }}</div>
+                            <div class="col">{{ participant.kills|add:participant.assists|add:participant.deaths|multiply:100 }}</div>
+                            <div class="col">{{ participant.kills|add:participant.assists|add:participant.deaths|multiply:100|divide:match.get_minutes|floatformat:1 }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Gold Tab Content -->
+        <div class="tab-content" id="gold-tab">
+            <div class="chart-container">
+                <canvas class="gold-chart"></canvas>
+            </div>
+            <div class="comparison-table">
+                <div class="table-header">
+                    <div class="col">Player</div>
+                    <div class="col">Champion</div>
+                    <div class="col">Total Gold</div>
+                    <div class="col">Gold/Min</div>
+                </div>
+                <div class="table-body">
+                    <!-- Blue Team -->
+                    <div class="team-section">
+                        <h4>Blue Team</h4>
+                        {% for participant in blue_team %}
+                        <div class="table-row {% if participant == main_participant %}highlight-row{% endif %}">
+                            <div class="col">{{ participant.game_name }}</div>
+                            <div class="col">{{ participant.champion.name }}</div>
+                            <div class="col">{{ participant.creep_score|multiply:20|add:participant.kills|multiply:300|add:participant.assists|multiply:150 }}</div>
+                            <div class="col">{{ participant.creep_score|multiply:20|add:participant.kills|multiply:300|add:participant.assists|multiply:150|divide:match.get_minutes|floatformat:1 }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Red Team -->
+                    <div class="team-section">
+                        <h4>Red Team</h4>
+                        {% for participant in red_team %}
+                        <div class="table-row {% if participant == main_participant %}highlight-row{% endif %}">
+                            <div class="col">{{ participant.game_name }}</div>
+                            <div class="col">{{ participant.champion.name }}</div>
+                            <div class="col">{{ participant.creep_score|multiply:20|add:participant.kills|multiply:300|add:participant.assists|multiply:150 }}</div>
+                            <div class="col">{{ participant.creep_score|multiply:20|add:participant.kills|multiply:300|add:participant.assists|multiply:150|divide:match.get_minutes|floatformat:1 }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- KDA Tab Content -->
+        <div class="tab-content" id="kda-tab">
+            <div class="chart-container">
+                <canvas class="kda-chart"></canvas>
+            </div>
+            <div class="comparison-table">
+                <div class="table-header">
+                    <div class="col">Player</div>
+                    <div class="col">Champion</div>
+                    <div class="col">Kills</div>
+                    <div class="col">Deaths</div>
+                    <div class="col">Assists</div>
+                    <div class="col">KDA</div>
+                </div>
+                <div class="table-body">
+                    <!-- Blue Team -->
+                    <div class="team-section">
+                        <h4>Blue Team</h4>
+                        {% for participant in blue_team %}
+                        <div class="table-row {% if participant == main_participant %}highlight-row{% endif %}">
+                            <div class="col">{{ participant.game_name }}</div>
+                            <div class="col">{{ participant.champion.name }}</div>
+                            <div class="col">{{ participant.kills }}</div>
+                            <div class="col">{{ participant.deaths }}</div>
+                            <div class="col">{{ participant.assists }}</div>
+                            <div class="col">{{ participant.kills|add:participant.assists|divide:participant.deaths|default:participant.kills|add:participant.assists|floatformat:2 }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Red Team -->
+                    <div class="team-section">
+                        <h4>Red Team</h4>
+                        {% for participant in red_team %}
+                        <div class="table-row {% if participant == main_participant %}highlight-row{% endif %}">
+                            <div class="col">{{ participant.game_name }}</div>
+                            <div class="col">{{ participant.champion.name }}</div>
+                            <div class="col">{{ participant.kills }}</div>
+                            <div class="col">{{ participant.deaths }}</div>
+                            <div class="col">{{ participant.assists }}</div>
+                            <div class="col">{{ participant.kills|add:participant.assists|divide:participant.deaths|default:participant.kills|add:participant.assists|floatformat:2 }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CS Tab Content -->
+        <div class="tab-content" id="cs-tab">
+            <div class="chart-container">
+                <canvas class="cs-chart"></canvas>
+            </div>
+            <div class="comparison-table">
+                <div class="table-header">
+                    <div class="col">Player</div>
+                    <div class="col">Champion</div>
+                    <div class="col">Total CS</div>
+                    <div class="col">CS/Min</div>
+                </div>
+                <div class="table-body">
+                    <!-- Blue Team -->
+                    <div class="team-section">
+                        <h4>Blue Team</h4>
+                        {% for participant in blue_team %}
+                        <div class="table-row {% if participant == main_participant %}highlight-row{% endif %}">
+                            <div class="col">{{ participant.game_name }}</div>
+                            <div class="col">{{ participant.champion.name }}</div>
+                            <div class="col">{{ participant.creep_score }}</div>
+                            <div class="col">{{ participant.creep_score|divide:match.get_minutes|floatformat:1 }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Red Team -->
+                    <div class="team-section">
+                        <h4>Red Team</h4>
+                        {% for participant in red_team %}
+                        <div class="table-row {% if participant == main_participant %}highlight-row{% endif %}">
+                            <div class="col">{{ participant.game_name }}</div>
+                            <div class="col">{{ participant.champion.name }}</div>
+                            <div class="col">{{ participant.creep_score }}</div>
+                            <div class="col">{{ participant.creep_score|divide:match.get_minutes|floatformat:1 }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
