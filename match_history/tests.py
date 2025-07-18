@@ -93,8 +93,11 @@ class PatchVersionCacheTest(TestCase):
         self.assertEqual(cached_patch, '13.15.1')
         
         # Check the timeout value (this requires accessing internal cache details)
-        # We can't directly check the timeout, but we can verify the patch is cached
+        # We can't directly check the timeout with the public API, but we can verify the patch is cached
+        # The timeout should be 3 weeks (1814400 seconds)
         self.assertIsNotNone(cached_patch)
+        
+        # For documentation purposes - the expected timeout is 3 weeks (1814400 seconds)
         
         # Verify that the mock was called
         mock_get_patch.assert_called_once()
