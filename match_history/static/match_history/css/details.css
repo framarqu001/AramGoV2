@@ -487,3 +487,153 @@ hr {
 .death-color {
     color: #ff4e50
 }
+
+/* Match Details Styles */
+.match-details {
+    width: 100%;
+    background-color: inherit;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.match-details-container {
+    padding: 20px;
+    color: #e6e6e6;
+}
+
+.match-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.details-section {
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.details-title {
+    font-family: "Space Mono", monospace;
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* KDA Breakdown Styles */
+.kda-stats, .cs-stats, .impact-stats, .damage-stats, .vision-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.kda-stat, .cs-stat, .impact-stat, .damage-stat, .vision-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #87888a;
+}
+
+.stat-value {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.stat-bar {
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.stat-fill {
+    height: 100%;
+    border-radius: 4px;
+}
+
+.kill-fill {
+    background-color: var(--blue-color);
+}
+
+.death-fill {
+    background-color: #ff4e50;
+}
+
+.assist-fill {
+    background-color: var(--purple-color);
+}
+
+.impact-fill {
+    background-color: var(--blue-color);
+}
+
+.damage-dealt-fill {
+    background-color: #ff9800;
+}
+
+.damage-taken-fill {
+    background-color: #ff4e50;
+}
+
+/* CS Graph Styles */
+.cs-graph {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.cs-graph-container {
+    width: 40px;
+    height: 100px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+.cs-graph-bar {
+    width: 100%;
+    background-color: var(--blue-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    min-height: 20px;
+}
+
+.cs-graph-label {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #87888a;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .match-details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animation for the chevron icon */
+.match-btn .drop {
+    transition: transform 0.3s ease;
+}
+
+.match-btn.active .drop {
+    transform: rotate(180deg);
+}
+
+/* Expanded match card */
+.match-card.expanded {
+    height: auto;
+}
