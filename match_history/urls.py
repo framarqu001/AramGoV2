@@ -11,5 +11,5 @@ urlpatterns = [
     path("summoner/", views.summoner, name="summoner"),  # Ensure this line exists
     path("update/", views.update, name="update"),
     path("about/", views.about, name="about"),
-
+    path("match/<str:match_id>/", views.match_details, name="match_details"),
 ]

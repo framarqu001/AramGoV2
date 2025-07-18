@@ -1,0 +1,218 @@
+{% extends 'match_history/base.html' %}
+
+{% block content %}
+<div class="match-details-container">
+    <div class="match-header">
+        <h1>Match Details</h1>
+        <div class="match-info">
+            <div class="match-id">Match ID: {{ match.match_id }}</div>
+            <div class="match-date">{{ match.game_start }}</div>
+            <div class="match-duration">Duration: {{ match.get_duration }}</div>
+            <div class="match-patch">Patch: {{ match.get_patch }}</div>
+            <div class="match-winner">
+                {% if match.winner == match.BLUE_TEAM %}
+                    <span class="blue-team-win">Blue Team Victory</span>
+                {% else %}
+                    <span class="red-team-win">Red Team Victory</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Statistics Overview -->
+    <div class="team-stats-container">
+        <h2>Team Statistics</h2>
+        <div class="team-stats-grid">
+            <div class="blue-team-stats">
+                <h3>Blue Team</h3>
+                <div class="stat-row">
+                    <span class="stat-label">Gold:</span>
+                    <span class="stat-value">{{ team_stats.blue_team_gold }}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Kills:</span>
+                    <span class="stat-value">{{ team_stats.blue_team_kills }}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Damage:</span>
+                    <span class="stat-value">{{ team_stats.blue_team_damage }}</span>
+                </div>
+            </div>
+            
+            <div class="team-comparison">
+                <div class="comparison-row">
+                    <span class="comparison-label">Gold Difference:</span>
+                    <span class="comparison-value {% if team_stats.gold_difference > 0 %}blue-advantage{% elif team_stats.gold_difference < 0 %}red-advantage{% endif %}">
+                        {{ team_stats.gold_difference }}
+                    </span>
+                </div>
+                <div class="comparison-row">
+                    <span class="comparison-label">Kill Difference:</span>
+                    <span class="comparison-value {% if team_stats.kill_difference > 0 %}blue-advantage{% elif team_stats.kill_difference < 0 %}red-advantage{% endif %}">
+                        {{ team_stats.kill_difference }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="red-team-stats">
+                <h3>Red Team</h3>
+                <div class="stat-row">
+                    <span class="stat-label">Gold:</span>
+                    <span class="stat-value">{{ team_stats.red_team_gold }}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Kills:</span>
+                    <span class="stat-value">{{ team_stats.red_team_kills }}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Damage:</span>
+                    <span class="stat-value">{{ team_stats.red_team_damage }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Participants Details -->
+    <div class="participants-container">
+        <div class="blue-team-participants">
+            <h3>Blue Team</h3>
+            <div class="participants-table">
+                <div class="table-header">
+                    <div class="header-cell">Champion</div>
+                    <div class="header-cell">Player</div>
+                    <div class="header-cell">KDA</div>
+                    <div class="header-cell">Damage</div>
+                    <div class="header-cell">Gold</div>
+                    <div class="header-cell">Items</div>
+                </div>
+                {% for participant in blue_team %}
+                <div class="participant-row">
+                    <div class="participant-cell">
+                        <img src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}" class="champion-icon">
+                        <span>{{ participant.champion.name }}</span>
+                    </div>
+                    <div class="participant-cell">
+                        <a href="{{ participant.summoner.get_url }}">{{ participant.game_name }}</a>
+                    </div>
+                    <div class="participant-cell">
+                        {{ participant.kills }}/{{ participant.deaths }}/{{ participant.assists }}
+                        <div class="kda-ratio">({{ participant.get_kda|floatformat:2 }})</div>
+                    </div>
+                    <div class="participant-cell">
+                        {{ participant.damage_dealt }}
+                        <div class="damage-share">({{ team_stats.blue_team_damage_share|get_item:participant.id|floatformat:1 }}%)</div>
+                    </div>
+                    <div class="participant-cell">
+                        {{ participant.gold_earned }}
+                        <div class="gold-share">({{ team_stats.blue_team_gold_share|get_item:participant.id|floatformat:1 }}%)</div>
+                    </div>
+                    <div class="participant-cell items">
+                        {% if participant.item1 %}<img src="{{ participant.item1.get_url }}" alt="{{ participant.item1.name }}" class="item-icon">{% endif %}
+                        {% if participant.item2 %}<img src="{{ participant.item2.get_url }}" alt="{{ participant.item2.name }}" class="item-icon">{% endif %}
+                        {% if participant.item3 %}<img src="{{ participant.item3.get_url }}" alt="{{ participant.item3.name }}" class="item-icon">{% endif %}
+                        {% if participant.item4 %}<img src="{{ participant.item4.get_url }}" alt="{{ participant.item4.name }}" class="item-icon">{% endif %}
+                        {% if participant.item5 %}<img src="{{ participant.item5.get_url }}" alt="{{ participant.item5.name }}" class="item-icon">{% endif %}
+                        {% if participant.item6 %}<img src="{{ participant.item6.get_url }}" alt="{{ participant.item6.name }}" class="item-icon">{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="red-team-participants">
+            <h3>Red Team</h3>
+            <div class="participants-table">
+                <div class="table-header">
+                    <div class="header-cell">Champion</div>
+                    <div class="header-cell">Player</div>
+                    <div class="header-cell">KDA</div>
+                    <div class="header-cell">Damage</div>
+                    <div class="header-cell">Gold</div>
+                    <div class="header-cell">Items</div>
+                </div>
+                {% for participant in red_team %}
+                <div class="participant-row">
+                    <div class="participant-cell">
+                        <img src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}" class="champion-icon">
+                        <span>{{ participant.champion.name }}</span>
+                    </div>
+                    <div class="participant-cell">
+                        <a href="{{ participant.summoner.get_url }}">{{ participant.game_name }}</a>
+                    </div>
+                    <div class="participant-cell">
+                        {{ participant.kills }}/{{ participant.deaths }}/{{ participant.assists }}
+                        <div class="kda-ratio">({{ participant.get_kda|floatformat:2 }})</div>
+                    </div>
+                    <div class="participant-cell">
+                        {{ participant.damage_dealt }}
+                        <div class="damage-share">({{ team_stats.red_team_damage_share|get_item:participant.id|floatformat:1 }}%)</div>
+                    </div>
+                    <div class="participant-cell">
+                        {{ participant.gold_earned }}
+                        <div class="gold-share">({{ team_stats.red_team_gold_share|get_item:participant.id|floatformat:1 }}%)</div>
+                    </div>
+                    <div class="participant-cell items">
+                        {% if participant.item1 %}<img src="{{ participant.item1.get_url }}" alt="{{ participant.item1.name }}" class="item-icon">{% endif %}
+                        {% if participant.item2 %}<img src="{{ participant.item2.get_url }}" alt="{{ participant.item2.name }}" class="item-icon">{% endif %}
+                        {% if participant.item3 %}<img src="{{ participant.item3.get_url }}" alt="{{ participant.item3.name }}" class="item-icon">{% endif %}
+                        {% if participant.item4 %}<img src="{{ participant.item4.get_url }}" alt="{{ participant.item4.name }}" class="item-icon">{% endif %}
+                        {% if participant.item5 %}<img src="{{ participant.item5.get_url }}" alt="{{ participant.item5.name }}" class="item-icon">{% endif %}
+                        {% if participant.item6 %}<img src="{{ participant.item6.get_url }}" alt="{{ participant.item6.name }}" class="item-icon">{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Item Build Timeline -->
+    {% if timeline_data %}
+    <div class="timeline-container">
+        <h2>Item Build Timeline</h2>
+        <div class="timeline-content">
+            {% for participant in blue_team %}
+            <div class="participant-timeline">
+                <div class="participant-header">
+                    <img src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}" class="champion-icon-small">
+                    <span>{{ participant.game_name }}</span>
+                </div>
+                <div class="item-timeline">
+                    {% for purchase in timeline_data.item_purchases|get_item:participant.id %}
+                    <div class="item-purchase">
+                        <div class="purchase-time">{{ purchase.timestamp|divide:60000|floatformat:0 }}m</div>
+                        <div class="purchase-item">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/{{ match.get_patch }}/img/item/{{ purchase.itemId }}.png" alt="Item {{ purchase.itemId }}" class="timeline-item-icon">
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="no-timeline-data">No item purchase data available</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% for participant in red_team %}
+            <div class="participant-timeline">
+                <div class="participant-header">
+                    <img src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}" class="champion-icon-small">
+                    <span>{{ participant.game_name }}</span>
+                </div>
+                <div class="item-timeline">
+                    {% for purchase in timeline_data.item_purchases|get_item:participant.id %}
+                    <div class="item-purchase">
+                        <div class="purchase-time">{{ purchase.timestamp|divide:60000|floatformat:0 }}m</div>
+                        <div class="purchase-item">
+                            <img src="https://ddragon.leagueoflegends.com/cdn/{{ match.get_patch }}/img/item/{{ purchase.itemId }}.png" alt="Item {{ purchase.itemId }}" class="timeline-item-icon">
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="no-timeline-data">No item purchase data available</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,4 +1,5 @@
 import os
+import json
 
 import django
 from datetime import datetime as dt
@@ -111,14 +112,80 @@ class MatchManager():
     def _get_match_info(self, match_id):
         try:
             match_details = self._watcher.match.by_id(self._region, match_id)
+            # Get timeline data for item builds
+            try:
+                timeline_data = self._watcher.match.timeline_by_match(self._region, match_id)
+                match_details['timeline'] = timeline_data
+            except ApiError as err:
+                print(f"Error fetching timeline data for match ID {match_id}: {err}")
+                match_details['timeline'] = None
             return match_details
         except ApiError as err:
             print(f"Error fetching match info for match ID {match_id}: {err}")
 
     def _create_match(self, match_id: str, match_info: dict, new=False):
-
         blue = match_info["teams"][0]["win"]
         winner = 100 if blue is True else 200
+        
+        # Calculate team statistics
+        blue_team_gold = 0
+        red_team_gold = 0
+        blue_team_kills = 0
+        red_team_kills = 0
+        blue_team_deaths = 0
+        red_team_deaths = 0
+        blue_team_assists = 0
+        red_team_assists = 0
+        blue_team_damage_dealt = 0
+        red_team_damage_dealt = 0
+        blue_team_damage_taken = 0
+        red_team_damage_taken = 0
+        
+        # Process participants to calculate team statistics
+        for participant in match_info["participants"]:
+            if participant["teamId"] == 100:  # Blue team
+                blue_team_gold += participant["goldEarned"]
+                blue_team_kills += participant["kills"]
+                blue_team_deaths += participant["deaths"]
+                blue_team_assists += participant["assists"]
+                blue_team_damage_dealt += participant["totalDamageDealtToChampions"]
+                blue_team_damage_taken += participant["totalDamageTaken"]
+            else:  # Red team
+                red_team_gold += participant["goldEarned"]
+                red_team_kills += participant["kills"]
+                red_team_deaths += participant["deaths"]
+                red_team_assists += participant["assists"]
+                red_team_damage_dealt += participant["totalDamageDealtToChampions"]
+                red_team_damage_taken += participant["totalDamageTaken"]
+        
+        # Process timeline data if available
+        timeline_json = None
+        if 'timeline' in match_info and match_info['timeline']:
+            # Extract relevant timeline data and convert to JSON string
+            timeline_data = {
+                'frames': []
+            }
+            
+            # Process frames to extract item purchases and other events
+            for frame in match_info['timeline']['info']['frames']:
+                frame_data = {
+                    'timestamp': frame['timestamp'],
+                    'events': []
+                }
+                
+                # Extract item purchase events
+                for event in frame.get('events', []):
+                    if event['type'] == 'ITEM_PURCHASED':
+                        frame_data['events'].append({
+                            'type': 'ITEM_PURCHASED',
+                            'timestamp': event['timestamp'],
+                            'participantId': event['participantId'],
+                            'itemId': event['itemId']
+                        })
+                
+                timeline_data['frames'].append(frame_data)
+            
+            timeline_json = json.dumps(timeline_data)
 
         match, created = Match.objects.update_or_create(
             match_id=match_id,
@@ -128,7 +195,21 @@ class MatchManager():
                 "game_mode": match_info["gameMode"],
                 "game_version": match_info["gameVersion"],
                 "winner": winner,
-                "new_match": new
+                "new_match": new,
+                # Add team statistics
+                "blue_team_gold": blue_team_gold,
+                "red_team_gold": red_team_gold,
+                "blue_team_kills": blue_team_kills,
+                "red_team_kills": red_team_kills,
+                "blue_team_deaths": blue_team_deaths,
+                "red_team_deaths": red_team_deaths,
+                "blue_team_assists": blue_team_assists,
+                "red_team_assists": red_team_assists,
+                "blue_team_damage_dealt": blue_team_damage_dealt,
+                "red_team_damage_dealt": red_team_damage_dealt,
+                "blue_team_damage_taken": blue_team_damage_taken,
+                "red_team_damage_taken": red_team_damage_taken,
+                "timeline_data": timeline_json
             }
         )
 
@@ -198,6 +279,24 @@ class MatchManager():
 
     def _create_participants(self, match_info: dict, match: Match):
         participants_puid = match_info["metadata"]["participants"]
+        
+        # Process timeline data for item purchases if available
+        participant_item_timelines = {}
+        if 'timeline' in match_info and match_info['timeline']:
+            for participant_id in range(1, 11):  # Participant IDs are 1-10
+                item_events = []
+                
+                # Extract item purchase events for this participant
+                for frame in match_info['timeline']['info']['frames']:
+                    for event in frame.get('events', []):
+                        if event['type'] == 'ITEM_PURCHASED' and event['participantId'] == participant_id:
+                            item_events.append({
+                                'timestamp': event['timestamp'],
+                                'itemId': event['itemId']
+                            })
+                
+                # Store timeline for this participant
+                participant_item_timelines[participant_id] = json.dumps(item_events)
 
         for i in range(len(participants_puid)):
             participant_data = match_info["info"]["participants"][i]
@@ -216,6 +315,18 @@ class MatchManager():
                 rune2 = Rune.objects.get(rune_id=participant_data["perks"]["styles"][1]["style"])
             except Rune.DoesNotExist:
                 rune2 = None
+            
+            # Get additional statistics
+            damage_dealt = participant_data.get("totalDamageDealtToChampions", 0)
+            damage_taken = participant_data.get("totalDamageTaken", 0)
+            healing_done = participant_data.get("totalHeal", 0) + participant_data.get("totalHealsOnTeammates", 0)
+            vision_score = participant_data.get("visionScore", 0)
+            gold_earned = participant_data.get("goldEarned", 0)
+            largest_killing_spree = participant_data.get("largestKillingSpree", 0)
+            largest_multi_kill = participant_data.get("largestMultiKill", 0)
+            
+            # Get item timeline for this participant
+            item_timeline = participant_item_timelines.get(i + 1)  # Participant IDs are 1-indexed
 
             participant, created = Participant.objects.update_or_create(
                 match=match,
@@ -233,6 +344,15 @@ class MatchManager():
                     "spell2": spell2,
                     "rune1": rune1,
                     "rune2": rune2,
+                    # Add new statistics
+                    "damage_dealt": damage_dealt,
+                    "damage_taken": damage_taken,
+                    "healing_done": healing_done,
+                    "vision_score": vision_score,
+                    "gold_earned": gold_earned,
+                    "largest_killing_spree": largest_killing_spree,
+                    "largest_multi_kill": largest_multi_kill,
+                    "item_timeline": item_timeline
                 }
             )
             total_snowballs = 0

@@ -1,10 +1,12 @@
 import pytz
+import json
 from django.db import models
 from django.utils import timezone
 from django.db import connection
 from django.urls import reverse
 from django import template
 from django.core.cache import cache
+from django.contrib.postgres.fields import JSONField
 
 
 class Champion(models.Model):
@@ -120,6 +122,23 @@ class Match(models.Model):
     game_version = models.CharField(max_length=50)
     winner = models.IntegerField(choices=WINNER_CHOICES)
     new_match = models.BooleanField(default=False)
+    
+    # New team statistics fields
+    blue_team_gold = models.IntegerField(default=0)
+    red_team_gold = models.IntegerField(default=0)
+    blue_team_kills = models.IntegerField(default=0)
+    red_team_kills = models.IntegerField(default=0)
+    blue_team_deaths = models.IntegerField(default=0)
+    red_team_deaths = models.IntegerField(default=0)
+    blue_team_assists = models.IntegerField(default=0)
+    red_team_assists = models.IntegerField(default=0)
+    blue_team_damage_dealt = models.IntegerField(default=0)
+    red_team_damage_dealt = models.IntegerField(default=0)
+    blue_team_damage_taken = models.IntegerField(default=0)
+    red_team_damage_taken = models.IntegerField(default=0)
+    
+    # Timeline data for item builds and other time-based statistics
+    timeline_data = models.TextField(blank=True, null=True)  # Stored as JSON string
 
     def get_patch(self):
         return '.'.join(self.game_version.split('.')[:2])
@@ -127,13 +146,43 @@ class Match(models.Model):
     def get_duration(self):
         minutes = self.game_duration // 60
         seconds = self.game_duration % 60
-        return f"{minutes}:{seconds}"
+        return f"{minutes}:{seconds:02d}"
 
     def get_minutes(self):
         return self.game_duration // 60
 
     def get_participants(self):
         return self.participants.select_related("match").all()
+    
+    def get_gold_difference(self):
+        """Calculate gold difference between teams (positive means blue team advantage)"""
+        return self.blue_team_gold - self.red_team_gold
+    
+    def get_kill_difference(self):
+        """Calculate kill difference between teams (positive means blue team advantage)"""
+        return self.blue_team_kills - self.red_team_kills
+    
+    def get_team_damage(self, team_id):
+        """Get total damage for a team"""
+        if team_id == self.BLUE_TEAM:
+            return self.blue_team_damage_dealt
+        elif team_id == self.RED_TEAM:
+            return self.red_team_damage_dealt
+        return 0
+    
+    def get_team_gold(self, team_id):
+        """Get total gold for a team"""
+        if team_id == self.BLUE_TEAM:
+            return self.blue_team_gold
+        elif team_id == self.RED_TEAM:
+            return self.red_team_gold
+        return 0
+    
+    def get_timeline_data(self):
+        """Get timeline data as Python object"""
+        if self.timeline_data:
+            return json.loads(self.timeline_data)
+        return {}
 
     def get_time_diff(self):
         la_timezone = pytz.timezone('America/Los_Angeles')
@@ -193,11 +242,51 @@ class Participant(models.Model):
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
     game_name = models.CharField(max_length=50)
+    
+    # New statistics fields
+    damage_dealt = models.IntegerField(default=0)
+    damage_taken = models.IntegerField(default=0)
+    healing_done = models.IntegerField(default=0)
+    vision_score = models.IntegerField(default=0)
+    gold_earned = models.IntegerField(default=0)
+    largest_killing_spree = models.IntegerField(default=0)
+    largest_multi_kill = models.IntegerField(default=0)
+    
+    # Timeline data for item builds
+    item_timeline = models.TextField(blank=True, null=True)  # Stored as JSON string
 
     def match_result(self):
         if self.win:
             return "Victory"
         return "Defeat"
+    
+    def get_kda(self):
+        """Calculate KDA ratio"""
+        if self.deaths == 0:
+            return self.kills + self.assists
+        return (self.kills + self.assists) / self.deaths
+    
+    def get_damage_share(self):
+        """Calculate damage share as percentage of team total"""
+        if self.team == self.BLUE_TEAM and self.match.blue_team_damage_dealt > 0:
+            return (self.damage_dealt / self.match.blue_team_damage_dealt) * 100
+        elif self.team == self.RED_TEAM and self.match.red_team_damage_dealt > 0:
+            return (self.damage_dealt / self.match.red_team_damage_dealt) * 100
+        return 0
+    
+    def get_gold_share(self):
+        """Calculate gold share as percentage of team total"""
+        if self.team == self.BLUE_TEAM and self.match.blue_team_gold > 0:
+            return (self.gold_earned / self.match.blue_team_gold) * 100
+        elif self.team == self.RED_TEAM and self.match.red_team_gold > 0:
+            return (self.gold_earned / self.match.red_team_gold) * 100
+        return 0
+    
+    def get_item_timeline(self):
+        """Get item timeline data as Python object"""
+        if self.item_timeline:
+            return json.loads(self.item_timeline)
+        return {}
 
     def __str__(self):
         return f"{self.game_name} playing {self.champion} in match {self.match}"
