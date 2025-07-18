@@ -6,9 +6,10 @@ from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.cache import cache_page
 
-from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
+from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch, Summoner
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from match_history.util.populate_data import SummonerManager
@@ -353,7 +354,7 @@ def _get_match_queryset(summoner):
             'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", "item1", "item2", "item3",
             'item4', 'item5', 'item6', 'summoner__profile_icon'),
                  to_attr='all_participants')
-    )
+    ).select_related()  # Add select_related for better performance
     return matches_queryset
 
 
@@ -366,3 +367,94 @@ def _get_champions_queryset(summoner):
 def _get_main_champ(summoner):
     queryset = _get_champions_queryset(summoner)
     return queryset.first().champion
+
+
+@require_GET
+def get_expanded_match_details(request, match_id):
+    """
+    API endpoint to fetch detailed match data for a specific match.
+    This function is optimized with prefetch_related and caching.
+    """
+    # Check if the data is in cache
+    cache_key = f'expanded_match_{match_id}'
+    cached_data = cache.get(cache_key)
+    
+    if cached_data:
+        return JsonResponse(cached_data)
+    
+    try:
+        # Get the match with optimized prefetch_related for all related data
+        match = Match.objects.prefetch_related(
+            Prefetch('participants', 
+                queryset=Participant.objects.select_related(
+                    'summoner', 'champion', 'spell1', 'spell2', 'rune1', 'rune2',
+                    'item1', 'item2', 'item3', 'item4', 'item5', 'item6',
+                    'summoner__profile_icon'
+                )
+            )
+        ).get(match_id=match_id)
+        
+        # Get all participants for this match
+        participants = match.participants.all()
+        
+        # Organize participants by team
+        blue_team = []
+        red_team = []
+        
+        for participant in participants:
+            participant_data = {
+                'summoner_name': participant.game_name,
+                'champion_name': participant.champion.name,
+                'champion_image': participant.champion.get_url(),
+                'kills': participant.kills,
+                'deaths': participant.deaths,
+                'assists': participant.assists,
+                'creep_score': participant.creep_score,
+                'items': [
+                    getattr(participant, f'item{i}').get_url() if getattr(participant, f'item{i}') else None
+                    for i in range(1, 7)
+                ],
+                'spells': [
+                    participant.spell1.get_url(),
+                    participant.spell2.get_url()
+                ],
+                'runes': [
+                    participant.rune1.get_url() if participant.rune1 else None,
+                    participant.rune2.get_url() if participant.rune2 else None
+                ],
+                'win': participant.win,
+                'summoner_id': participant.summoner.puuid,
+                'summoner_url': participant.summoner.get_url()
+            }
+            
+            if participant.team == 100:  # Blue team
+                blue_team.append(participant_data)
+            else:  # Red team
+                red_team.append(participant_data)
+        
+        # Match details
+        match_details = {
+            'match_id': match.match_id,
+            'game_start': match.game_start.isoformat(),
+            'game_duration': match.game_duration,
+            'game_duration_formatted': match.get_duration(),
+            'game_mode': match.game_mode,
+            'game_version': match.game_version,
+            'patch': match.get_patch(),
+            'winner': match.winner,
+            'blue_team': blue_team,
+            'red_team': red_team,
+            'time_diff': match.get_time_diff()
+        }
+        
+        response_data = {'match_details': match_details}
+        
+        # Cache the data for 15 minutes
+        cache.set(cache_key, response_data, 60 * 15)
+        
+        return JsonResponse(response_data)
+    
+    except Match.DoesNotExist:
+        return JsonResponse({'error': 'Match not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
