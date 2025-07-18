@@ -155,18 +155,53 @@ def summoner(request):
 
 
 def champions(request):
-    champion_query = ChampionStatsPatch.objects.filter(patch__iexact=patch).prefetch_related('champion')
+    # Get available patches for filtering
+    available_patches = ChampionStatsPatch.objects.values_list('patch', flat=True).distinct().order_by('-patch')
+    
+    # Get selected patch from query parameters or use default
+    selected_patch = request.GET.get('patch', patch)
+    
+    # Get sort parameter from query parameters
+    sort_by = request.GET.get('sort', 'win_rate')  # Default sort by win rate
+    
+    # Query champion stats for the selected patch
+    champion_query = ChampionStatsPatch.objects.filter(patch__iexact=selected_patch).prefetch_related('champion')
+    
+    # Process champion data with calculated statistics
     champion_data = []
-
     for champion_stat in champion_query:
-        champion_stat_tuple = (
-            champion_stat.patch,
-            champion_stat.total_played,
-            champion_stat.total_wins,
-            champion_stat.total_losses,
-        )
-        champion_data.append((champion_stat.champion.name, champion_stat_tuple))
-    context = {'champion_query': champion_data}
+        # Calculate win rate and pick rate
+        win_rate = (champion_stat.total_wins / champion_stat.total_played * 100) if champion_stat.total_played > 0 else 0
+        
+        champion_data.append({
+            'champion': champion_stat.champion,
+            'patch': champion_stat.patch,
+            'games_played': champion_stat.total_played,
+            'wins': champion_stat.total_wins,
+            'losses': champion_stat.total_losses,
+            'win_rate': win_rate,
+        })
+    
+    # Sort the data based on the sort parameter
+    if sort_by == 'win_rate':
+        champion_data = sorted(champion_data, key=lambda x: x['win_rate'], reverse=True)
+    elif sort_by == 'games_played':
+        champion_data = sorted(champion_data, key=lambda x: x['games_played'], reverse=True)
+    elif sort_by == 'name':
+        champion_data = sorted(champion_data, key=lambda x: x['champion'].name)
+    
+    # Pagination
+    paginator = Paginator(champion_data, 20)  # 20 champions per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'champion_data': page_obj,
+        'available_patches': available_patches,
+        'selected_patch': selected_patch,
+        'sort_by': sort_by,
+    }
+    
     return render(request, 'match_history/champions.html', context)
 
 

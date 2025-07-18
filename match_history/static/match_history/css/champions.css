@@ -1,0 +1,210 @@
+/* Champions Page Styles */
+.champions-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    color: #e8e8e8;
+}
+
+.champions-title {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    color: #ffffff;
+}
+
+/* Controls Container */
+.controls-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-container {
+    background-color: #1e1e2f;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.filter-container label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.filter-container select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    background-color: #2a2a3a;
+    color: #ffffff;
+    border: 1px solid #3a3a4a;
+    cursor: pointer;
+}
+
+/* Champions Table */
+.champions-table-container {
+    overflow-x: auto;
+    background-color: #1e1e2f;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.champions-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.champions-table th,
+.champions-table td {
+    padding: 15px;
+    border-bottom: 1px solid #2a2a3a;
+}
+
+.champions-table thead {
+    background-color: #2a2a3a;
+}
+
+.champions-table th {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.champions-table tbody tr:hover {
+    background-color: #2a2a3a;
+}
+
+/* Champion Column */
+.champion-info {
+    display: flex;
+    align-items: center;
+}
+
+.champion-portrait {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 10px;
+    border: 2px solid #3a3a4a;
+}
+
+.champion-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.champion-name {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Stats Columns */
+.stats-column {
+    text-align: center;
+}
+
+.win-rate {
+    font-weight: bold;
+}
+
+/* Sort Links */
+.sort-link {
+    color: #ffffff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sort-link:hover {
+    color: #c9aa71;
+}
+
+.sort-link.active {
+    color: #c9aa71;
+    font-weight: bold;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 5px;
+}
+
+.pagination-number,
+.pagination-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: #2a2a3a;
+    color: #ffffff;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.pagination-number:hover,
+.pagination-arrow:hover {
+    background-color: #3a3a4a;
+}
+
+.pagination-number.active {
+    background-color: #c9aa71;
+    color: #1e1e2f;
+    font-weight: bold;
+}
+
+.pagination-arrow.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* No Data Message */
+.no-data {
+    text-align: center;
+    padding: 30px;
+    font-style: italic;
+    color: #888;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .champions-table th,
+    .champions-table td {
+        padding: 10px;
+    }
+    
+    .rank-column {
+        display: none;
+    }
+    
+    .champion-portrait {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .champions-title {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .champions-table {
+        font-size: 0.9rem;
+    }
+    
+    .champion-name {
+        max-width: 80px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}

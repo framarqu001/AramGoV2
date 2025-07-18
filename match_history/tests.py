@@ -1,5 +1,6 @@
-from django.test import TransactionTestCase, TestCase
+from django.test import TransactionTestCase, TestCase, Client
 from django.core.cache import cache
+from django.urls import reverse
 from unittest.mock import patch
 from .models import *
 from AramGoV2.util.current_patch import get_patch
@@ -98,3 +99,89 @@ class PatchVersionCacheTest(TestCase):
         
         # Verify that the mock was called
         mock_get_patch.assert_called_once()
+
+
+class ChampionsViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.champions_url = reverse('match_history:champions')
+        
+        # Create test champions
+        self.champion1 = Champion.objects.create(
+            champion_id='Aatrox',
+            name='Aatrox',
+            title='The Darkin Blade',
+            image_path='Aatrox.png',
+            splash_image_path='Aatrox_0.jpg'
+        )
+        
+        self.champion2 = Champion.objects.create(
+            champion_id='Ahri',
+            name='Ahri',
+            title='The Nine-Tailed Fox',
+            image_path='Ahri.png',
+            splash_image_path='Ahri_0.jpg'
+        )
+        
+        # Create champion stats for different patches
+        self.stats1 = ChampionStatsPatch.objects.create(
+            champion=self.champion1,
+            patch='14.17',
+            total_played=100,
+            total_wins=60,
+            total_losses=40
+        )
+        
+        self.stats2 = ChampionStatsPatch.objects.create(
+            champion=self.champion2,
+            patch='14.17',
+            total_played=150,
+            total_wins=75,
+            total_losses=75
+        )
+        
+        self.stats3 = ChampionStatsPatch.objects.create(
+            champion=self.champion1,
+            patch='14.16',
+            total_played=80,
+            total_wins=40,
+            total_losses=40
+        )
+    
+    def test_champions_view_loads(self):
+        response = self.client.get(self.champions_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'match_history/champions.html')
+    
+    def test_champions_view_context(self):
+        response = self.client.get(self.champions_url)
+        self.assertIn('champion_data', response.context)
+        self.assertIn('available_patches', response.context)
+        self.assertIn('selected_patch', response.context)
+        self.assertIn('sort_by', response.context)
+    
+    def test_champions_view_filtering(self):
+        # Test filtering by patch
+        response = self.client.get(f"{self.champions_url}?patch=14.16")
+        self.assertEqual(response.context['selected_patch'], '14.16')
+        self.assertEqual(len(response.context['champion_data']), 1)
+        
+        # Test default patch
+        response = self.client.get(self.champions_url)
+        self.assertEqual(len(response.context['champion_data']), 2)
+    
+    def test_champions_view_sorting(self):
+        # Test sorting by win rate
+        response = self.client.get(f"{self.champions_url}?sort=win_rate")
+        champions = response.context['champion_data']
+        self.assertEqual(champions[0]['champion'].name, 'Aatrox')  # 60% win rate
+        
+        # Test sorting by games played
+        response = self.client.get(f"{self.champions_url}?sort=games_played")
+        champions = response.context['champion_data']
+        self.assertEqual(champions[0]['champion'].name, 'Ahri')  # 150 games played
+        
+        # Test sorting by name
+        response = self.client.get(f"{self.champions_url}?sort=name")
+        champions = response.context['champion_data']
+        self.assertEqual(champions[0]['champion'].name, 'Aatrox')  # Alphabetically first
