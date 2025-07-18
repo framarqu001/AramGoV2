@@ -1,0 +1,131 @@
+{% comment %}
+This template contains the detailed match statistics that will be shown when a match card is expanded.
+It's included in match_list.html and receives the same context variables.
+{% endcomment %}
+
+<div class="match-details-container">
+    <div class="match-details-grid">
+        <!-- KDA Breakdown Section -->
+        <div class="details-section kda-breakdown">
+            <h3 class="details-title">KDA Breakdown</h3>
+            <div class="kda-stats">
+                <div class="kda-stat">
+                    <span class="stat-label">Kills</span>
+                    <span class="stat-value">{{ main_participant.kills }}</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill kill-fill" style="width: {{ main_participant.kills|default:0|floatformat:0 }}%;"></div>
+                    </div>
+                </div>
+                <div class="kda-stat">
+                    <span class="stat-label">Deaths</span>
+                    <span class="stat-value death-color">{{ main_participant.deaths }}</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill death-fill" style="width: {{ main_participant.deaths|default:0|floatformat:0 }}%;"></div>
+                    </div>
+                </div>
+                <div class="kda-stat">
+                    <span class="stat-label">Assists</span>
+                    <span class="stat-value">{{ main_participant.assists }}</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill assist-fill" style="width: {{ main_participant.assists|default:0|floatformat:0 }}%;"></div>
+                    </div>
+                </div>
+                <div class="kda-stat">
+                    <span class="stat-label">KDA Ratio</span>
+                    <span class="stat-value {% if main_stats.kda|floatformat:2 > 4 %}excellent-stat{% elif main_stats.kda|floatformat:2 > 3 %}great-stat{% elif main_stats.kda|floatformat:2 > 2 %}good-stat{% endif %}">{{ main_stats.kda }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CS Section -->
+        <div class="details-section cs-section">
+            <h3 class="details-title">Creep Score</h3>
+            <div class="cs-stats">
+                <div class="cs-stat">
+                    <span class="stat-label">Total CS</span>
+                    <span class="stat-value">{{ main_participant.creep_score }}</span>
+                </div>
+                <div class="cs-stat">
+                    <span class="stat-label">CS per Minute</span>
+                    <span class="stat-value {% if main_stats.cs_min|floatformat:1 > 7 %}excellent-stat{% elif main_stats.cs_min|floatformat:1 > 5 %}great-stat{% elif main_stats.cs_min|floatformat:1 > 3 %}good-stat{% endif %}">{{ main_stats.cs_min }}</span>
+                </div>
+                <div class="cs-graph">
+                    <div class="cs-graph-container">
+                        <div class="cs-graph-bar" style="height: {{ main_stats.cs_min|floatformat:1|multiply:10 }}%;">
+                            <span class="cs-graph-value">{{ main_stats.cs_min }}</span>
+                        </div>
+                    </div>
+                    <div class="cs-graph-label">CS/min</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Impact Section -->
+        <div class="details-section impact-section">
+            <h3 class="details-title">Game Impact</h3>
+            <div class="impact-stats">
+                <div class="impact-stat">
+                    <span class="stat-label">Kill Participation</span>
+                    <span class="stat-value">{{ main_stats.kill_participation|default:"N/A" }}%</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill impact-fill" style="width: {{ main_stats.kill_participation|default:0 }}%;"></div>
+                    </div>
+                </div>
+                <div class="impact-stat">
+                    <span class="stat-label">Damage Share</span>
+                    <span class="stat-value">{{ main_stats.damage_share|default:"N/A" }}%</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill impact-fill" style="width: {{ main_stats.damage_share|default:0 }}%;"></div>
+                    </div>
+                </div>
+                <div class="impact-stat">
+                    <span class="stat-label">Gold Share</span>
+                    <span class="stat-value">{{ main_stats.gold_share|default:"N/A" }}%</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill impact-fill" style="width: {{ main_stats.gold_share|default:0 }}%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Damage Section -->
+        <div class="details-section damage-section">
+            <h3 class="details-title">Damage</h3>
+            <div class="damage-stats">
+                <div class="damage-stat">
+                    <span class="stat-label">Damage Dealt</span>
+                    <span class="stat-value">{{ main_stats.damage_dealt|default:"N/A" }}</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill damage-dealt-fill" style="width: {{ main_stats.damage_percentage|default:0 }}%;"></div>
+                    </div>
+                </div>
+                <div class="damage-stat">
+                    <span class="stat-label">Damage Taken</span>
+                    <span class="stat-value">{{ main_stats.damage_taken|default:"N/A" }}</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill damage-taken-fill" style="width: {{ main_stats.damage_taken_percentage|default:0 }}%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vision Section -->
+        <div class="details-section vision-section">
+            <h3 class="details-title">Vision</h3>
+            <div class="vision-stats">
+                <div class="vision-stat">
+                    <span class="stat-label">Vision Score</span>
+                    <span class="stat-value">{{ main_stats.vision_score|default:"N/A" }}</span>
+                </div>
+                <div class="vision-stat">
+                    <span class="stat-label">Wards Placed</span>
+                    <span class="stat-value">{{ main_stats.wards_placed|default:"N/A" }}</span>
+                </div>
+                <div class="vision-stat">
+                    <span class="stat-label">Wards Destroyed</span>
+                    <span class="stat-value">{{ main_stats.wards_destroyed|default:"N/A" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

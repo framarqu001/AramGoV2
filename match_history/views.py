@@ -225,9 +225,36 @@ def _get_new_match_data(summoner):
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
+        # Calculate team totals for advanced statistics
+        team_kills = sum(p.kills for p in blue_team_list if p.team == main_participant.team) or 1
+        team_damage = 10000  # Placeholder value since we don't have actual damage data
+        team_gold = 10000    # Placeholder value since we don't have actual gold data
+        
+        # Calculate kill participation, damage share, and gold share
+        kill_participation = ((main_participant.kills + main_participant.assists) / team_kills) * 100 if team_kills > 0 else 0
+        damage_share = 25  # Placeholder percentage
+        gold_share = 20    # Placeholder percentage
+        
+        # Additional placeholder statistics
+        damage_dealt = 15000
+        damage_taken = 12000
+        vision_score = 15
+        wards_placed = 5
+        wards_destroyed = 2
+
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "kill_participation": int(kill_participation),
+            "damage_share": damage_share,
+            "gold_share": gold_share,
+            "damage_dealt": damage_dealt,
+            "damage_taken": damage_taken,
+            "damage_percentage": 65,  # Placeholder percentage for bar width
+            "damage_taken_percentage": 55,  # Placeholder percentage for bar width
+            "vision_score": vision_score,
+            "wards_placed": wards_placed,
+            "wards_destroyed": wards_destroyed
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
@@ -252,9 +279,36 @@ def _get_match_data(summoner, page_obj):
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
+        # Calculate team totals for advanced statistics
+        team_kills = sum(p.kills for p in blue_team_list if p.team == main_participant.team) or 1
+        team_damage = 10000  # Placeholder value since we don't have actual damage data
+        team_gold = 10000    # Placeholder value since we don't have actual gold data
+        
+        # Calculate kill participation, damage share, and gold share
+        kill_participation = ((main_participant.kills + main_participant.assists) / team_kills) * 100 if team_kills > 0 else 0
+        damage_share = 25  # Placeholder percentage
+        gold_share = 20    # Placeholder percentage
+        
+        # Additional placeholder statistics
+        damage_dealt = 15000
+        damage_taken = 12000
+        vision_score = 15
+        wards_placed = 5
+        wards_destroyed = 2
+
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "kill_participation": int(kill_participation),
+            "damage_share": damage_share,
+            "gold_share": gold_share,
+            "damage_dealt": damage_dealt,
+            "damage_taken": damage_taken,
+            "damage_percentage": 65,  # Placeholder percentage for bar width
+            "damage_taken_percentage": 55,  # Placeholder percentage for bar width
+            "vision_score": vision_score,
+            "wards_placed": wards_placed,
+            "wards_destroyed": wards_destroyed
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data
