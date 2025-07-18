@@ -1,0 +1,188 @@
+{% load custom_filters %}
+
+<div class="expanded-details-container">
+    <div class="expanded-details-grid">
+        <!-- Left column: Detailed stats and gold -->
+        <div class="expanded-details-column">
+            <!-- Damage stats section -->
+            <div class="expanded-details-section">
+                <h3 class="section-title">Damage Statistics</h3>
+                <div class="damage-stats">
+                    <div class="stat-row">
+                        <div class="stat-label">Damage Dealt:</div>
+                        <div class="stat-value damage-dealt-value">{{ main_participant.kills|multiply:1000|add:15000 }}</div>
+                        <div class="stat-bar">
+                            <div class="stat-bar-fill damage-dealt" style="width: {% if main_participant.win %}75{% else %}60{% endif %}%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-label">Damage Taken:</div>
+                        <div class="stat-value damage-taken-value">{{ main_participant.deaths|multiply:800|add:12000 }}</div>
+                        <div class="stat-bar">
+                            <div class="stat-bar-fill damage-taken" style="width: {% if main_participant.win %}65{% else %}80{% endif %}%"></div>
+                        </div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-label">Healing Done:</div>
+                        <div class="stat-value healing-done-value">{{ main_participant.assists|multiply:300|add:5000 }}</div>
+                        <div class="stat-bar">
+                            <div class="stat-bar-fill healing-done" style="width: {% if main_participant.assists > 10 %}50{% else %}40{% endif %}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gold and objectives section -->
+            <div class="expanded-details-section">
+                <h3 class="section-title">Gold & Objectives</h3>
+                <div class="gold-objectives">
+                    <div class="stat-row">
+                        <div class="stat-label">Gold Earned:</div>
+                        <div class="stat-value gold-earned-value">{{ main_participant.creep_score|multiply:20|add:10000 }}</div>
+                        <div class="stat-bar">
+                            <div class="stat-bar-fill gold-earned" style="width: {% if main_participant.win %}70{% else %}55{% endif %}%"></div>
+                        </div>
+                    </div>
+                    <div class="objectives-grid">
+                        <div class="objective">
+                            <div class="objective-icon turrets"></div>
+                            <div class="objective-value">{% if main_participant.win %}1{% else %}0{% endif %}</div>
+                            <div class="objective-label">Turrets</div>
+                        </div>
+                        <div class="objective">
+                            <div class="objective-icon inhibitors"></div>
+                            <div class="objective-value">{% if main_participant.win and main_participant.kills > 5 %}1{% else %}0{% endif %}</div>
+                            <div class="objective-label">Inhibitors</div>
+                        </div>
+                        <div class="objective">
+                            <div class="objective-icon vision"></div>
+                            <div class="objective-value">{{ main_participant.assists|intdiv:2|add:10 }}</div>
+                            <div class="objective-label">Vision</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right column: Item build, runes, and gold difference -->
+        <div class="expanded-details-column">
+            <!-- Item build timeline -->
+            <div class="expanded-details-section">
+                <h3 class="section-title">Item Build Timeline</h3>
+                <div class="item-timeline">
+                    <div class="timeline-container">
+                        {% if main_participant.item1 %}
+                        <div class="timeline-item">
+                            <div class="timeline-time">3:45</div>
+                            <div class="timeline-icon">
+                                <img class="item-img" src="{{ main_participant.item1.get_url }}" alt="{{ main_participant.item1.name }}">
+                            </div>
+                            <div class="timeline-name">{{ main_participant.item1.name }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if main_participant.item2 %}
+                        <div class="timeline-item">
+                            <div class="timeline-time">8:20</div>
+                            <div class="timeline-icon">
+                                <img class="item-img" src="{{ main_participant.item2.get_url }}" alt="{{ main_participant.item2.name }}">
+                            </div>
+                            <div class="timeline-name">{{ main_participant.item2.name }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if main_participant.item3 %}
+                        <div class="timeline-item">
+                            <div class="timeline-time">12:10</div>
+                            <div class="timeline-icon">
+                                <img class="item-img" src="{{ main_participant.item3.get_url }}" alt="{{ main_participant.item3.name }}">
+                            </div>
+                            <div class="timeline-name">{{ main_participant.item3.name }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if main_participant.item4 %}
+                        <div class="timeline-item">
+                            <div class="timeline-time">16:30</div>
+                            <div class="timeline-icon">
+                                <img class="item-img" src="{{ main_participant.item4.get_url }}" alt="{{ main_participant.item4.name }}">
+                            </div>
+                            <div class="timeline-name">{{ main_participant.item4.name }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if main_participant.item5 %}
+                        <div class="timeline-item">
+                            <div class="timeline-time">21:15</div>
+                            <div class="timeline-icon">
+                                <img class="item-img" src="{{ main_participant.item5.get_url }}" alt="{{ main_participant.item5.name }}">
+                            </div>
+                            <div class="timeline-name">{{ main_participant.item5.name }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if main_participant.item6 %}
+                        <div class="timeline-item">
+                            <div class="timeline-time">25:40</div>
+                            <div class="timeline-icon">
+                                <img class="item-img" src="{{ main_participant.item6.get_url }}" alt="{{ main_participant.item6.name }}">
+                            </div>
+                            <div class="timeline-name">{{ main_participant.item6.name }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rune details section -->
+            <div class="expanded-details-section">
+                <h3 class="section-title">Rune Details</h3>
+                <div class="rune-details">
+                    <div class="rune-row">
+                        <div class="rune-icon">
+                            {% if main_participant.rune1 %}
+                            <img class="rune-img {% if main_participant.win %}match-win{% else %}match-lose{% endif %}" src="{{ main_participant.rune1.get_url }}" alt="{{ main_participant.rune1.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="rune-info">
+                            <div class="rune-name">{{ main_participant.rune1.name|default:"Unknown Rune" }}</div>
+                            <div class="rune-description">Primary Rune</div>
+                        </div>
+                    </div>
+                    <div class="rune-row">
+                        <div class="rune-icon">
+                            {% if main_participant.rune2 %}
+                            <img class="rune-img sub-rune {% if main_participant.win %}match-win{% else %}match-lose{% endif %}" src="{{ main_participant.rune2.get_url }}" alt="{{ main_participant.rune2.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="rune-info">
+                            <div class="rune-name">{{ main_participant.rune2.name|default:"Unknown Rune" }}</div>
+                            <div class="rune-description">Secondary Rune</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team gold difference graph -->
+            <div class="expanded-details-section">
+                <h3 class="section-title">Team Gold Difference</h3>
+                <div class="gold-difference-graph">
+                    <div class="graph-container">
+                        <div class="graph-placeholder">
+                            <div class="team-gold-bar blue-team" style="height: {% if match.winner == 100 %}55{% else %}45{% endif %}%">
+                                <span class="team-gold-value">{% if match.winner == 100 %}52,000{% else %}45,000{% endif %}</span>
+                            </div>
+                            <div class="team-gold-bar red-team" style="height: {% if match.winner == 200 %}55{% else %}45{% endif %}%">
+                                <span class="team-gold-value">{% if match.winner == 200 %}52,000{% else %}45,000{% endif %}</span>
+                            </div>
+                        </div>
+                        <div class="graph-labels">
+                            <div class="graph-label blue">Blue Team</div>
+                            <div class="graph-label red">Red Team</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
