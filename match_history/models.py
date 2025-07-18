@@ -275,12 +275,45 @@ class AccountStats(models.Model):
         self.save()
 
 
+class ChampionStats(models.Model):
+    champion = models.ForeignKey(Champion, on_delete=models.CASCADE, related_name='champion_stats')
+    patch = models.CharField(max_length=10)
+    games_played = models.IntegerField(default=0)
+    wins = models.IntegerField(default=0)
+    losses = models.IntegerField(default=0)
+    pick_rate = models.FloatField(default=0.0)
+
+    class Meta:
+        unique_together = ('champion', 'patch')
+
+    def __str__(self):
+        return f"Champion Stats for {self.champion.name} in patch {self.patch}"
+
+    def win_rate(self):
+        return (self.wins / self.games_played) * 100 if self.games_played > 0 else 0
+
+    def update_stats(self, participant: Participant, total_games_in_patch=None):
+        self.games_played += 1
+        if participant.win:
+            self.wins += 1
+        else:
+            self.losses += 1
+        
+        # Update pick rate if total games in patch is provided
+        if total_games_in_patch and total_games_in_patch > 0:
+            self.pick_rate = (self.games_played / total_games_in_patch) * 100
+        
+        self.save()
+
+
 class ChampionStatsPatch(models.Model):
     champion = models.ForeignKey(Champion, on_delete=models.CASCADE, related_name='stats')
     patch = models.CharField(max_length=10)
     total_played = models.IntegerField(default=0)
     total_wins = models.IntegerField(default=0)
     total_losses = models.IntegerField(default=0)
+    pick_rate = models.FloatField(default=0.0)
+    average_kda = models.FloatField(default=0.0)
 
     class Meta:
         unique_together = ('champion', 'patch')
@@ -288,10 +321,35 @@ class ChampionStatsPatch(models.Model):
     def __str__(self):
         return f"Stats {self.champion}:{self.patch}"
 
-    def update_stats(self, participant: Participant):
+    def win_rate(self):
+        return (self.total_wins / self.total_played) * 100 if self.total_played > 0 else 0
+    
+    def pick_rate(self):
+        # This returns the stored pick rate value
+        return self.pick_rate
+
+    def update_stats(self, participant: Participant, total_games_in_patch=None):
+        # Track previous values for KDA calculation
+        prev_played = self.total_played
+        prev_kda = self.average_kda
+        
         self.total_played += 1
         if participant.win:
             self.total_wins += 1
         else:
             self.total_losses += 1
+        
+        # Update pick rate if total games in patch is provided
+        if total_games_in_patch and total_games_in_patch > 0:
+            self.pick_rate = (self.total_played / total_games_in_patch) * 100
+        
+        # Calculate KDA for this participant
+        participant_kda = (participant.kills + participant.assists) / max(1, participant.deaths)
+        
+        # Update average KDA using weighted average
+        if prev_played > 0:
+            self.average_kda = ((prev_kda * prev_played) + participant_kda) / self.total_played
+        else:
+            self.average_kda = participant_kda
+        
         self.save()

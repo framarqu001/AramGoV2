@@ -1,6 +1,7 @@
 from django.test import TransactionTestCase, TestCase
 from django.core.cache import cache
 from unittest.mock import patch
+import datetime
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
@@ -74,6 +75,225 @@ class MatchParticipantTest(TestCase):
     ##AramGoV2 if user changes there name
     ## AramGoV2 all items are retriavable
 
+
+class ChampionStatsTest(TestCase):
+    def setUp(self):
+        self.champion = Champion.objects.create(
+            champion_id='Ahri',
+            name='Ahri',
+            title='The Nine-Tailed Fox',
+            image_path='Ahri.png',
+            splash_image_path='Ahri_0.jpg'
+        )
+        self.match = Match.objects.create(
+            match_id='match_002',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='ARAM',
+            game_version='13.15.1',
+            winner=100
+        )
+        self.summoner = Summoner.objects.create(
+            puuid='some-unique-id-2',
+            game_name='testSummoner2',
+            tag_line='NA1',
+            summoner_name='testSummoner2',
+            summoner_level=30
+        )
+        self.participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=10,
+            deaths=2,
+            assists=8,
+            creep_score=150,
+            team=100,
+            win=True,
+            game_name='testSummoner2'
+        )
+        self.champion_stats = ChampionStats.objects.create(
+            champion=self.champion,
+            patch='13.15',
+            games_played=10,
+            wins=6,
+            losses=4,
+            pick_rate=5.0
+        )
+
+    def test_champion_stats_creation(self):
+        self.assertEqual(self.champion_stats.champion, self.champion)
+        self.assertEqual(self.champion_stats.patch, '13.15')
+        self.assertEqual(self.champion_stats.games_played, 10)
+        self.assertEqual(self.champion_stats.wins, 6)
+        self.assertEqual(self.champion_stats.losses, 4)
+        self.assertEqual(self.champion_stats.pick_rate, 5.0)
+
+    def test_win_rate_calculation(self):
+        self.assertEqual(self.champion_stats.win_rate(), 60.0)  # 6/10 * 100 = 60%
+        
+        # Test with zero games played
+        zero_stats = ChampionStats.objects.create(
+            champion=self.champion,
+            patch='13.16',
+            games_played=0,
+            wins=0,
+            losses=0
+        )
+        self.assertEqual(zero_stats.win_rate(), 0)
+
+    def test_update_stats(self):
+        # Initial values
+        initial_games = self.champion_stats.games_played
+        initial_wins = self.champion_stats.wins
+        
+        # Update stats with a winning participant
+        self.champion_stats.update_stats(self.participant, total_games_in_patch=200)
+        
+        # Check that values were updated correctly
+        self.assertEqual(self.champion_stats.games_played, initial_games + 1)
+        self.assertEqual(self.champion_stats.wins, initial_wins + 1)
+        self.assertEqual(self.champion_stats.pick_rate, (initial_games + 1) / 200 * 100)
+        
+        # Create a losing participant and test
+        losing_participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=5,
+            deaths=10,
+            assists=3,
+            creep_score=100,
+            team=200,
+            win=False,
+            game_name='testSummoner2'
+        )
+        
+        initial_losses = self.champion_stats.losses
+        self.champion_stats.update_stats(losing_participant, total_games_in_patch=200)
+        self.assertEqual(self.champion_stats.losses, initial_losses + 1)
+
+    def test_unique_together_constraint(self):
+        # Attempting to create another ChampionStats with the same champion and patch
+        # should raise an IntegrityError
+        with self.assertRaises(Exception):
+            ChampionStats.objects.create(
+                champion=self.champion,
+                patch='13.15',
+                games_played=5,
+                wins=3,
+                losses=2
+            )
+
+
+class ChampionStatsPatchTest(TestCase):
+    def setUp(self):
+        self.champion = Champion.objects.create(
+            champion_id='Lux',
+            name='Lux',
+            title='The Lady of Luminosity',
+            image_path='Lux.png',
+            splash_image_path='Lux_0.jpg'
+        )
+        self.match = Match.objects.create(
+            match_id='match_003',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='ARAM',
+            game_version='13.15.1',
+            winner=100
+        )
+        self.summoner = Summoner.objects.create(
+            puuid='some-unique-id-3',
+            game_name='testSummoner3',
+            tag_line='NA1',
+            summoner_name='testSummoner3',
+            summoner_level=30
+        )
+        self.participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=10,
+            deaths=2,
+            assists=8,
+            creep_score=150,
+            team=100,
+            win=True,
+            game_name='testSummoner3'
+        )
+        self.champion_stats_patch = ChampionStatsPatch.objects.create(
+            champion=self.champion,
+            patch='13.15',
+            total_played=10,
+            total_wins=6,
+            total_losses=4,
+            pick_rate=5.0,
+            average_kda=4.5
+        )
+
+    def test_champion_stats_patch_creation(self):
+        self.assertEqual(self.champion_stats_patch.champion, self.champion)
+        self.assertEqual(self.champion_stats_patch.patch, '13.15')
+        self.assertEqual(self.champion_stats_patch.total_played, 10)
+        self.assertEqual(self.champion_stats_patch.total_wins, 6)
+        self.assertEqual(self.champion_stats_patch.total_losses, 4)
+        self.assertEqual(self.champion_stats_patch.pick_rate, 5.0)
+        self.assertEqual(self.champion_stats_patch.average_kda, 4.5)
+
+    def test_win_rate_calculation(self):
+        self.assertEqual(self.champion_stats_patch.win_rate(), 60.0)  # 6/10 * 100 = 60%
+        
+        # Test with zero games played
+        zero_stats = ChampionStatsPatch.objects.create(
+            champion=self.champion,
+            patch='13.16',
+            total_played=0,
+            total_wins=0,
+            total_losses=0
+        )
+        self.assertEqual(zero_stats.win_rate(), 0)
+
+    def test_pick_rate_method(self):
+        self.assertEqual(self.champion_stats_patch.pick_rate(), 5.0)
+
+    def test_update_stats(self):
+        # Initial values
+        initial_played = self.champion_stats_patch.total_played
+        initial_wins = self.champion_stats_patch.total_wins
+        initial_kda = self.champion_stats_patch.average_kda
+        
+        # Update stats with a winning participant
+        self.champion_stats_patch.update_stats(self.participant, total_games_in_patch=200)
+        
+        # Check that values were updated correctly
+        self.assertEqual(self.champion_stats_patch.total_played, initial_played + 1)
+        self.assertEqual(self.champion_stats_patch.total_wins, initial_wins + 1)
+        self.assertEqual(self.champion_stats_patch.pick_rate, (initial_played + 1) / 200 * 100)
+        
+        # Check KDA calculation
+        # KDA for participant is (10 + 8) / 2 = 9
+        # New average KDA should be ((4.5 * 10) + 9) / 11 = 5.0
+        expected_kda = ((initial_kda * initial_played) + ((10 + 8) / 2)) / (initial_played + 1)
+        self.assertAlmostEqual(self.champion_stats_patch.average_kda, expected_kda, places=2)
+        
+        # Create a losing participant and test
+        losing_participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=5,
+            deaths=10,
+            assists=3,
+            creep_score=100,
+            team=200,
+            win=False,
+            game_name='testSummoner3'
+        )
+        
+        initial_losses = self.champion_stats_patch.total_losses
+        self.champion_stats_patch.update_stats(losing_participant, total_games_in_patch=200)
+        self.assertEqual(self.champion_stats_patch.total_losses, initial_losses + 1)
 
 class PatchVersionCacheTest(TestCase):
     @patch('AramGoV2.util.current_patch.get_patch')
