@@ -142,10 +142,13 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    min-height: 100px;
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .match-card .stat-section.stats-text{
@@ -486,4 +489,125 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Expanded content styles */
+.expanded-content {
+    width: 100%;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* Loading indicator styles */
+.loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #e6e6e6;
+    font-family: "Mulish", sans-serif;
+}
+
+/* Spinner animation */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: #4b6bc3;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Expanded match details styles */
+.expanded-match-details {
+    padding: 10px 0;
+}
+
+/* Lazy loading for images */
+.lazy-load {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.lazy-load.loaded {
+    opacity: 1;
+}
+
+/* Rotate chevron when expanded */
+.match-btn.expanded .drop {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+/* Match card expanded state */
+.match-card.expanded {
+    margin-bottom: 10px;
+}
+
+/* Detailed stats table */
+.detailed-stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    color: #e6e6e6;
+    font-family: "Mulish", sans-serif;
+}
+
+.detailed-stats-table th,
+.detailed-stats-table td {
+    padding: 8px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detailed-stats-table th {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.detailed-stats-table .team-header {
+    text-align: left;
+    padding: 10px 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.blue-team-header {
+    color: #4b6bc3;
+}
+
+.red-team-header {
+    color: #f46bf4;
+}
+
+/* Player row in detailed stats */
+.player-row {
+    transition: background-color 0.2s ease;
+}
+
+.player-row:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.player-row.current-player {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Champion image in detailed stats */
+.detailed-champion-img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 5px;
 }
