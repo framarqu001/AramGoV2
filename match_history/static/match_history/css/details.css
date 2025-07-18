@@ -144,8 +144,21 @@ hr {
     /* height: 100px; */
     height: 100px;
     display: flex;
+    flex-direction: column;
     font-weight: 1000;
     border-radius: 5px;
+    transition: height 0.3s ease;
+    overflow: hidden;
+}
+
+.match-card.expanded {
+    height: auto;
+    padding-bottom: 20px;
+}
+
+.match-section-container {
+    display: flex;
+    width: 100%;
 }
 
 .match-card .stat-section.stats-text{
@@ -224,6 +237,7 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    cursor: pointer;
 }
 
 
@@ -486,4 +500,89 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Expanded Statistics Styles */
+.expanded-stats {
+    display: none;
+    width: 100%;
+    padding: 0 20px;
+    margin-top: 10px;
+}
+
+.match-card.expanded .expanded-stats {
+    display: block;
+}
+
+.expanded-stats.match-win {
+    background-color: rgba(75, 107, 195, 0.1);
+}
+
+.expanded-stats.match-lose {
+    background-color: rgba(244, 107, 244, 0.1);
+}
+
+.stats-header {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.stats-header h3 {
+    font-family: "Space Mono", monospace;
+    font-size: 18px;
+    margin: 0;
+    padding: 10px 0;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stats-section {
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.stats-section h4 {
+    font-family: "Mulish", sans-serif;
+    font-size: 16px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.stat-label {
+    font-weight: 400;
+    color: #e6e6e6;
+}
+
+.stat-value {
+    font-weight: 700;
+}
+
+/* Transition for chevron rotation */
+.drop {
+    transition: transform 0.3s ease;
 }
