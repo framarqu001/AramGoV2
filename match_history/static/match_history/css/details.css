@@ -153,6 +153,15 @@ hr {
     top: 3px
 }
 
+/* Expanded Match Card Details Styles */
+.match-card-details {
+    display: none;
+    padding: 15px;
+    border-radius: 0 0 5px 5px;
+    margin-top: -5px;
+    margin-bottom: 10px;
+}
+
 
 .match-result.sub-text{
     font-family: "Mulish", sans-serif;
