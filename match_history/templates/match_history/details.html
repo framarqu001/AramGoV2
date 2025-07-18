@@ -292,6 +292,25 @@
     
 </script>
 
+<script>
+    $(document).ready(function() {
+        // Match card expansion functionality
+        $(document).on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            const isExpanded = matchCard.hasClass('expanded');
+            
+            // Toggle expanded class on match card and button
+            matchCard.toggleClass('expanded');
+            $(this).toggleClass('expanded');
+            
+            // Accessibility
+            $(this).attr('aria-expanded', !isExpanded);
+            
+            // Prevent event propagation
+            return false;
+        });
+    });
+</script>
 
 
 {% endblock %}
