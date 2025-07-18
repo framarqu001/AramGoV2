@@ -1,0 +1,84 @@
+<div class="match-expanded-content">
+    <div class="match-expanded-header">
+        <h3>Match Details</h3>
+        <div class="match-date">{{ match.game_start_timestamp|date:"F j, Y" }}</div>
+    </div>
+    
+    <div class="match-expanded-stats">
+        <div class="team-stats blue-team">
+            <h4>Blue Team</h4>
+            <div class="team-stats-summary">
+                <div class="team-kills">Total Kills: {{ blue_team_stats.total_kills }}</div>
+                <div class="team-deaths">Total Deaths: {{ blue_team_stats.total_deaths }}</div>
+                <div class="team-assists">Total Assists: {{ blue_team_stats.total_assists }}</div>
+                <div class="team-gold">Total Gold: {{ blue_team_stats.total_gold }}</div>
+            </div>
+            
+            <div class="team-participants">
+                {% for participant in blue_team %}
+                <div class="participant-expanded-stats {% if participant == main_participant %}highlight-participant{% endif %}">
+                    <div class="participant-header">
+                        <img class="champ-img-medium" src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}">
+                        <div class="participant-name">
+                            <a href="{{ participant.summoner.get_url }}">{{ participant.game_name }}</a>
+                        </div>
+                    </div>
+                    <div class="participant-details">
+                        <div class="participant-kda">
+                            <span class="kills">{{ participant.kills }}</span> / 
+                            <span class="deaths">{{ participant.deaths }}</span> / 
+                            <span class="assists">{{ participant.assists }}</span>
+                        </div>
+                        <div class="participant-damage">
+                            Damage: {{ participant.total_damage_dealt_to_champions }}
+                        </div>
+                        <div class="participant-gold">
+                            Gold: {{ participant.gold_earned }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="team-stats red-team">
+            <h4>Red Team</h4>
+            <div class="team-stats-summary">
+                <div class="team-kills">Total Kills: {{ red_team_stats.total_kills }}</div>
+                <div class="team-deaths">Total Deaths: {{ red_team_stats.total_deaths }}</div>
+                <div class="team-assists">Total Assists: {{ red_team_stats.total_assists }}</div>
+                <div class="team-gold">Total Gold: {{ red_team_stats.total_gold }}</div>
+            </div>
+            
+            <div class="team-participants">
+                {% for participant in red_team %}
+                <div class="participant-expanded-stats {% if participant == main_participant %}highlight-participant{% endif %}">
+                    <div class="participant-header">
+                        <img class="champ-img-medium" src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}">
+                        <div class="participant-name">
+                            <a href="{{ participant.summoner.get_url }}">{{ participant.game_name }}</a>
+                        </div>
+                    </div>
+                    <div class="participant-details">
+                        <div class="participant-kda">
+                            <span class="kills">{{ participant.kills }}</span> / 
+                            <span class="deaths">{{ participant.deaths }}</span> / 
+                            <span class="assists">{{ participant.assists }}</span>
+                        </div>
+                        <div class="participant-damage">
+                            Damage: {{ participant.total_damage_dealt_to_champions }}
+                        </div>
+                        <div class="participant-gold">
+                            Gold: {{ participant.gold_earned }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="match-expanded-footer">
+        <div class="match-duration">Match Duration: {{ match.get_duration }}</div>
+    </div>
+</div>
