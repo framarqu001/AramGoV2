@@ -10,9 +10,9 @@ class MatchHistoryConfig(AppConfig):
     def ready(self):
         patch = get_patch()
         if patch:
-            # Increased cache timeout from 7 days (604800 seconds) to 30 days (2592000 seconds)
-            # to ensure patch version is cached for longer as requested
-            cache.set('PATCH', patch, timeout=2592000)
+            # Updated cache timeout to 3 weeks (1814400 seconds)
+            # to ensure patch version is cached for the required duration
+            cache.set('PATCH', patch, timeout=1814400)
             print(f"{patch} cache successfully")
         else:
             print("Patch could not be retrieved")
