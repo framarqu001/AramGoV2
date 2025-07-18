@@ -146,6 +146,8 @@ hr {
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
+    overflow: hidden;
+    transition: height 0.3s ease;
 }
 
 .match-card .stat-section.stats-text{
@@ -245,6 +247,27 @@ hr {
     background-color: #4e2855; 
 }
 
+/* Match card expansion styles */
+.match-card.expanded {
+    height: 250px; /* Expanded height */
+}
+
+.match-card.expanding {
+    height: 250px; /* Height during expansion animation */
+}
+
+.match-card.collapsing {
+    height: 100px; /* Height during collapse animation */
+}
+
+/* Rotate the dropdown icon when expanded */
+.drop {
+    transition: transform 0.3s ease;
+}
+
+.drop.rotated {
+    transform: rotate(180deg);
+}
 
 
 .match-btn.match-win {
