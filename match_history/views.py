@@ -1,4 +1,5 @@
 import time
+import json
 
 from django.core.cache import cache
 from django.db.models import Prefetch
@@ -366,3 +367,150 @@ def _get_champions_queryset(summoner):
 def _get_main_champ(summoner):
     queryset = _get_champions_queryset(summoner)
     return queryset.first().champion
+
+
+def match_details(request, match_id):
+    """
+    View for displaying detailed match information.
+    Includes expanded statistics and timeline data.
+    Uses caching for expensive calculations.
+    """
+    # Try to get match details from cache first
+    cache_key = f'match_details_{match_id}'
+    match_data = cache.get(cache_key)
+    
+    if not match_data:
+        # If not in cache, fetch and process the data
+        try:
+            match = get_object_or_404(Match, match_id=match_id)
+            
+            # Prefetch all participants with related data
+            participants = Participant.objects.filter(match=match).select_related(
+                'summoner', 'champion', 'spell1', 'spell2', 'rune1', 'rune2',
+                'item1', 'item2', 'item3', 'item4', 'item5', 'item6'
+            )
+            
+            # Separate participants by team
+            blue_team = []
+            red_team = []
+            for participant in participants:
+                if participant.team == Match.BLUE_TEAM:
+                    blue_team.append(participant)
+                else:
+                    red_team.append(participant)
+            
+            # Process timeline data
+            timeline_data = None
+            if match.timeline_data:
+                timeline_data = _process_timeline_data(match)
+            
+            # Calculate team statistics
+            team_stats = _calculate_team_stats(match, blue_team, red_team)
+            
+            # Create match data dictionary
+            match_data = {
+                'match': match,
+                'blue_team': blue_team,
+                'red_team': red_team,
+                'timeline_data': timeline_data,
+                'team_stats': team_stats
+            }
+            
+            # Cache the data for 1 hour (3600 seconds)
+            cache.set(cache_key, match_data, 3600)
+        
+        except Match.DoesNotExist:
+            raise Http404("Match not found")
+    
+    # Render the template with match data
+    return render(request, 'match_history/match_details.html', match_data)
+
+
+def _process_timeline_data(match):
+    """
+    Process timeline data from the match.
+    Returns structured data for display in the template.
+    """
+    # Get timeline data from cache or process it
+    cache_key = f'timeline_data_{match.match_id}'
+    processed_data = cache.get(cache_key)
+    
+    if not processed_data:
+        try:
+            # Parse timeline data from JSON string
+            timeline_data = match.get_timeline_data()
+            
+            # Process frames to create a structured timeline
+            processed_data = {
+                'item_purchases': defaultdict(list),
+                'timestamps': []
+            }
+            
+            # Extract timestamps and events
+            for frame in timeline_data.get('frames', []):
+                timestamp = frame['timestamp']
+                processed_data['timestamps'].append(timestamp)
+                
+                for event in frame.get('events', []):
+                    if event['type'] == 'ITEM_PURCHASED':
+                        participant_id = event['participantId']
+                        processed_data['item_purchases'][participant_id].append({
+                            'timestamp': event['timestamp'],
+                            'itemId': event['itemId']
+                        })
+            
+            # Cache the processed data for 1 hour
+            cache.set(cache_key, processed_data, 3600)
+        
+        except (json.JSONDecodeError, AttributeError, KeyError) as e:
+            # Handle errors in timeline data processing
+            print(f"Error processing timeline data: {e}")
+            processed_data = None
+    
+    return processed_data
+
+
+def _calculate_team_stats(match, blue_team, red_team):
+    """
+    Calculate and return team statistics.
+    Uses cached values when available.
+    """
+    cache_key = f'team_stats_{match.match_id}'
+    team_stats = cache.get(cache_key)
+    
+    if not team_stats:
+        # Calculate team statistics
+        blue_team_damage_share = {}
+        red_team_damage_share = {}
+        blue_team_gold_share = {}
+        red_team_gold_share = {}
+        
+        # Calculate damage and gold share for each participant
+        for participant in blue_team:
+            blue_team_damage_share[participant.id] = participant.get_damage_share()
+            blue_team_gold_share[participant.id] = participant.get_gold_share()
+        
+        for participant in red_team:
+            red_team_damage_share[participant.id] = participant.get_damage_share()
+            red_team_gold_share[participant.id] = participant.get_gold_share()
+        
+        # Create team stats dictionary
+        team_stats = {
+            'blue_team_gold': match.blue_team_gold,
+            'red_team_gold': match.red_team_gold,
+            'blue_team_kills': match.blue_team_kills,
+            'red_team_kills': match.red_team_kills,
+            'blue_team_damage': match.blue_team_damage_dealt,
+            'red_team_damage': match.red_team_damage_dealt,
+            'gold_difference': match.get_gold_difference(),
+            'kill_difference': match.get_kill_difference(),
+            'blue_team_damage_share': blue_team_damage_share,
+            'red_team_damage_share': red_team_damage_share,
+            'blue_team_gold_share': blue_team_gold_share,
+            'red_team_gold_share': red_team_gold_share
+        }
+        
+        # Cache the team stats for 1 hour
+        cache.set(cache_key, team_stats, 3600)
+    
+    return team_stats

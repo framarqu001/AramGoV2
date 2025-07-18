@@ -9,6 +9,9 @@
                 <div class="sub-text from-now">{{match.get_time_diff}}</div>
                 <div class="match-result sub-text">{{main_participant.match_result}}</div>
                 <div class="match-length sub-text">{{match.get_duration}}</div>
+                <div class="match-details-link">
+                    <a href="{% url 'match_history:match_details' match.match_id %}" class="details-link">Details</a>
+                </div>
             </div>
         </div>
 
@@ -77,6 +80,9 @@
             <div class="kda">{{main_participant.kills}} / <span class ="death-color">{{main_participant.deaths}}</span> / {{main_participant.assists}}</div>
             <div class="calculated-kda sub-text">KDA: {{main_stats.kda}}</div>
             <div class="cs sub-text">{{main_participant.creep_score}} CS ({{main_stats.cs_min}})</div>
+            {% if main_participant.damage_dealt > 0 %}
+            <div class="damage sub-text">DMG: {{main_participant.damage_dealt}}</div>
+            {% endif %}
         </div>
         <div class="participant-section">
 
