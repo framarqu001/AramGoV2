@@ -211,6 +211,14 @@ def _get_new_match_data(summoner):
     match_data = []
 
     for match in matches_queryset:
+        # Check if expanded match data is in cache
+        cache_key = f'expanded_match_data_{match.match_id}_{summoner.puuid}'
+        cached_data = cache.get(cache_key)
+        
+        if cached_data:
+            match_data.append(cached_data)
+            continue
+            
         blue_team_list = []
         red_team_list = []
         for participant in match.all_participants:
@@ -221,23 +229,87 @@ def _get_new_match_data(summoner):
             else:
                 red_team_list.append(participant)
 
-        kda = (
-                      main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
+        kda = (main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
+        # Basic stats (existing)
         main_stats = {
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
-        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+        
+        # Add expanded statistics
+        
+        # Damage statistics
+        damage_stats = main_participant.get_damage_stats() if hasattr(main_participant, 'get_damage_stats') else {
+            'total_dealt': 0,
+            'physical_dealt': 0,
+            'magic_dealt': 0,
+            'true_dealt': 0,
+            'total_taken': 0,
+        }
+        
+        # Calculate damage distribution percentages
+        total_damage = damage_stats['total_dealt']
+        if total_damage > 0:
+            damage_stats['physical_percent'] = f"{(damage_stats['physical_dealt'] / total_damage * 100):.1f}%"
+            damage_stats['magic_percent'] = f"{(damage_stats['magic_dealt'] / total_damage * 100):.1f}%"
+            damage_stats['true_percent'] = f"{(damage_stats['true_dealt'] / total_damage * 100):.1f}%"
+        else:
+            damage_stats['physical_percent'] = "0%"
+            damage_stats['magic_percent'] = "0%"
+            damage_stats['true_percent'] = "0%"
+            
+        main_stats['damage'] = damage_stats
+        
+        # Gold statistics
+        gold_stats = main_participant.get_gold_stats() if hasattr(main_participant, 'get_gold_stats') else {
+            'earned': 0,
+            'spent': 0,
+            'efficiency': '0%',
+        }
+        main_stats['gold'] = gold_stats
+        
+        # Vision statistics
+        vision_stats = main_participant.get_vision_stats() if hasattr(main_participant, 'get_vision_stats') else {
+            'score': 0,
+            'wards_placed': 0,
+            'wards_killed': 0,
+        }
+        main_stats['vision'] = vision_stats
+        
+        # Objective statistics
+        team_objectives = match.get_team_objectives(main_participant.team) if hasattr(match, 'get_team_objectives') else {
+            'towers': 0,
+            'dragons': 0,
+            'barons': 0,
+            'heralds': 0,
+        }
+        main_stats['objectives'] = team_objectives
+        
+        # Create the match data tuple
+        match_data_tuple = (match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats)
+        
+        # Cache the expanded match data
+        cache.set(cache_key, match_data_tuple, timeout=3600)  # Cache for 1 hour
+        
+        match_data.append(match_data_tuple)
     matches_queryset.update(new_match=False)
     return match_data
 
 
 def _get_match_data(summoner, page_obj):
     match_data = []
-
+    
     for match in page_obj:
+        # Check if expanded match data is in cache
+        cache_key = f'expanded_match_data_{match.match_id}_{summoner.puuid}'
+        cached_data = cache.get(cache_key)
+        
+        if cached_data:
+            match_data.append(cached_data)
+            continue
+            
         blue_team_list = []
         red_team_list = []
         for participant in match.all_participants:
@@ -248,15 +320,71 @@ def _get_match_data(summoner, page_obj):
             else:
                 red_team_list.append(participant)
 
-        kda = (
-                      main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
+        kda = (main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
+        # Basic stats (existing)
         main_stats = {
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
-        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+        
+        # Add expanded statistics
+        
+        # Damage statistics
+        damage_stats = main_participant.get_damage_stats() if hasattr(main_participant, 'get_damage_stats') else {
+            'total_dealt': 0,
+            'physical_dealt': 0,
+            'magic_dealt': 0,
+            'true_dealt': 0,
+            'total_taken': 0,
+        }
+        
+        # Calculate damage distribution percentages
+        total_damage = damage_stats['total_dealt']
+        if total_damage > 0:
+            damage_stats['physical_percent'] = f"{(damage_stats['physical_dealt'] / total_damage * 100):.1f}%"
+            damage_stats['magic_percent'] = f"{(damage_stats['magic_dealt'] / total_damage * 100):.1f}%"
+            damage_stats['true_percent'] = f"{(damage_stats['true_dealt'] / total_damage * 100):.1f}%"
+        else:
+            damage_stats['physical_percent'] = "0%"
+            damage_stats['magic_percent'] = "0%"
+            damage_stats['true_percent'] = "0%"
+            
+        main_stats['damage'] = damage_stats
+        
+        # Gold statistics
+        gold_stats = main_participant.get_gold_stats() if hasattr(main_participant, 'get_gold_stats') else {
+            'earned': 0,
+            'spent': 0,
+            'efficiency': '0%',
+        }
+        main_stats['gold'] = gold_stats
+        
+        # Vision statistics
+        vision_stats = main_participant.get_vision_stats() if hasattr(main_participant, 'get_vision_stats') else {
+            'score': 0,
+            'wards_placed': 0,
+            'wards_killed': 0,
+        }
+        main_stats['vision'] = vision_stats
+        
+        # Objective statistics
+        team_objectives = match.get_team_objectives(main_participant.team) if hasattr(match, 'get_team_objectives') else {
+            'towers': 0,
+            'dragons': 0,
+            'barons': 0,
+            'heralds': 0,
+        }
+        main_stats['objectives'] = team_objectives
+        
+        # Create the match data tuple
+        match_data_tuple = (match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats)
+        
+        # Cache the expanded match data
+        cache.set(cache_key, match_data_tuple, timeout=3600)  # Cache for 1 hour
+        
+        match_data.append(match_data_tuple)
     return match_data
 
 

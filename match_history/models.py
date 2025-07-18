@@ -120,6 +120,16 @@ class Match(models.Model):
     game_version = models.CharField(max_length=50)
     winner = models.IntegerField(choices=WINNER_CHOICES)
     new_match = models.BooleanField(default=False)
+    
+    # Objective statistics
+    blue_team_towers = models.IntegerField(default=0)
+    red_team_towers = models.IntegerField(default=0)
+    blue_team_dragons = models.IntegerField(default=0)
+    red_team_dragons = models.IntegerField(default=0)
+    blue_team_barons = models.IntegerField(default=0)
+    red_team_barons = models.IntegerField(default=0)
+    blue_team_heralds = models.IntegerField(default=0)
+    red_team_heralds = models.IntegerField(default=0)
 
     def get_patch(self):
         return '.'.join(self.game_version.split('.')[:2])
@@ -127,13 +137,31 @@ class Match(models.Model):
     def get_duration(self):
         minutes = self.game_duration // 60
         seconds = self.game_duration % 60
-        return f"{minutes}:{seconds}"
+        return f"{minutes}:{seconds:02d}"
 
     def get_minutes(self):
         return self.game_duration // 60
 
     def get_participants(self):
         return self.participants.select_related("match").all()
+        
+    def get_team_objectives(self, team_id):
+        """Return objective statistics for the specified team"""
+        if team_id == self.BLUE_TEAM:
+            return {
+                'towers': self.blue_team_towers,
+                'dragons': self.blue_team_dragons,
+                'barons': self.blue_team_barons,
+                'heralds': self.blue_team_heralds,
+            }
+        elif team_id == self.RED_TEAM:
+            return {
+                'towers': self.red_team_towers,
+                'dragons': self.red_team_dragons,
+                'barons': self.red_team_barons,
+                'heralds': self.red_team_heralds,
+            }
+        return {}
 
     def get_time_diff(self):
         la_timezone = pytz.timezone('America/Los_Angeles')
@@ -193,11 +221,54 @@ class Participant(models.Model):
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
     game_name = models.CharField(max_length=50)
+    
+    # Damage statistics
+    total_damage_dealt = models.IntegerField(default=0)
+    physical_damage_dealt = models.IntegerField(default=0)
+    magic_damage_dealt = models.IntegerField(default=0)
+    true_damage_dealt = models.IntegerField(default=0)
+    total_damage_taken = models.IntegerField(default=0)
+    
+    # Gold statistics
+    gold_earned = models.IntegerField(default=0)
+    gold_spent = models.IntegerField(default=0)
+    
+    # Vision statistics
+    vision_score = models.IntegerField(default=0)
+    wards_placed = models.IntegerField(default=0)
+    wards_killed = models.IntegerField(default=0)
 
     def match_result(self):
         if self.win:
             return "Victory"
         return "Defeat"
+        
+    def get_damage_stats(self):
+        """Return damage statistics for this participant"""
+        return {
+            'total_dealt': self.total_damage_dealt,
+            'physical_dealt': self.physical_damage_dealt,
+            'magic_dealt': self.magic_damage_dealt,
+            'true_dealt': self.true_damage_dealt,
+            'total_taken': self.total_damage_taken,
+        }
+        
+    def get_gold_stats(self):
+        """Return gold statistics for this participant"""
+        gold_efficiency = (self.gold_spent / self.gold_earned * 100) if self.gold_earned > 0 else 0
+        return {
+            'earned': self.gold_earned,
+            'spent': self.gold_spent,
+            'efficiency': f"{gold_efficiency:.1f}%",
+        }
+        
+    def get_vision_stats(self):
+        """Return vision statistics for this participant"""
+        return {
+            'score': self.vision_score,
+            'wards_placed': self.wards_placed,
+            'wards_killed': self.wards_killed,
+        }
 
     def __str__(self):
         return f"{self.game_name} playing {self.champion} in match {self.match}"
