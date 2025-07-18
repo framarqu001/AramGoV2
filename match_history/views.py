@@ -6,9 +6,9 @@ from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 
-from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
+from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch, Summoner
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from match_history.util.populate_data import SummonerManager
@@ -19,6 +19,65 @@ from .tasks import *
 
 patch = "14.17"
 
+@require_GET
+def get_match_details(request, match_id):
+    """
+    API endpoint to fetch detailed match statistics for a specific match.
+    This is called asynchronously when a match card is expanded.
+    """
+    try:
+        # Get the match and prefetch related participants
+        match = Match.objects.filter(match_id=match_id).prefetch_related(
+            Prefetch('participants', queryset=Participant.objects.select_related(
+                'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", 
+                "item1", "item2", "item3", 'item4', 'item5', 'item6', 'summoner__profile_icon'),
+                     to_attr='all_participants')
+        ).first()
+        
+        if not match:
+            return JsonResponse({'error': 'Match not found'}, status=404)
+        
+        # Get the current summoner from the URL
+        game_name = request.GET.get('game_name')
+        tag = request.GET.get('tag')
+        
+        if not game_name or not tag:
+            return JsonResponse({'error': 'Summoner information required'}, status=400)
+        
+        try:
+            summoner = Summoner.objects.get(normalized_game_name=game_name.lower(), normalized_tag_line=tag.lower())
+        except Summoner.DoesNotExist:
+            return JsonResponse({'error': 'Summoner not found'}, status=404)
+        
+        # Organize participants into teams
+        blue_team = []
+        red_team = []
+        main_participant = None
+        
+        for participant in match.all_participants:
+            if participant.summoner == summoner:
+                main_participant = participant
+            
+            if participant.team == 100:  # Blue team
+                blue_team.append(participant)
+            else:  # Red team
+                red_team.append(participant)
+        
+        if not main_participant:
+            return JsonResponse({'error': 'Summoner not found in match'}, status=404)
+        
+        # Render the match details template
+        html_content = render_to_string('match_history/match_details.html', {
+            'match': match,
+            'main_participant': main_participant,
+            'blue_team': blue_team,
+            'red_team': red_team
+        })
+        
+        return JsonResponse({'html': html_content})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 def home(request):
     return render(request, 'match_history/index.html')

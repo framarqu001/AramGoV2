@@ -487,3 +487,138 @@ hr {
 .death-color {
     color: #ff4e50
 }
+
+/* Match details styles */
+.match-details-container {
+    margin-bottom: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.match-details-container.match-win {
+    background-color: #1e2a48;
+}
+
+.match-details-container.match-lose {
+    background-color: #4e2855;
+}
+
+.match-details {
+    padding: 15px;
+    color: #e6e6e6;
+}
+
+.match-details-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.match-details-info {
+    display: flex;
+    gap: 20px;
+}
+
+.match-details-teams {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.match-details-team {
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.blue-team {
+    background-color: rgba(75, 107, 195, 0.2);
+}
+
+.red-team {
+    background-color: rgba(244, 107, 244, 0.1);
+}
+
+.team-header {
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.team-participants {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.participant-details {
+    display: grid;
+    grid-template-columns: 40px 1fr 1fr 2fr;
+    align-items: center;
+    gap: 10px;
+}
+
+.participant-details.highlight {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    padding: 3px;
+}
+
+.participant-name {
+    font-family: "Mulish", sans-serif;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.participant-stats {
+    font-size: 12px;
+}
+
+.participant-items {
+    display: flex;
+    gap: 3px;
+}
+
+/* Loading spinner */
+.match-details-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #e6e6e6;
+}
+
+.loading-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid #4b6bc3;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.match-details-error {
+    padding: 15px;
+    color: #ff4e50;
+    text-align: center;
+}
+
+/* Button rotation for expanded state */
+.match-btn[aria-expanded="true"] .drop {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+.match-btn[aria-expanded="false"] .drop {
+    transform: rotate(0deg);
+    transition: transform 0.3s ease;
+}
