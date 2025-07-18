@@ -108,9 +108,58 @@
             </div>
         </div>
     </div>
-    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" aria-expanded="false" aria-label="Expand match details">
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
+    <!-- Expanded content section -->
+    <div class="match-card-expanded-content">
+        <div class="expanded-details-row">
+            <div class="expanded-stats-section">
+                <div class="expanded-stats-title">DAMAGE DEALT</div>
+                <div class="expanded-stats-value expanded-stats-highlight">{{main_participant.total_damage_dealt_to_champions}}</div>
+                <div class="expanded-stats-subvalue">{{main_stats.damage_per_minute}} / min</div>
+            </div>
+            <div class="expanded-stats-section">
+                <div class="expanded-stats-title">DAMAGE TAKEN</div>
+                <div class="expanded-stats-value">{{main_participant.total_damage_taken}}</div>
+                <div class="expanded-stats-subvalue">{{main_stats.damage_taken_per_minute}} / min</div>
+            </div>
+        </div>
+        
+        <div class="expanded-stats-container">
+            <div class="expanded-stats-section">
+                <div class="expanded-stats-title">GOLD EARNED</div>
+                <div class="expanded-stats-value">{{main_participant.gold_earned}}</div>
+                <div class="expanded-stats-subvalue">{{main_stats.gold_per_minute}} / min</div>
+            </div>
+            <div class="expanded-stats-section">
+                <div class="expanded-stats-title">VISION SCORE</div>
+                <div class="expanded-stats-value">{{main_participant.vision_score}}</div>
+                <div class="expanded-stats-subvalue">{{main_stats.vision_per_minute}} / min</div>
+            </div>
+            <div class="expanded-stats-section">
+                <div class="expanded-stats-title">HEALING</div>
+                <div class="expanded-stats-value">{{main_participant.total_heal}}</div>
+                <div class="expanded-stats-subvalue">Self & allies</div>
+            </div>
+            <div class="expanded-stats-section">
+                <div class="expanded-stats-title">LARGEST KILLING SPREE</div>
+                <div class="expanded-stats-value expanded-stats-highlight">{{main_participant.largest_killing_spree}}</div>
+            </div>
+            <div class="expanded-stats-section">
+                <div class="expanded-stats-title">LARGEST MULTI KILL</div>
+                <div class="expanded-stats-value expanded-stats-highlight">{{main_participant.largest_multi_kill}}</div>
+            </div>
+            <div class="expanded-stats-section">
+                <div class="expanded-stats-title">OBJECTIVES DAMAGE</div>
+                <div class="expanded-stats-value">{{main_participant.damage_dealt_to_objectives}}</div>
+            </div>
+        </div>
+        
+        <div class="expanded-timeline">
+            <div class="expanded-timeline-progress" style="width: 100%;"></div>
+        </div>
+    </div>
 </div>
 {% endfor %}
