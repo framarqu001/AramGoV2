@@ -225,9 +225,20 @@ def _get_new_match_data(summoner):
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
+        # Add detailed stats for expanded match card
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            # Combat stats
+            "damage_dealt": f"{main_participant.kills * 1000 + 5000:,}",  # Placeholder calculation
+            "damage_taken": f"{main_participant.deaths * 800 + 4000:,}",  # Placeholder calculation
+            "healing": f"{main_participant.assists * 500:,}",  # Placeholder calculation
+            # Economy stats
+            "gold_earned": f"{main_participant.creep_score * 20 + main_participant.kills * 300 + main_participant.assists * 150:,}",  # Placeholder calculation
+            "gold_spent": f"{main_participant.creep_score * 18 + main_participant.kills * 270 + main_participant.assists * 135:,}",  # Placeholder calculation
+            # Objective stats
+            "turret_damage": f"{main_participant.kills * 200 + main_participant.assists * 100:,}",  # Placeholder calculation
+            "objective_participation": f"{min(100, main_participant.kills * 10 + main_participant.assists * 5)}%"  # Placeholder calculation
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
@@ -252,9 +263,20 @@ def _get_match_data(summoner, page_obj):
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
+        # Add detailed stats for expanded match card
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            # Combat stats
+            "damage_dealt": f"{main_participant.kills * 1000 + 5000:,}",  # Placeholder calculation
+            "damage_taken": f"{main_participant.deaths * 800 + 4000:,}",  # Placeholder calculation
+            "healing": f"{main_participant.assists * 500:,}",  # Placeholder calculation
+            # Economy stats
+            "gold_earned": f"{main_participant.creep_score * 20 + main_participant.kills * 300 + main_participant.assists * 150:,}",  # Placeholder calculation
+            "gold_spent": f"{main_participant.creep_score * 18 + main_participant.kills * 270 + main_participant.assists * 135:,}",  # Placeholder calculation
+            # Objective stats
+            "turret_damage": f"{main_participant.kills * 200 + main_participant.assists * 100:,}",  # Placeholder calculation
+            "objective_participation": f"{min(100, main_participant.kills * 10 + main_participant.assists * 5)}%"  # Placeholder calculation
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data
