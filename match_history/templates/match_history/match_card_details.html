@@ -1,0 +1,272 @@
+{% load static %}
+{% load custom_filters %}
+
+<div class="match-details-container {% if main_participant.win %}match-win{% else %}match-lose{% endif %}">
+    <!-- Header Section -->
+    <div class="match-details-header">
+        <div class="match-details-info">
+            <div class="match-details-date">{{ match.game_start|date:"M d, Y" }}</div>
+            <div class="match-details-time">{{ match.game_start|date:"h:i A" }}</div>
+            <div class="match-details-duration">{{ match.get_duration }}</div>
+            <div class="match-details-result {% if main_participant.win %}win-text{% else %}lose-text{% endif %}">
+                {{ main_participant.match_result }}
+            </div>
+        </div>
+        <div class="match-details-patch">
+            <span class="sub-text">Patch: {{ match.get_patch }}</span>
+        </div>
+    </div>
+
+    <!-- Team Stats Comparison Section -->
+    <div class="team-stats-comparison">
+        <div class="team-stats-header">
+            <div class="blue-team-header">Blue Team {% if match.winner == match.BLUE_TEAM %}<span class="win-text">(Victory)</span>{% endif %}</div>
+            <div class="vs-text">VS</div>
+            <div class="red-team-header">Red Team {% if match.winner == match.RED_TEAM %}<span class="win-text">(Victory)</span>{% endif %}</div>
+        </div>
+        
+        <!-- Team KDA Comparison -->
+        <div class="team-stats-row">
+            <div class="stat-label">Team KDA</div>
+            <div class="team-stats-values">
+                {% with blue_kills=0 blue_deaths=0 blue_assists=0 red_kills=0 red_deaths=0 red_assists=0 %}
+                    {% for participant in blue_team %}
+                        {% with blue_kills=blue_kills|add:participant.kills blue_deaths=blue_deaths|add:participant.deaths blue_assists=blue_assists|add:participant.assists %}{% endwith %}
+                    {% endfor %}
+                    {% for participant in red_team %}
+                        {% with red_kills=red_kills|add:participant.kills red_deaths=red_deaths|add:participant.deaths red_assists=red_assists|add:participant.assists %}{% endwith %}
+                    {% endfor %}
+                    
+                    <div class="blue-team-value">{{ blue_kills }} / {{ blue_deaths }} / {{ blue_assists }}</div>
+                    <div class="comparison-bar-container">
+                        <div class="comparison-bar blue-bar" style="width: {% widthratio blue_kills|add:blue_assists blue_kills|add:blue_assists|add:red_kills|add:red_assists 100 %}%"></div>
+                        <div class="comparison-bar red-bar" style="width: {% widthratio red_kills|add:red_assists blue_kills|add:blue_assists|add:red_kills|add:red_assists 100 %}%"></div>
+                    </div>
+                    <div class="red-team-value">{{ red_kills }} / {{ red_deaths }} / {{ red_assists }}</div>
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Player Stats Section -->
+    <div class="detailed-player-stats">
+        <h3 class="section-title">Player Statistics</h3>
+        
+        <!-- Blue Team Stats -->
+        <div class="team-stats blue-team-stats">
+            <div class="team-stats-title">Blue Team</div>
+            <div class="player-stats-table">
+                <div class="player-stats-header">
+                    <div class="player-name-col">Player</div>
+                    <div class="player-kda-col">KDA</div>
+                    <div class="player-damage-col">Damage</div>
+                    <div class="player-gold-col">Gold</div>
+                    <div class="player-cs-col">CS</div>
+                    <div class="player-items-col">Items</div>
+                </div>
+                
+                {% for participant in blue_team %}
+                <div class="player-stats-row {% if participant == main_participant %}highlight-player{% endif %}">
+                    <div class="player-name-col">
+                        <div class="player-champion">
+                            <img class="champ-img" src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}">
+                        </div>
+                        <div class="player-name">
+                            <a href="{{ participant.summoner.get_url }}">{{ participant.game_name }}</a>
+                        </div>
+                    </div>
+                    <div class="player-kda-col">
+                        {{ participant.kills }} / <span class="death-color">{{ participant.deaths }}</span> / {{ participant.assists }}
+                    </div>
+                    <div class="player-damage-col">
+                        <div class="stat-value">~15.2k</div>
+                        <div class="stat-bar" style="width: 75%"></div>
+                    </div>
+                    <div class="player-gold-col">
+                        <div class="stat-value">~12.4k</div>
+                        <div class="stat-bar" style="width: 70%"></div>
+                    </div>
+                    <div class="player-cs-col">
+                        {{ participant.creep_score }} ({{ participant.creep_score|divide:match.get_minutes|floatformat:1 }})
+                    </div>
+                    <div class="player-items-col">
+                        <div class="player-items-list">
+                            {% if participant.item1 %}<img class="small-img" src="{{ participant.item1.get_url }}" alt="">{% endif %}
+                            {% if participant.item2 %}<img class="small-img" src="{{ participant.item2.get_url }}" alt="">{% endif %}
+                            {% if participant.item3 %}<img class="small-img" src="{{ participant.item3.get_url }}" alt="">{% endif %}
+                            {% if participant.item4 %}<img class="small-img" src="{{ participant.item4.get_url }}" alt="">{% endif %}
+                            {% if participant.item5 %}<img class="small-img" src="{{ participant.item5.get_url }}" alt="">{% endif %}
+                            {% if participant.item6 %}<img class="small-img" src="{{ participant.item6.get_url }}" alt="">{% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Red Team Stats -->
+        <div class="team-stats red-team-stats">
+            <div class="team-stats-title">Red Team</div>
+            <div class="player-stats-table">
+                <div class="player-stats-header">
+                    <div class="player-name-col">Player</div>
+                    <div class="player-kda-col">KDA</div>
+                    <div class="player-damage-col">Damage</div>
+                    <div class="player-gold-col">Gold</div>
+                    <div class="player-cs-col">CS</div>
+                    <div class="player-items-col">Items</div>
+                </div>
+                
+                {% for participant in red_team %}
+                <div class="player-stats-row {% if participant == main_participant %}highlight-player{% endif %}">
+                    <div class="player-name-col">
+                        <div class="player-champion">
+                            <img class="champ-img" src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}">
+                        </div>
+                        <div class="player-name">
+                            <a href="{{ participant.summoner.get_url }}">{{ participant.game_name }}</a>
+                        </div>
+                    </div>
+                    <div class="player-kda-col">
+                        {{ participant.kills }} / <span class="death-color">{{ participant.deaths }}</span> / {{ participant.assists }}
+                    </div>
+                    <div class="player-damage-col">
+                        <div class="stat-value">~14.8k</div>
+                        <div class="stat-bar" style="width: 73%"></div>
+                    </div>
+                    <div class="player-gold-col">
+                        <div class="stat-value">~11.9k</div>
+                        <div class="stat-bar" style="width: 68%"></div>
+                    </div>
+                    <div class="player-cs-col">
+                        {{ participant.creep_score }} ({{ participant.creep_score|divide:match.get_minutes|floatformat:1 }})
+                    </div>
+                    <div class="player-items-col">
+                        <div class="player-items-list">
+                            {% if participant.item1 %}<img class="small-img" src="{{ participant.item1.get_url }}" alt="">{% endif %}
+                            {% if participant.item2 %}<img class="small-img" src="{{ participant.item2.get_url }}" alt="">{% endif %}
+                            {% if participant.item3 %}<img class="small-img" src="{{ participant.item3.get_url }}" alt="">{% endif %}
+                            {% if participant.item4 %}<img class="small-img" src="{{ participant.item4.get_url }}" alt="">{% endif %}
+                            {% if participant.item5 %}<img class="small-img" src="{{ participant.item5.get_url }}" alt="">{% endif %}
+                            {% if participant.item6 %}<img class="small-img" src="{{ participant.item6.get_url }}" alt="">{% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    <!-- Match Timeline Section -->
+    <div class="match-timeline">
+        <h3 class="section-title">Match Timeline</h3>
+        <div class="timeline-container">
+            <!-- Since we don't have actual timeline data, we'll create a placeholder timeline -->
+            <div class="timeline-event">
+                <div class="timeline-time">2:15</div>
+                <div class="timeline-icon first-blood-icon">
+                    <img src="{% static 'match_history/icons/sword.svg' %}" alt="First Blood">
+                </div>
+                <div class="timeline-description">First Blood</div>
+            </div>
+            
+            <div class="timeline-event">
+                <div class="timeline-time">8:30</div>
+                <div class="timeline-icon objective-icon">
+                    <img src="{% static 'match_history/icons/trophy.svg' %}" alt="Objective">
+                </div>
+                <div class="timeline-description">First Tower</div>
+            </div>
+            
+            <div class="timeline-event">
+                <div class="timeline-time">15:45</div>
+                <div class="timeline-icon objective-icon">
+                    <img src="{% static 'match_history/icons/trophy.svg' %}" alt="Objective">
+                </div>
+                <div class="timeline-description">Dragon Kill</div>
+            </div>
+            
+            <div class="timeline-event">
+                <div class="timeline-time">{{ match.get_duration }}</div>
+                <div class="timeline-icon game-end-icon">
+                    <img src="{% static 'match_history/icons/history.svg' %}" alt="Game End">
+                </div>
+                <div class="timeline-description">Game End</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Item Build Order Timeline -->
+    <div class="item-build-timeline">
+        <h3 class="section-title">{{ main_participant.champion.name }}'s Item Build Order</h3>
+        <div class="build-timeline-container">
+            <!-- Since we don't have actual build order data, we'll create a placeholder timeline -->
+            <div class="build-timeline-event">
+                <div class="build-timeline-time">0:00</div>
+                <div class="build-timeline-item">
+                    <img class="small-img" src="https://ddragon.leagueoflegends.com/cdn/14.16.1/img/item/2052.png" alt="Starting Item">
+                </div>
+                <div class="build-timeline-description">Starting Items</div>
+            </div>
+            
+            {% if main_participant.item1 %}
+            <div class="build-timeline-event">
+                <div class="build-timeline-time">~5:00</div>
+                <div class="build-timeline-item">
+                    <img class="small-img" src="{{ main_participant.item1.get_url }}" alt="{{ main_participant.item1.name }}">
+                </div>
+                <div class="build-timeline-description">{{ main_participant.item1.name }}</div>
+            </div>
+            {% endif %}
+            
+            {% if main_participant.item2 %}
+            <div class="build-timeline-event">
+                <div class="build-timeline-time">~10:00</div>
+                <div class="build-timeline-item">
+                    <img class="small-img" src="{{ main_participant.item2.get_url }}" alt="{{ main_participant.item2.name }}">
+                </div>
+                <div class="build-timeline-description">{{ main_participant.item2.name }}</div>
+            </div>
+            {% endif %}
+            
+            {% if main_participant.item3 %}
+            <div class="build-timeline-event">
+                <div class="build-timeline-time">~15:00</div>
+                <div class="build-timeline-item">
+                    <img class="small-img" src="{{ main_participant.item3.get_url }}" alt="{{ main_participant.item3.name }}">
+                </div>
+                <div class="build-timeline-description">{{ main_participant.item3.name }}</div>
+            </div>
+            {% endif %}
+            
+            {% if main_participant.item4 %}
+            <div class="build-timeline-event">
+                <div class="build-timeline-time">~20:00</div>
+                <div class="build-timeline-item">
+                    <img class="small-img" src="{{ main_participant.item4.get_url }}" alt="{{ main_participant.item4.name }}">
+                </div>
+                <div class="build-timeline-description">{{ main_participant.item4.name }}</div>
+            </div>
+            {% endif %}
+            
+            {% if main_participant.item5 %}
+            <div class="build-timeline-event">
+                <div class="build-timeline-time">~25:00</div>
+                <div class="build-timeline-item">
+                    <img class="small-img" src="{{ main_participant.item5.get_url }}" alt="{{ main_participant.item5.name }}">
+                </div>
+                <div class="build-timeline-description">{{ main_participant.item5.name }}</div>
+            </div>
+            {% endif %}
+            
+            {% if main_participant.item6 %}
+            <div class="build-timeline-event">
+                <div class="build-timeline-time">~30:00</div>
+                <div class="build-timeline-item">
+                    <img class="small-img" src="{{ main_participant.item6.get_url }}" alt="{{ main_participant.item6.name }}">
+                </div>
+                <div class="build-timeline-description">{{ main_participant.item6.name }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
