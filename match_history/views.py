@@ -1,14 +1,14 @@
 import time
 
 from django.core.cache import cache
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Sum
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 
-from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
+from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch, Summoner
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from match_history.util.populate_data import SummonerManager
@@ -366,3 +366,80 @@ def _get_champions_queryset(summoner):
 def _get_main_champ(summoner):
     queryset = _get_champions_queryset(summoner)
     return queryset.first().champion
+
+
+@require_GET
+def get_match_details(request, match_id):
+    """
+    AJAX endpoint to fetch expanded match details
+    """
+    if not request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return HttpResponseBadRequest("AJAX requests only")
+    
+    try:
+        match = Match.objects.get(id=match_id)
+    except Match.DoesNotExist:
+        return JsonResponse({'error': 'Match not found'}, status=404)
+    
+    # Get the summoner from the request path
+    path_parts = request.path.split('/')
+    if len(path_parts) >= 3:
+        try:
+            game_name = path_parts[-3]
+            tag = path_parts[-2]
+            summoner = _validate_summoner(game_name, tag)
+        except (IndexError, Http404):
+            return JsonResponse({'error': 'Summoner not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request path'}, status=400)
+    
+    # Get participants data
+    participants = match.participants.select_related(
+        'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", 
+        "item1", "item2", "item3", 'item4', 'item5', 'item6'
+    ).all()
+    
+    blue_team = []
+    red_team = []
+    main_participant = None
+    
+    for participant in participants:
+        if participant.summoner == summoner:
+            main_participant = participant
+        if participant.team == 100:
+            blue_team.append(participant)
+        else:
+            red_team.append(participant)
+    
+    if not main_participant:
+        return JsonResponse({'error': 'Summoner not found in match'}, status=404)
+    
+    # Calculate team stats
+    blue_team_stats = {
+        'total_kills': sum(p.kills for p in blue_team),
+        'total_deaths': sum(p.deaths for p in blue_team),
+        'total_assists': sum(p.assists for p in blue_team),
+        'total_gold': sum(p.gold_earned for p in blue_team),
+    }
+    
+    red_team_stats = {
+        'total_kills': sum(p.kills for p in red_team),
+        'total_deaths': sum(p.deaths for p in red_team),
+        'total_assists': sum(p.assists for p in red_team),
+        'total_gold': sum(p.gold_earned for p in red_team),
+    }
+    
+    # Render the expanded match template
+    html_content = render_to_string('match_history/match_expanded.html', {
+        'match': match,
+        'main_participant': main_participant,
+        'blue_team': blue_team,
+        'red_team': red_team,
+        'blue_team_stats': blue_team_stats,
+        'red_team_stats': red_team_stats,
+    })
+    
+    return JsonResponse({
+        'html': html_content,
+        'match_id': match_id
+    })
