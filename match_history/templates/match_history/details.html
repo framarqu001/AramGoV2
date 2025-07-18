@@ -288,6 +288,79 @@
                 }
             }, 1000);
         }
+        
+        // Match details expansion functionality
+        const matchDetailsCache = {};
+        
+        $(document).on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            const matchId = matchCard.data('match-id');
+            const detailsContainer = $(`.match-details-container[data-match-id="${matchId}"]`);
+            const isExpanded = $(this).attr('aria-expanded') === 'true';
+            
+            // Toggle aria-expanded attribute
+            $(this).attr('aria-expanded', !isExpanded);
+            
+            if (isExpanded) {
+                // Hide details if already expanded
+                detailsContainer.slideUp(200);
+                return;
+            }
+            
+            // Show the container with loading state
+            detailsContainer.addClass(matchCard.hasClass('match-win') ? 'match-win' : 'match-lose');
+            detailsContainer.slideDown(200);
+            
+            // Check if we already have the data cached
+            if (matchDetailsCache[matchId]) {
+                detailsContainer.find('.match-details-loading').hide();
+                detailsContainer.find('.match-details-content').html(matchDetailsCache[matchId]).show();
+                return;
+            }
+            
+            // Show loading state
+            detailsContainer.find('.match-details-loading').show();
+            detailsContainer.find('.match-details-content').hide();
+            
+            // Fetch match details via AJAX
+            $.ajax({
+                url: `{% url 'match_history:match_details' match_id='MATCH_ID' %}`.replace('MATCH_ID', matchId),
+                method: 'GET',
+                data: {
+                    'game_name': '{{ summoner.normalized_game_name }}',
+                    'tag': '{{ summoner.normalized_tag_line }}'
+                },
+                success: function(response) {
+                    // Cache the response
+                    matchDetailsCache[matchId] = response.html;
+                    
+                    // Hide loading and show content
+                    detailsContainer.find('.match-details-loading').hide();
+                    detailsContainer.find('.match-details-content').html(response.html).show();
+                },
+                error: function(xhr) {
+                    // Show error message
+                    detailsContainer.find('.match-details-loading').hide();
+                    detailsContainer.find('.match-details-content').html(
+                        `<div class="match-details-error">
+                            <p>Failed to load match details. ${xhr.responseJSON?.error || 'Please try again.'}</p>
+                            <button class="retry-btn">Retry</button>
+                        </div>`
+                    ).show();
+                }
+            });
+        });
+        
+        // Handle retry button clicks
+        $(document).on('click', '.retry-btn', function() {
+            const detailsContainer = $(this).closest('.match-details-container');
+            const matchId = detailsContainer.data('match-id');
+            const matchCard = $(`.match-card[data-match-id="${matchId}"]`);
+            const matchBtn = matchCard.find('.match-btn');
+            
+            // Trigger the click event on the match button to retry
+            matchBtn.click();
+        });
     });
     
 </script>

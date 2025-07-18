@@ -1,0 +1,74 @@
+{% if match %}
+<div class="match-details">
+    <div class="match-details-header">
+        <div class="match-details-info">
+            <div class="match-details-mode">{{ match.game_mode }}</div>
+            <div class="match-details-time">{{ match.get_time_diff }}</div>
+            <div class="match-details-duration">Duration: {{ match.get_duration }}</div>
+            <div class="match-details-patch">Patch: {{ match.get_patch }}</div>
+        </div>
+    </div>
+    
+    <div class="match-details-teams">
+        <div class="match-details-team blue-team">
+            <div class="team-header">Blue Team {% if match.winner == 100 %}(Victory){% else %}(Defeat){% endif %}</div>
+            <div class="team-participants">
+                {% for participant in blue_team %}
+                <div class="participant-details {% if participant == main_participant %}highlight{% endif %}">
+                    <div class="participant-champion">
+                        <img class="champ-img" src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}">
+                    </div>
+                    <div class="participant-name">
+                        <a href="{{ participant.summoner.get_url }}">{{ participant.game_name }}</a>
+                    </div>
+                    <div class="participant-stats">
+                        <div class="participant-kda">{{ participant.kills }}/{{ participant.deaths }}/{{ participant.assists }}</div>
+                        <div class="participant-cs">{{ participant.creep_score }} CS</div>
+                    </div>
+                    <div class="participant-items">
+                        {% if participant.item1 %}<img class="small-img" src="{{ participant.item1.get_url }}" alt="">{% endif %}
+                        {% if participant.item2 %}<img class="small-img" src="{{ participant.item2.get_url }}" alt="">{% endif %}
+                        {% if participant.item3 %}<img class="small-img" src="{{ participant.item3.get_url }}" alt="">{% endif %}
+                        {% if participant.item4 %}<img class="small-img" src="{{ participant.item4.get_url }}" alt="">{% endif %}
+                        {% if participant.item5 %}<img class="small-img" src="{{ participant.item5.get_url }}" alt="">{% endif %}
+                        {% if participant.item6 %}<img class="small-img" src="{{ participant.item6.get_url }}" alt="">{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="match-details-team red-team">
+            <div class="team-header">Red Team {% if match.winner == 200 %}(Victory){% else %}(Defeat){% endif %}</div>
+            <div class="team-participants">
+                {% for participant in red_team %}
+                <div class="participant-details {% if participant == main_participant %}highlight{% endif %}">
+                    <div class="participant-champion">
+                        <img class="champ-img" src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}">
+                    </div>
+                    <div class="participant-name">
+                        <a href="{{ participant.summoner.get_url }}">{{ participant.game_name }}</a>
+                    </div>
+                    <div class="participant-stats">
+                        <div class="participant-kda">{{ participant.kills }}/{{ participant.deaths }}/{{ participant.assists }}</div>
+                        <div class="participant-cs">{{ participant.creep_score }} CS</div>
+                    </div>
+                    <div class="participant-items">
+                        {% if participant.item1 %}<img class="small-img" src="{{ participant.item1.get_url }}" alt="">{% endif %}
+                        {% if participant.item2 %}<img class="small-img" src="{{ participant.item2.get_url }}" alt="">{% endif %}
+                        {% if participant.item3 %}<img class="small-img" src="{{ participant.item3.get_url }}" alt="">{% endif %}
+                        {% if participant.item4 %}<img class="small-img" src="{{ participant.item4.get_url }}" alt="">{% endif %}
+                        {% if participant.item5 %}<img class="small-img" src="{{ participant.item5.get_url }}" alt="">{% endif %}
+                        {% if participant.item6 %}<img class="small-img" src="{{ participant.item6.get_url }}" alt="">{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="match-details-error">
+    <p>Failed to load match details. Please try again.</p>
+</div>
+{% endif %}
