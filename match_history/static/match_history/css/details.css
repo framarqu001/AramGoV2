@@ -53,6 +53,38 @@ hr {
     letter-spacing: -2px;
 }
 
+/* User info styles */
+.user-info-container {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.profile-icon-small {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+}
+
+.profile-img {
+    width: 15px;
+    height: 15px;
+    object-fit: cover;
+}
+
+.level-small {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background-color: #222433;
+    color: #e6e6e6;
+    font-size: 6px;
+    padding: 0 1px;
+    border-radius: 2px;
+    line-height: 1;
+}
 
 .champ-icon-small {
     width: 15px;
