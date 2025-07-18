@@ -10,6 +10,7 @@ from AramGoV2 import settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', "AramGoV2.settings")
 django.setup()
 from match_history.models import *
+from match_history.models import ItemPurchase  # Explicitly import ItemPurchase
 
 RIOT_API_KEY = settings.RIOT_API_KEY
 QUEUE = 450  # Aram
@@ -216,6 +217,31 @@ class MatchManager():
                 rune2 = Rune.objects.get(rune_id=participant_data["perks"]["styles"][1]["style"])
             except Rune.DoesNotExist:
                 rune2 = None
+                
+            # Extract additional statistics
+            damage_dealt = participant_data.get("totalDamageDealtToChampions", 0)
+            damage_taken = participant_data.get("totalDamageTaken", 0)
+            vision_score = participant_data.get("visionScore", 0)
+            
+            # Extract objective participation
+            objectives_stolen = 0
+            objectives_killed = 0
+            
+            # Check for objective participation in challenges if available
+            if "challenges" in participant_data:
+                challenges = participant_data["challenges"]
+                if "teamBaronKills" in challenges:
+                    objectives_killed += challenges.get("teamBaronKills", 0)
+                if "teamElderDragonKills" in challenges:
+                    objectives_killed += challenges.get("teamElderDragonKills", 0)
+                if "teamRiftHeraldKills" in challenges:
+                    objectives_killed += challenges.get("teamRiftHeraldKills", 0)
+                if "dragonTakedowns" in challenges:
+                    objectives_killed += challenges.get("dragonTakedowns", 0)
+                if "baronTakedowns" in challenges:
+                    objectives_killed += challenges.get("baronTakedowns", 0)
+                if "objectivesStolen" in challenges:
+                    objectives_stolen = challenges.get("objectivesStolen", 0)
 
             participant, created = Participant.objects.update_or_create(
                 match=match,
@@ -233,6 +259,12 @@ class MatchManager():
                     "spell2": spell2,
                     "rune1": rune1,
                     "rune2": rune2,
+                    # Add new fields
+                    "damage_dealt": damage_dealt,
+                    "damage_taken": damage_taken,
+                    "vision_score": vision_score,
+                    "objectives_stolen": objectives_stolen,
+                    "objectives_killed": objectives_killed,
                 }
             )
             total_snowballs = 0
@@ -244,6 +276,22 @@ class MatchManager():
             snowballs = (snowball_hits, total_snowballs)
 
             self._add_items(participant, participant_data)
+            
+            # Process item purchase timeline if available
+            if "timeline" in participant_data and "itemPurchases" in participant_data["timeline"]:
+                for purchase in participant_data["timeline"]["itemPurchases"]:
+                    item_id = purchase.get("itemId")
+                    timestamp = purchase.get("timestamp", 0) // 1000  # Convert from ms to seconds
+                    
+                    try:
+                        item = Item.objects.get(item_id=item_id)
+                        ItemPurchase.objects.update_or_create(
+                            participant=participant,
+                            item=item,
+                            timestamp=timestamp
+                        )
+                    except Item.DoesNotExist:
+                        print(f"Item with ID {item_id} does not exist")
 
             self._increment_models(participant, match, snowballs)
 
