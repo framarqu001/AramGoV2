@@ -104,6 +104,39 @@ class Summoner(models.Model):
         return f"Summoner:{self.game_name} {self.puuid}"
 
 
+class TimelineEvent(models.Model):
+    EVENT_TYPE_CHOICES = [
+        ('KILL', 'Kill'),
+        ('ASSIST', 'Assist'),
+        ('DEATH', 'Death'),
+        ('OBJECTIVE', 'Objective'),
+        ('BUILDING', 'Building'),
+        ('ITEM_PURCHASED', 'Item Purchased'),
+        ('LEVEL_UP', 'Level Up'),
+        ('OTHER', 'Other'),
+    ]
+    
+    match = models.ForeignKey('Match', on_delete=models.CASCADE, related_name='timeline_events')
+    event_type = models.CharField(max_length=20, choices=EVENT_TYPE_CHOICES)
+    timestamp = models.IntegerField(help_text="Time in seconds from the start of the match")
+    description = models.CharField(max_length=255)
+    participants_involved = models.ManyToManyField('Participant', related_name='timeline_events')
+    position_x = models.FloatField(null=True, blank=True, help_text="X coordinate on the map")
+    position_y = models.FloatField(null=True, blank=True, help_text="Y coordinate on the map")
+    additional_data = models.JSONField(null=True, blank=True, help_text="Additional event-specific data")
+    
+    def __str__(self):
+        return f"{self.event_type} at {self.timestamp}s in {self.match.match_id}"
+    
+    def get_formatted_time(self):
+        minutes = self.timestamp // 60
+        seconds = self.timestamp % 60
+        return f"{minutes}:{seconds:02d}"
+    
+    class Meta:
+        ordering = ['timestamp']
+
+
 class Match(models.Model):
     BLUE_TEAM = 100
     RED_TEAM = 200
@@ -120,6 +153,7 @@ class Match(models.Model):
     game_version = models.CharField(max_length=50)
     winner = models.IntegerField(choices=WINNER_CHOICES)
     new_match = models.BooleanField(default=False)
+    has_timeline = models.BooleanField(default=False, help_text="Indicates if timeline data has been processed for this match")
 
     def get_patch(self):
         return '.'.join(self.game_version.split('.')[:2])
@@ -127,13 +161,16 @@ class Match(models.Model):
     def get_duration(self):
         minutes = self.game_duration // 60
         seconds = self.game_duration % 60
-        return f"{minutes}:{seconds}"
+        return f"{minutes}:{seconds:02d}"
 
     def get_minutes(self):
         return self.game_duration // 60
 
     def get_participants(self):
         return self.participants.select_related("match").all()
+        
+    def get_timeline_events(self):
+        return self.timeline_events.all().prefetch_related('participants_involved')
 
     def get_time_diff(self):
         la_timezone = pytz.timezone('America/Los_Angeles')

@@ -8,7 +8,7 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
-from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
+from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch, TimelineEvent
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from match_history.util.populate_data import SummonerManager
@@ -206,7 +206,8 @@ def _get_new_match_data(summoner):
         Prefetch('participants', queryset=Participant.objects.select_related(
             'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", "item1", "item2", "item3",
             'item4', 'item5', 'item6', 'summoner__profile_icon'),
-                 to_attr='all_participants')
+                 to_attr='all_participants'),
+        Prefetch('timeline_events', queryset=TimelineEvent.objects.all(), to_attr='all_timeline_events')
     )
     match_data = []
 
@@ -229,6 +230,14 @@ def _get_new_match_data(summoner):
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
+        
+        # Process timeline events if they exist
+        if hasattr(match, 'all_timeline_events'):
+            match.timeline_events_list = match.all_timeline_events
+            match.has_timeline = len(match.timeline_events_list) > 0
+        else:
+            match.has_timeline = False
+            
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
     return match_data
@@ -256,6 +265,14 @@ def _get_match_data(summoner, page_obj):
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
+        
+        # Process timeline events if they exist
+        if hasattr(match, 'all_timeline_events'):
+            match.timeline_events_list = match.all_timeline_events
+            match.has_timeline = len(match.timeline_events_list) > 0
+        else:
+            match.has_timeline = False
+            
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data
 
@@ -352,7 +369,8 @@ def _get_match_queryset(summoner):
         Prefetch('participants', queryset=Participant.objects.select_related(
             'summoner', 'champion', "spell1", "spell2", "rune1", "rune2", "item1", "item2", "item3",
             'item4', 'item5', 'item6', 'summoner__profile_icon'),
-                 to_attr='all_participants')
+                 to_attr='all_participants'),
+        Prefetch('timeline_events', queryset=TimelineEvent.objects.all(), to_attr='all_timeline_events')
     )
     return matches_queryset
 

@@ -8,6 +8,7 @@
 
 {% block extra_styles %}
     <link rel="stylesheet" href="{% static 'match_history/css/details.css' %}">
+    <link rel="stylesheet" href="{% static 'match_history/css/timeline.css' %}">
 {% endblock %}
 
 
@@ -110,6 +111,7 @@
 {% endblock content %}
 {% block extra_scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'match_history/js/timeline.js' %}"></script>
     {% if summoner.being_parsed %}
 
     <script src="{% static 'celery_progress/celery_progress.js' %}"></script>
