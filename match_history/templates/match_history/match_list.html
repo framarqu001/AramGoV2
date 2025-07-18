@@ -108,9 +108,33 @@
             </div>
         </div>
     </div>
-    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
-        <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
+    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" aria-expanded="false" aria-label="Expand match details">
+        <svg class="drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
+    
+    <!-- Expanded content container -->
+    <div class="match-expanded-content">
+        <div class="match-details-container">
+            <div class="match-details-section">
+                <div class="match-details-title">Player Performance</div>
+                <div class="match-details-content">
+                    <div>Damage Dealt: {{main_participant.total_damage_dealt_to_champions}}</div>
+                    <div>Damage Taken: {{main_participant.total_damage_taken}}</div>
+                    <div>Gold Earned: {{main_participant.gold_earned}}</div>
+                    <div>Vision Score: {{main_participant.vision_score}}</div>
+                </div>
+            </div>
+            <div class="match-details-section">
+                <div class="match-details-title">Match Statistics</div>
+                <div class="match-details-content">
+                    <div>Match ID: {{match.match_id}}</div>
+                    <div>Game Version: {{match.game_version}}</div>
+                    <div>Game Duration: {{match.get_duration}}</div>
+                    <div>Game Creation: {{match.game_creation}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 {% endfor %}
