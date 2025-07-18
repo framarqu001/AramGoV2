@@ -9,3 +9,11 @@ def to_float(value):
         return float(value)
     except (ValueError, TypeError):
         return 0.0
+
+
+@register.filter(name='divide')
+def divide(value, arg):
+    try:
+        return float(value) / float(arg)
+    except (ValueError, TypeError, ZeroDivisionError):
+        return 0.0
