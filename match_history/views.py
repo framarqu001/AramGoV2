@@ -225,9 +225,14 @@ def _get_new_match_data(summoner):
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
+        # Include new statistics in main_stats
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "total_damage_dealt": f"{main_participant.total_damage_dealt:,}",
+            "gold_earned": f"{main_participant.gold_earned:,}",
+            "vision_score": main_participant.vision_score,
+            "largest_killing_spree": main_participant.largest_killing_spree
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
@@ -252,9 +257,14 @@ def _get_match_data(summoner, page_obj):
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
+        # Include new statistics in main_stats
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "total_damage_dealt": f"{main_participant.total_damage_dealt:,}",
+            "gold_earned": f"{main_participant.gold_earned:,}",
+            "vision_score": main_participant.vision_score,
+            "largest_killing_spree": main_participant.largest_killing_spree
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data
