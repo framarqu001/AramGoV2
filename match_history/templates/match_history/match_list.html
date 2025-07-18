@@ -112,5 +112,66 @@
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
+    <!-- Timeline Section - Added for Advanced Match Timeline feature -->
+    <div class="timeline-section">
+        <div class="timeline-title">Match Timeline</div>
+        
+        {% if match.has_timeline %}
+            <div class="timeline-container" data-match-id="{{ match.match_id }}" data-duration="{{ match.game_duration }}">
+                <div class="timeline-track">
+                    <div class="timeline-markers">
+                        <!-- Time markers will be added by JavaScript -->
+                    </div>
+                    
+                    <!-- Timeline events will be added here -->
+                    {% for event in match.timeline_events.all %}
+                        <div class="timeline-event {{ event.event_type|lower }}" 
+                             data-timestamp="{{ event.timestamp }}" 
+                             data-type="{{ event.event_type }}"
+                             data-position-x="{{ event.position_x|default:'0' }}"
+                             data-position-y="{{ event.position_y|default:'0' }}">
+                            <div class="event-tooltip">
+                                {{ event.get_formatted_time }} - {{ event.description }}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="no-events-message">No timeline data available for this match.</div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="timeline-legend">
+                <div class="legend-item">
+                    <div class="legend-color kill"></div>
+                    <span>Kill</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color death"></div>
+                    <span>Death</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color assist"></div>
+                    <span>Assist</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color objective"></div>
+                    <span>Objective</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color building"></div>
+                    <span>Building</span>
+                </div>
+            </div>
+            
+            <div class="timeline-controls">
+                <div class="timeline-filter active" data-filter="all">All Events</div>
+                <div class="timeline-filter" data-filter="kill">Kills</div>
+                <div class="timeline-filter" data-filter="objective">Objectives</div>
+                <div class="timeline-filter" data-filter="building">Buildings</div>
+            </div>
+        {% else %}
+            <div class="no-timeline-message">Timeline data is not available for this match.</div>
+        {% endif %}
+    </div>
 </div>
 {% endfor %}

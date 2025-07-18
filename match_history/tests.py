@@ -1,9 +1,11 @@
 from django.test import TransactionTestCase, TestCase
 from django.core.cache import cache
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
+from match_history.util.timeline_processor import process_match_timeline
+import datetime
 
 
 class MatchParticipantDBTest(TransactionTestCase):
@@ -56,7 +58,7 @@ class MatchParticipantTest(TestCase):
         self.assertIn(self.participant, self.match.participants.all())
 
     def test_participant_string_representation(self):
-        self.assertEqual(str(self.participant), 'testSummoner#NA1 playing Aatrox in match match_001')
+        self.assertEqual(str(self.participant), 'testSummoner playing Aatrox in match match_001')
 
     def test_cascade_delete_with_match(self):
         self.match.delete()
@@ -71,8 +73,145 @@ class MatchParticipantTest(TestCase):
         self.assertFalse(Participant.objects.filter(pk=self.participant.pk).exists())
 
 
-    ##AramGoV2 if user changes there name
-    ## AramGoV2 all items are retriavable
+class TimelineEventTest(TestCase):
+    def setUp(self):
+        self.summoner = Summoner.objects.create(
+            puuid='some-unique-id',
+            game_name='testSummoner',
+            tag_line='NA1',
+            summoner_name='testSummoner',
+            summoner_level=30
+        )
+        self.champion = Champion.objects.create(
+            champion_id='Aatrox',
+            name='Aatrox',
+            title='The Darkin Blade',
+            image_path='Aatrox.png'
+        )
+        self.match = Match.objects.create(
+            match_id='match_001',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='Classic',
+            game_version='13.15.1',
+            has_timeline=False
+        )
+        self.participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=10,
+            deaths=2,
+            assists=8,
+            creep_score=150
+        )
+        
+        # Create a timeline event
+        self.timeline_event = TimelineEvent.objects.create(
+            match=self.match,
+            event_type='KILL',
+            timestamp=300,  # 5 minutes into the match
+            description='testSummoner killed an enemy',
+            position_x=1000.0,
+            position_y=1000.0
+        )
+        self.timeline_event.participants_involved.add(self.participant)
+
+    def test_timeline_event_relationships(self):
+        self.assertEqual(self.timeline_event.match, self.match)
+        self.assertIn(self.participant, self.timeline_event.participants_involved.all())
+        self.assertIn(self.timeline_event, self.match.timeline_events.all())
+
+    def test_timeline_event_string_representation(self):
+        self.assertEqual(str(self.timeline_event), f"KILL at 300s in match_001")
+
+    def test_get_formatted_time(self):
+        self.assertEqual(self.timeline_event.get_formatted_time(), "5:00")
+        
+        # Test with seconds
+        event = TimelineEvent.objects.create(
+            match=self.match,
+            event_type='KILL',
+            timestamp=65,  # 1 minute and 5 seconds
+            description='Another kill'
+        )
+        self.assertEqual(event.get_formatted_time(), "1:05")
+
+    def test_cascade_delete_with_match(self):
+        self.match.delete()
+        self.assertFalse(TimelineEvent.objects.filter(pk=self.timeline_event.pk).exists())
+
+
+class TimelineProcessorTest(TestCase):
+    def setUp(self):
+        self.summoner = Summoner.objects.create(
+            puuid='player1',
+            game_name='testSummoner',
+            tag_line='NA1',
+            summoner_name='testSummoner',
+            summoner_level=30
+        )
+        self.champion = Champion.objects.create(
+            champion_id='Aatrox',
+            name='Aatrox',
+            title='The Darkin Blade',
+            image_path='Aatrox.png'
+        )
+        self.match = Match.objects.create(
+            match_id='match_001',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='Classic',
+            game_version='13.15.1',
+            has_timeline=False
+        )
+        self.participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=10,
+            deaths=2,
+            assists=8,
+            creep_score=150
+        )
+        
+        # Mock timeline data
+        self.timeline_data = {
+            'info': {
+                'frames': [
+                    {
+                        'timestamp': 300000,  # 5 minutes in milliseconds
+                        'events': [
+                            {
+                                'type': 'CHAMPION_KILL',
+                                'timestamp': 300000,
+                                'killerId': 'player1',
+                                'victimId': 'player2',
+                                'position': {'x': 1000.0, 'y': 1000.0}
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+
+    @patch('match_history.util.timeline_processor.Participant.objects.get')
+    def test_process_match_timeline(self, mock_participant_get):
+        # Mock the participant get method
+        mock_participant = MagicMock()
+        mock_participant.game_name = 'testSummoner'
+        mock_participant.champion.name = 'Aatrox'
+        mock_participant_get.return_value = mock_participant
+        
+        # Process the timeline
+        result = process_match_timeline(self.match.match_id, self.timeline_data)
+        
+        # Check that the match has timeline data
+        self.match.refresh_from_db()
+        self.assertTrue(self.match.has_timeline)
+        
+        # Check that timeline events were created
+        self.assertTrue(TimelineEvent.objects.filter(match=self.match).exists())
 
 
 class PatchVersionCacheTest(TestCase):
