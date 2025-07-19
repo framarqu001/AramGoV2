@@ -146,6 +146,13 @@ hr {
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
+    transition: height 0.3s ease, background-color 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.match-card.expanded {
+    height: 250px;
 }
 
 .match-card .stat-section.stats-text{
@@ -164,6 +171,7 @@ hr {
     grid-template-columns: .6fr 1fr 1fr 1fr;
     padding: 0 .5rem;
     place-items: center;
+    position: relative;
 }
 .result-section {
     justify-self: start;
@@ -224,24 +232,35 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    cursor: pointer;
+}
+
+.match-btn .drop {
+    transition: transform 0.3s ease;
+}
+
+.match-btn.expanded .drop {
+    transform: rotate(180deg);
 }
 
 
 .match-card.match-win {
     background-color: #263358; 
-    transition: background-color 0.3s 
+    transition: background-color 0.3s ease, height 0.3s ease; 
 }
 
 .match-card.match-lose {
     background-color: #64336a; 
-    transition: background-color 0.3s ease; 
+    transition: background-color 0.3s ease, height 0.3s ease; 
 }
 
-.match-card.match-win:hover {
+.match-card.match-win:hover,
+.match-card.match-win.expanded {
     background-color: #1e2a48; 
 }
 
-.match-card.match-lose:hover {
+.match-card.match-lose:hover,
+.match-card.match-lose.expanded {
     background-color: #4e2855; 
 }
 
@@ -274,6 +293,32 @@ hr {
     display: flex;
     color: #e6e6e6;
     gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.match-card.expanded .participant-section {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    justify-content: center;
+    gap: 40px;
+}
+
+.participant-details {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    width: 100%;
+    padding: 0 20px;
+    margin-top: 10px;
+    opacity: 0;
+    height: 0;
+    transition: opacity 0.3s ease, height 0.3s ease;
+}
+
+.match-card.expanded .participant-details {
+    opacity: 1;
+    height: auto;
 }
 .participant-entry {
     display: flex;
@@ -486,4 +531,69 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+.participant-detail-entry {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px;
+    border-radius: 5px;
+    margin: 5px;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.participant-detail-champion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.participant-detail-champion img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-bottom: 3px;
+}
+
+.participant-detail-stats {
+    font-size: 12px;
+    text-align: center;
+}
+
+.participant-detail-stats .kda {
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+@media (max-width: 768px) {
+    .match-card.expanded {
+        height: 300px;
+    }
+    
+    .match-card.expanded .participant-section {
+        flex-direction: column;
+        gap: 15px;
+        bottom: 10px;
+    }
+    
+    .participant-details {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .match-card.expanded {
+        height: 350px;
+    }
+    
+    .match-section-container {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+    }
+    
+    .participant-details {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
