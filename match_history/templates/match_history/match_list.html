@@ -112,5 +112,128 @@
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
+    <!-- Detailed Participant Statistics Section (Initially Hidden) -->
+    <div class="detailed-stats-container" style="display: none;">
+        <div class="detailed-stats-header">
+            <div class="team-header blue-team-header">Blue Team</div>
+            <div class="team-header red-team-header">Red Team</div>
+        </div>
+        
+        <div class="detailed-stats-grid">
+            <!-- Blue Team Detailed Stats -->
+            <div class="team-stats blue-team-stats">
+                {% for participant in blue_team %}
+                <div class="participant-stats-row {% if participant == main_participant %}highlight-row{% endif %}">
+                    <div class="participant-info">
+                        <div class="participant-champion">
+                            <img class="champion-icon-med" src="{{participant.champion.get_url}}" alt="{{participant.champion.name}}">
+                            <div class="participant-name">{{participant.game_name}}</div>
+                        </div>
+                        <div class="participant-spells">
+                            <img class="spell-icon" src="{{participant.spell1.get_url}}" alt="Spell 1">
+                            <img class="spell-icon" src="{{participant.spell2.get_url}}" alt="Spell 2">
+                        </div>
+                    </div>
+                    
+                    <div class="participant-kda">
+                        <span class="kills">{{participant.kills}}</span> / 
+                        <span class="deaths death-color">{{participant.deaths}}</span> / 
+                        <span class="assists">{{participant.assists}}</span>
+                        <div class="kda-ratio">
+                            {% with kda=participant.kills|add:participant.assists|floatformat:2 %}
+                            {% if participant.deaths > 0 %}
+                                {{ kda|divisibleby:participant.deaths|floatformat:2 }}:1
+                            {% else %}
+                                Perfect
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                    
+                    <div class="participant-cs">
+                        <span>{{participant.creep_score}} CS</span>
+                        <span class="cs-per-min">
+                            {% with cs_min=participant.creep_score|floatformat:1 %}
+                            {% if match.game_duration > 0 %}
+                                ({{ cs_min|divisibleby:match.game_duration|multiply:60|floatformat:1 }})
+                            {% else %}
+                                (0.0)
+                            {% endif %}
+                            {% endwith %}
+                        </span>
+                    </div>
+                    
+                    <div class="participant-items">
+                        <div class="item-grid">
+                            {% if participant.item1 %}<div class="item-icon"><img src="{{participant.item1.get_url}}" alt="Item 1"></div>{% else %}<div class="item-icon empty"></div>{% endif %}
+                            {% if participant.item2 %}<div class="item-icon"><img src="{{participant.item2.get_url}}" alt="Item 2"></div>{% else %}<div class="item-icon empty"></div>{% endif %}
+                            {% if participant.item3 %}<div class="item-icon"><img src="{{participant.item3.get_url}}" alt="Item 3"></div>{% else %}<div class="item-icon empty"></div>{% endif %}
+                            {% if participant.item4 %}<div class="item-icon"><img src="{{participant.item4.get_url}}" alt="Item 4"></div>{% else %}<div class="item-icon empty"></div>{% endif %}
+                            {% if participant.item5 %}<div class="item-icon"><img src="{{participant.item5.get_url}}" alt="Item 5"></div>{% else %}<div class="item-icon empty"></div>{% endif %}
+                            {% if participant.item6 %}<div class="item-icon"><img src="{{participant.item6.get_url}}" alt="Item 6"></div>{% else %}<div class="item-icon empty"></div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Red Team Detailed Stats -->
+            <div class="team-stats red-team-stats">
+                {% for participant in red_team %}
+                <div class="participant-stats-row {% if participant == main_participant %}highlight-row{% endif %}">
+                    <div class="participant-info">
+                        <div class="participant-champion">
+                            <img class="champion-icon-med" src="{{participant.champion.get_url}}" alt="{{participant.champion.name}}">
+                            <div class="participant-name">{{participant.game_name}}</div>
+                        </div>
+                        <div class="participant-spells">
+                            <img class="spell-icon" src="{{participant.spell1.get_url}}" alt="Spell 1">
+                            <img class="spell-icon" src="{{participant.spell2.get_url}}" alt="Spell 2">
+                        </div>
+                    </div>
+                    
+                    <div class="participant-kda">
+                        <span class="kills">{{participant.kills}}</span> / 
+                        <span class="deaths death-color">{{participant.deaths}}</span> / 
+                        <span class="assists">{{participant.assists}}</span>
+                        <div class="kda-ratio">
+                            {% with kda=participant.kills|add:participant.assists|floatformat:2 %}
+                            {% if participant.deaths > 0 %}
+                                {{ kda|divisibleby:participant.deaths|floatformat:2 }}:1
+                            {% else %}
+                                Perfect
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                    
+                    <div class="participant-cs">
+                        <span>{{participant.creep_score}} CS</span>
+                        <span class="cs-per-min">
+                            {% with cs_min=participant.creep_score|floatformat:1 %}
+                            {% if match.game_duration > 0 %}
+                                ({{ cs_min|divisibleby:match.game_duration|multiply:60|floatformat:1 }})
+                            {% else %}
+                                (0.0)
+                            {% endif %}
+                            {% endwith %}
+                        </span>
+                    </div>
+                    
+                    <div class="participant-items">
+                        <div class="item-grid">
+                            {% if participant.item1 %}<div class="item-icon"><img src="{{participant.item1.get_url}}" alt="Item 1"></div>{% else %}<div class="item-icon empty"></div>{% endif %}
+                            {% if participant.item2 %}<div class="item-icon"><img src="{{participant.item2.get_url}}" alt="Item 2"></div>{% else %}<div class="item-icon empty"></div>{% endif %}
+                            {% if participant.item3 %}<div class="item-icon"><img src="{{participant.item3.get_url}}" alt="Item 3"></div>{% else %}<div class="item-icon empty"></div>{% endif %}
+                            {% if participant.item4 %}<div class="item-icon"><img src="{{participant.item4.get_url}}" alt="Item 4"></div>{% else %}<div class="item-icon empty"></div>{% endif %}
+                            {% if participant.item5 %}<div class="item-icon"><img src="{{participant.item5.get_url}}" alt="Item 5"></div>{% else %}<div class="item-icon empty"></div>{% endif %}
+                            {% if participant.item6 %}<div class="item-icon"><img src="{{participant.item6.get_url}}" alt="Item 6"></div>{% else %}<div class="item-icon empty"></div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 </div>
 {% endfor %}

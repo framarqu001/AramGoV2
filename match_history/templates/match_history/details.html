@@ -181,6 +181,8 @@
                         } else {
                             $('#match-list').append(data);
                             page += 1;
+                            // Initialize match buttons for newly loaded content
+                            initMatchButtons();
                         }
                         loading = false;
                     },
@@ -191,6 +193,43 @@
                 });
             }
         });
+        
+        // Initialize match buttons for initial content
+        initMatchButtons();
+        
+        // Function to initialize match buttons
+        function initMatchButtons() {
+            $('.match-btn').off('click').on('click', function() {
+                const matchCard = $(this).closest('.match-card');
+                const detailedStats = matchCard.find('.detailed-stats-container');
+                
+                // Toggle the detailed stats visibility
+                detailedStats.slideToggle(300);
+                
+                // Toggle the expanded class for the button to rotate the chevron
+                $(this).toggleClass('expanded');
+                
+                // Adjust the match card height
+                if ($(this).hasClass('expanded')) {
+                    matchCard.css('height', 'auto');
+                } else {
+                    // Wait for the animation to complete before resetting height
+                    setTimeout(() => {
+                        matchCard.css('height', '100px');
+                    }, 300);
+                }
+            });
+            
+            // Add hover effect for participant rows
+            $('.participant-stats-row').hover(
+                function() {
+                    $(this).css('cursor', 'pointer');
+                },
+                function() {
+                    $(this).css('cursor', 'default');
+                }
+            );
+        }
     });
 </script>
 <script>
