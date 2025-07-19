@@ -107,6 +107,38 @@
                 {% endfor %}
             </div>
         </div>
+        
+        <!-- Additional details section that will be shown when expanded -->
+        <div class="participant-details">
+            {% for participant in blue_team %}
+                <div class="participant-detail-entry">
+                    <div class="participant-detail-champion">
+                        <img class="champ-img" src="{{participant.champion.get_url}}" alt="">
+                        <span class="game-name {% if participant == main_participant %}highlight{% endif %}">
+                            {{participant.game_name}}
+                        </span>
+                    </div>
+                    <div class="participant-detail-stats">
+                        <div class="kda">{{participant.kills}} / <span class="death-color">{{participant.deaths}}</span> / {{participant.assists}}</div>
+                        <div class="damage sub-text">DMG: {{participant.total_damage_dealt_to_champions}}</div>
+                    </div>
+                </div>
+            {% endfor %}
+            {% for participant in red_team %}
+                <div class="participant-detail-entry">
+                    <div class="participant-detail-champion">
+                        <img class="champ-img" src="{{participant.champion.get_url}}" alt="">
+                        <span class="game-name {% if participant == main_participant %}highlight{% endif %}">
+                            {{participant.game_name}}
+                        </span>
+                    </div>
+                    <div class="participant-detail-stats">
+                        <div class="kda">{{participant.kills}} / <span class="death-color">{{participant.deaths}}</span> / {{participant.assists}}</div>
+                        <div class="damage sub-text">DMG: {{participant.total_damage_dealt_to_champions}}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
     <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
