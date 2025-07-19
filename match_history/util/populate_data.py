@@ -233,6 +233,12 @@ class MatchManager():
                     "spell2": spell2,
                     "rune1": rune1,
                     "rune2": rune2,
+                    "gold_earned": participant_data.get("goldEarned", 0),
+                    "damage_dealt": participant_data.get("totalDamageDealtToChampions", 0),
+                    "damage_taken": participant_data.get("totalDamageTaken", 0),
+                    "vision_score": participant_data.get("visionScore", 0),
+                    "spell1_cooldown": participant_data.get("summoner1Cooldown", None),
+                    "spell2_cooldown": participant_data.get("summoner2Cooldown", None),
                 }
             )
             total_snowballs = 0

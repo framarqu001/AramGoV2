@@ -181,6 +181,8 @@
                         } else {
                             $('#match-list').append(data);
                             page += 1;
+                            // Initialize match card expansion for newly loaded cards
+                            initMatchCardExpansion();
                         }
                         loading = false;
                     },
@@ -191,7 +193,40 @@
                 });
             }
         });
+
+        // Initialize match card expansion
+        initMatchCardExpansion();
     });
+
+    // Function to initialize match card expansion
+    function initMatchCardExpansion() {
+        $('.match-btn').off('click').on('click', function() {
+            const matchCard = $(this).closest('.match-card');
+            const expandedView = matchCard.find('.expanded-view');
+            const chevron = $(this).find('.drop');
+            
+            // Toggle expanded view
+            expandedView.slideToggle(300);
+            
+            // Rotate chevron icon
+            if (chevron.hasClass('rotated')) {
+                chevron.removeClass('rotated');
+                chevron.css('transform', 'rotate(0deg)');
+            } else {
+                chevron.addClass('rotated');
+                chevron.css('transform', 'rotate(180deg)');
+            }
+            
+            // Adjust match card height
+            if (matchCard.hasClass('expanded')) {
+                matchCard.removeClass('expanded');
+                matchCard.css('height', '100px');
+            } else {
+                matchCard.addClass('expanded');
+                matchCard.css('height', 'auto');
+            }
+        });
+    }
 </script>
 <script>
     $(document).ready(function() {
