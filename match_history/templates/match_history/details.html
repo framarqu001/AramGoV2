@@ -181,6 +181,8 @@
                         } else {
                             $('#match-list').append(data);
                             page += 1;
+                            // Initialize expand/collapse for newly loaded match cards
+                            initMatchCardExpand();
                         }
                         loading = false;
                     },
@@ -191,6 +193,22 @@
                 });
             }
         });
+
+        // Initialize expand/collapse functionality
+        initMatchCardExpand();
+
+        function initMatchCardExpand() {
+            $('.match-btn').off('click').on('click', function() {
+                const matchCard = $(this).closest('.match-card');
+                const expandableContent = matchCard.find('.expandable-content');
+                
+                // Toggle active class on button for rotation
+                $(this).toggleClass('active');
+                
+                // Toggle expanded class on content
+                expandableContent.toggleClass('expanded');
+            });
+        }
     });
 </script>
 <script>
