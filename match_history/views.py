@@ -1,5 +1,6 @@
 import time
 
+from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Prefetch
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
@@ -120,6 +121,8 @@ def details(request, game_name: str, tag: str):
         "champion_stats": _get_champion_stats_data(summoner, summoner_champion_stats),
         "recent_list": _get_recent(summoner),
         "main_champ": main_champ,
+        "debug": settings.DEBUG,
+        "total_pages": paginator.num_pages
     }
 
     return render(request, 'match_history/details.html', context)
