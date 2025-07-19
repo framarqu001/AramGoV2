@@ -181,6 +181,8 @@
                         } else {
                             $('#match-list').append(data);
                             page += 1;
+                            // Add event listeners to newly loaded match buttons
+                            addMatchButtonListeners();
                         }
                         loading = false;
                     },
@@ -191,6 +193,44 @@
                 });
             }
         });
+        
+        // Function to toggle match card expansion
+        function toggleExpansion(event) {
+            const matchBtn = event.currentTarget;
+            const matchCard = matchBtn.closest('.match-card');
+            const chevron = matchBtn.querySelector('.drop');
+            
+            // Toggle expanded state
+            const isExpanded = matchCard.getAttribute('aria-expanded') === 'true';
+            const newExpandedState = !isExpanded;
+            
+            // Update aria-expanded attribute
+            matchCard.setAttribute('aria-expanded', newExpandedState);
+            
+            // Toggle expanded class on match card
+            if (newExpandedState) {
+                matchCard.classList.add('expanded');
+                chevron.classList.add('expanded');
+                matchBtn.setAttribute('aria-label', 'Collapse match details');
+            } else {
+                matchCard.classList.remove('expanded');
+                chevron.classList.remove('expanded');
+                matchBtn.setAttribute('aria-label', 'Expand match details');
+            }
+        }
+        
+        // Function to add event listeners to match buttons
+        function addMatchButtonListeners() {
+            document.querySelectorAll('.match-btn').forEach(btn => {
+                // Remove existing event listeners to prevent duplicates
+                btn.removeEventListener('click', toggleExpansion);
+                // Add new event listener
+                btn.addEventListener('click', toggleExpansion);
+            });
+        }
+        
+        // Add event listeners to initial match buttons
+        addMatchButtonListeners();
     });
 </script>
 <script>
