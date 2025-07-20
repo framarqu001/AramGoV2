@@ -146,11 +146,53 @@ hr {
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
+    overflow: hidden;
+    transition: height 0.3s ease, background-color 0.3s ease;
+}
+
+.match-card--expanded {
+    height: 240px;
 }
 
 .match-card .stat-section.stats-text{
     position: relative;
     top: 3px
+}
+
+/* Expanded stats containers */
+.expanded-stats-container {
+    display: none;
+    opacity: 0;
+    height: 0;
+    transition: opacity 0.3s ease;
+}
+
+.match-card--expanded .expanded-stats-container {
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    height: auto;
+    margin-top: 10px;
+    padding: 10px;
+}
+
+/* Media queries for responsive layout */
+@media (max-width: 1200px) {
+    .match-card--expanded {
+        height: 260px;
+    }
+}
+
+@media (max-width: 768px) {
+    .match-card--expanded {
+        height: 300px;
+    }
+    
+    .match-section-container {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 10px;
+    }
 }
 
 
@@ -224,12 +266,21 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    cursor: pointer;
+}
+
+.match-btn .drop {
+    transition: transform 0.3s ease;
+}
+
+.match-card--expanded .match-btn .drop {
+    transform: rotate(180deg);
 }
 
 
 .match-card.match-win {
     background-color: #263358; 
-    transition: background-color 0.3s 
+    transition: background-color 0.3s ease;
 }
 
 .match-card.match-lose {
@@ -243,6 +294,55 @@ hr {
 
 .match-card.match-lose:hover {
     background-color: #4e2855; 
+}
+
+/* Expanded state background colors */
+.match-card.match-win.match-card--expanded {
+    background-color: #1a2540;
+}
+
+.match-card.match-lose.match-card--expanded {
+    background-color: #462347;
+}
+
+/* Expanded stats styling */
+.expanded-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 15px;
+    padding: 0 15px;
+    width: 100%;
+}
+
+.expanded-stat-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.expanded-stat-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #e7e7e7;
+}
+
+.expanded-stat-value {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Media queries for expanded stats */
+@media (max-width: 992px) {
+    .expanded-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .expanded-stats {
+        grid-template-columns: 1fr;
+    }
 }
 
 

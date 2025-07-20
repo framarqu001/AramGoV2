@@ -1,6 +1,6 @@
 {% for match, main_participant, blue_team, red_team, main_stats in matches%}
 
-<div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+<div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" data-participant="{{ main_participant.id }}" data-match="{{ match.id }}">
 
     <div class="match-section-container">
         <div class="result-section">
@@ -108,7 +108,7 @@
             </div>
         </div>
     </div>
-    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" aria-label="Expand match details">
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
