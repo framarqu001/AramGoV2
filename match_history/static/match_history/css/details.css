@@ -146,6 +146,7 @@ hr {
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
+    overflow: hidden;
 }
 
 .match-card .stat-section.stats-text{
@@ -224,6 +225,7 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    cursor: pointer;
 }
 
 
@@ -486,4 +488,17 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Match card expansion styles */
+.card-transition {
+    transition: height 300ms ease-in-out;
+}
+
+.drop {
+    transition: transform 300ms ease-in-out;
+}
+
+.drop.rotated {
+    transform: rotate(180deg);
 }
