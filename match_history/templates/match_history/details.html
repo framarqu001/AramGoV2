@@ -292,6 +292,228 @@
     
 </script>
 
+<!-- Match expansion functionality -->
+<script>
+    $(document).ready(function() {
+        // Cache for expanded match data to prevent redundant requests
+        const expandedMatchCache = {};
+        
+        // Handle match button clicks
+        $(document).on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            const matchId = matchCard.data('match-id');
+            const expandedContent = matchCard.find('.expanded-match-content');
+            const expandedDataContainer = matchCard.find('.expanded-match-data-container');
+            const loadingIndicator = matchCard.find('.loading-indicator');
+            
+            // Toggle button active state
+            $(this).toggleClass('active');
+            
+            // If content is already visible, hide it
+            if (expandedContent.is(':visible')) {
+                expandedContent.slideUp(200);
+                return;
+            }
+            
+            // Show the expanded content with loading indicator
+            expandedContent.slideDown(200);
+            
+            // If we already have the data cached, use it
+            if (expandedMatchCache[matchId]) {
+                loadingIndicator.hide();
+                expandedDataContainer.html(expandedMatchCache[matchId]).show();
+                return;
+            }
+            
+            // Otherwise, fetch the data
+            loadingIndicator.show();
+            expandedDataContainer.hide();
+            
+            $.ajax({
+                url: `/match/${matchId}/expanded/`,
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Format and display the expanded data
+                        const expandedData = response.expanded_data;
+                        const formattedHtml = formatExpandedMatchData(expandedData);
+                        
+                        // Cache the formatted HTML
+                        expandedMatchCache[matchId] = formattedHtml;
+                        
+                        // Hide loading indicator and show data
+                        loadingIndicator.hide();
+                        expandedDataContainer.html(formattedHtml).show();
+                    } else {
+                        expandedDataContainer.html('<p>Error loading match data.</p>').show();
+                        loadingIndicator.hide();
+                    }
+                },
+                error: function() {
+                    expandedDataContainer.html('<p>Error loading match data. Please try again.</p>').show();
+                    loadingIndicator.hide();
+                }
+            });
+        });
+        
+        // Function to format expanded match data into HTML
+        function formatExpandedMatchData(data) {
+            // Create HTML for expanded match data
+            let html = `
+                <div class="expanded-match-details">
+                    <div class="match-overview">
+                        <h3>Match Details</h3>
+                        <div class="match-info-expanded">
+                            <p>Duration: ${data.game_duration}</p>
+                            <p>Game Mode: ${data.game_mode}</p>
+                            <p>Patch: ${data.patch}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="teams-container">
+                        <div class="team blue-team">
+                            <h4>Blue Team ${data.blue_team.win ? '(Victory)' : '(Defeat)'}</h4>
+                            <div class="team-stats">
+                                <p>Total Kills: ${data.blue_team.stats.total_kills}</p>
+                                <p>Total Deaths: ${data.blue_team.stats.total_deaths}</p>
+                                <p>Total Assists: ${data.blue_team.stats.total_assists}</p>
+                            </div>
+                            <div class="team-participants">
+                                ${formatTeamParticipants(data.blue_team.participants)}
+                            </div>
+                        </div>
+                        
+                        <div class="team red-team">
+                            <h4>Red Team ${data.red_team.win ? '(Victory)' : '(Defeat)'}</h4>
+                            <div class="team-stats">
+                                <p>Total Kills: ${data.red_team.stats.total_kills}</p>
+                                <p>Total Deaths: ${data.red_team.stats.total_deaths}</p>
+                                <p>Total Assists: ${data.red_team.stats.total_assists}</p>
+                            </div>
+                            <div class="team-participants">
+                                ${formatTeamParticipants(data.red_team.participants)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+        
+        // Function to format team participants
+        function formatTeamParticipants(participants) {
+            let html = '<div class="participants-table">';
+            html += '<table><thead><tr><th>Champion</th><th>Summoner</th><th>KDA</th><th>Items</th></tr></thead><tbody>';
+            
+            participants.forEach(participant => {
+                html += `
+                    <tr>
+                        <td>
+                            <div class="participant-champion">
+                                <img src="${participant.champion_image}" alt="${participant.champion_name}" width="30" height="30">
+                                ${participant.champion_name}
+                            </div>
+                        </td>
+                        <td>${participant.summoner_name}</td>
+                        <td>${participant.kills}/${participant.deaths}/${participant.assists} (${participant.kda})</td>
+                        <td class="participant-items">
+                            ${formatItems(participant.items)}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table></div>';
+            return html;
+        }
+        
+        // Function to format items
+        function formatItems(items) {
+            let html = '<div class="items-container">';
+            
+            items.forEach(item => {
+                if (item) {
+                    html += `<img src="${item}" alt="Item" width="25" height="25">`;
+                } else {
+                    html += `<div class="empty-item" style="width:25px;height:25px;display:inline-block;background:#333;"></div>`;
+                }
+            });
+            
+            html += '</div>';
+            return html;
+        }
+    });
+</script>
+
+<style>
+    /* Styles for expanded match content */
+    .expanded-match-details {
+        color: #fff;
+        font-family: Arial, sans-serif;
+    }
+    
+    .match-overview {
+        margin-bottom: 20px;
+    }
+    
+    .teams-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .team {
+        flex: 1;
+        min-width: 300px;
+        padding: 15px;
+        border-radius: 5px;
+    }
+    
+    .blue-team {
+        background-color: rgba(0, 120, 215, 0.2);
+    }
+    
+    .red-team {
+        background-color: rgba(215, 0, 64, 0.2);
+    }
+    
+    .team h4 {
+        margin-top: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding-bottom: 10px;
+    }
+    
+    .participants-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .participants-table th, .participants-table td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .participant-champion {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .participant-items {
+        display: flex;
+        gap: 2px;
+    }
+    
+    .items-container {
+        display: flex;
+        gap: 2px;
+    }
+</style>
 
 
 {% endblock %}
