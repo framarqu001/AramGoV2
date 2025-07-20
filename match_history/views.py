@@ -170,6 +170,26 @@ def champions(request):
     return render(request, 'match_history/champions.html', context)
 
 
+def get_expanded_match_data(request, match_id):
+    """
+    AJAX endpoint to get expanded match data for a specific match.
+    Returns JSON with detailed match information.
+    """
+    if not request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return HttpResponseBadRequest("Invalid request")
+        
+    match = get_object_or_404(Match, match_id=match_id)
+    
+    # Get expanded match data (either from cache or generate it)
+    expanded_data = match.get_expanded_match_data()
+    
+    return JsonResponse({
+        'match_id': match_id,
+        'expanded_data': expanded_data,
+        'success': True
+    })
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 def update_page(summoner):
     data = {
