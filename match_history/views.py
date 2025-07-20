@@ -12,6 +12,7 @@ from match_history.models import Participant, Match, AccountStats, SummonerChamp
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from match_history.util.populate_data import SummonerManager
+from match_history.util.champion_data import get_champion_damage_type, calculate_team_damage_composition, analyze_team_synergy
 from riotwatcher import ApiError
 from django.core.paginator import Paginator
 from collections import defaultdict
@@ -225,11 +226,36 @@ def _get_new_match_data(summoner):
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
+        # Add damage type for each participant
+        for participant in match.all_participants:
+            participant.damage_type = get_champion_damage_type(participant.champion.name)
+
+        # Calculate team damage composition
+        blue_team_comp = calculate_team_damage_composition(blue_team_list)
+        red_team_comp = calculate_team_damage_composition(red_team_list)
+        
+        # Analyze team synergy
+        blue_team_synergy = analyze_team_synergy(blue_team_comp)
+        red_team_synergy = analyze_team_synergy(red_team_comp)
+
         main_stats = {
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
-        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+        
+        # Add team composition data
+        team_comp_data = {
+            "blue_team": {
+                "composition": blue_team_comp,
+                "synergy": blue_team_synergy
+            },
+            "red_team": {
+                "composition": red_team_comp,
+                "synergy": red_team_synergy
+            }
+        }
+        
+        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats, team_comp_data))
     matches_queryset.update(new_match=False)
     return match_data
 
@@ -252,11 +278,36 @@ def _get_match_data(summoner, page_obj):
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
 
+        # Add damage type for each participant
+        for participant in match.all_participants:
+            participant.damage_type = get_champion_damage_type(participant.champion.name)
+
+        # Calculate team damage composition
+        blue_team_comp = calculate_team_damage_composition(blue_team_list)
+        red_team_comp = calculate_team_damage_composition(red_team_list)
+        
+        # Analyze team synergy
+        blue_team_synergy = analyze_team_synergy(blue_team_comp)
+        red_team_synergy = analyze_team_synergy(red_team_comp)
+
         main_stats = {
             "kda": f"{kda:.2f}",
             "cs_min": f"{cs_min:.1f}"
         }
-        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+        
+        # Add team composition data
+        team_comp_data = {
+            "blue_team": {
+                "composition": blue_team_comp,
+                "synergy": blue_team_synergy
+            },
+            "red_team": {
+                "composition": red_team_comp,
+                "synergy": red_team_synergy
+            }
+        }
+        
+        match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats, team_comp_data))
     return match_data
 
 

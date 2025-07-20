@@ -1,4 +1,4 @@
-{% for match, main_participant, blue_team, red_team, main_stats in matches%}
+{% for match, main_participant, blue_team, red_team, main_stats, team_comp in matches%}
 
 <div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
 
@@ -111,6 +111,87 @@
     <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
+
+    <!-- Team Composition Analysis Section -->
+    <div class="team-comp-section">
+        <div class="team-comp-header">
+            <h3>Team Composition Analysis</h3>
+        </div>
+        <div class="team-comp-content">
+            <div class="team-comp-column">
+                <h4>Blue Team</h4>
+                <div class="damage-distribution">
+                    <div class="damage-chart">
+                        <div class="damage-bar ap" style="width: {{ team_comp.blue_team.composition.percentages.AP }}%;" title="AP: {{ team_comp.blue_team.composition.counts.AP }} champions">
+                            <span class="damage-label">AP: {{ team_comp.blue_team.composition.percentages.AP }}%</span>
+                        </div>
+                        <div class="damage-bar ad" style="width: {{ team_comp.blue_team.composition.percentages.AD }}%;" title="AD: {{ team_comp.blue_team.composition.counts.AD }} champions">
+                            <span class="damage-label">AD: {{ team_comp.blue_team.composition.percentages.AD }}%</span>
+                        </div>
+                        <div class="damage-bar hybrid" style="width: {{ team_comp.blue_team.composition.percentages.HYBRID }}%;" title="Hybrid: {{ team_comp.blue_team.composition.counts.HYBRID }} champions">
+                            <span class="damage-label">Hybrid: {{ team_comp.blue_team.composition.percentages.HYBRID }}%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="team-synergy">
+                    <p><strong>Synergy:</strong> {{ team_comp.blue_team.synergy.balance }}</p>
+                    <p>{{ team_comp.blue_team.synergy.assessment }}</p>
+                </div>
+                <div class="champion-damage-breakdown">
+                    <h5>Champion Damage Types</h5>
+                    <ul class="champion-list">
+                        {% for participant in blue_team %}
+                        <li class="champion-item" data-damage-type="{{ participant.damage_type }}">
+                            <div class="champion-tooltip">
+                                <img class="tooltip-img" src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}">
+                                <span class="tooltip-name">{{ participant.champion.name }}</span>
+                                <span class="tooltip-damage-type">{{ participant.damage_type }}</span>
+                            </div>
+                            <span class="champion-name">{{ participant.champion.name }}</span>
+                            <span class="damage-type damage-type-{{ participant.damage_type|lower }}">{{ participant.damage_type }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="team-comp-column">
+                <h4>Red Team</h4>
+                <div class="damage-distribution">
+                    <div class="damage-chart">
+                        <div class="damage-bar ap" style="width: {{ team_comp.red_team.composition.percentages.AP }}%;" title="AP: {{ team_comp.red_team.composition.counts.AP }} champions">
+                            <span class="damage-label">AP: {{ team_comp.red_team.composition.percentages.AP }}%</span>
+                        </div>
+                        <div class="damage-bar ad" style="width: {{ team_comp.red_team.composition.percentages.AD }}%;" title="AD: {{ team_comp.red_team.composition.counts.AD }} champions">
+                            <span class="damage-label">AD: {{ team_comp.red_team.composition.percentages.AD }}%</span>
+                        </div>
+                        <div class="damage-bar hybrid" style="width: {{ team_comp.red_team.composition.percentages.HYBRID }}%;" title="Hybrid: {{ team_comp.red_team.composition.counts.HYBRID }} champions">
+                            <span class="damage-label">Hybrid: {{ team_comp.red_team.composition.percentages.HYBRID }}%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="team-synergy">
+                    <p><strong>Synergy:</strong> {{ team_comp.red_team.synergy.balance }}</p>
+                    <p>{{ team_comp.red_team.synergy.assessment }}</p>
+                </div>
+                <div class="champion-damage-breakdown">
+                    <h5>Champion Damage Types</h5>
+                    <ul class="champion-list">
+                        {% for participant in red_team %}
+                        <li class="champion-item" data-damage-type="{{ participant.damage_type }}">
+                            <div class="champion-tooltip">
+                                <img class="tooltip-img" src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}">
+                                <span class="tooltip-name">{{ participant.champion.name }}</span>
+                                <span class="tooltip-damage-type">{{ participant.damage_type }}</span>
+                            </div>
+                            <span class="champion-name">{{ participant.champion.name }}</span>
+                            <span class="damage-type damage-type-{{ participant.damage_type|lower }}">{{ participant.damage_type }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 {% endfor %}

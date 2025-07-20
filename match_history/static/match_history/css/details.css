@@ -487,3 +487,212 @@ hr {
 .death-color {
     color: #ff4e50
 }
+/* Team Composition Analysis Section */
+.team-comp-section {
+    display: none;
+    width: 100%;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.match-card.expanded .team-comp-section {
+    display: block;
+}
+
+.team-comp-header {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.team-comp-header h3 {
+    font-family: "Space Mono", monospace;
+    font-size: 18px;
+    margin: 0;
+    color: #e6e6e6;
+}
+
+.team-comp-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.team-comp-column {
+    flex: 1;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.team-comp-column h4 {
+    font-family: "Mulish", sans-serif;
+    font-size: 16px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #e6e6e6;
+}
+
+.damage-distribution {
+    margin-bottom: 15px;
+}
+
+.damage-chart {
+    height: 25px;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+}
+
+.damage-bar {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    transition: width 0.3s ease;
+}
+
+.damage-bar.ap {
+    background-color: #4b6bc3;
+}
+
+.damage-bar.ad {
+    background-color: #f46bf4;
+}
+
+.damage-bar.hybrid {
+    background-color: #9c59b6;
+}
+
+.damage-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 5px;
+}
+
+.team-synergy {
+    margin-bottom: 15px;
+    font-family: "Mulish", sans-serif;
+    font-size: 14px;
+    color: #e6e6e6;
+}
+
+.team-synergy p {
+    margin: 5px 0;
+}
+
+.champion-damage-breakdown {
+    margin-bottom: 10px;
+}
+
+.champion-damage-breakdown h5 {
+    font-family: "Mulish", sans-serif;
+    font-size: 14px;
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #e6e6e6;
+}
+
+.champion-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.champion-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 6px;
+    border-radius: 3px;
+    background-color: rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.champion-name {
+    font-family: "Mulish", sans-serif;
+    font-size: 12px;
+    color: #e6e6e6;
+}
+
+.damage-type {
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-weight: bold;
+}
+
+.damage-type-ap {
+    background-color: #4b6bc3;
+    color: white;
+}
+
+.damage-type-ad {
+    background-color: #f46bf4;
+    color: white;
+}
+
+.damage-type-hybrid {
+    background-color: #9c59b6;
+    color: white;
+}
+
+/* Tooltip styles */
+.champion-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 8px;
+    border-radius: 4px;
+    width: 150px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.champion-item:hover .champion-tooltip {
+    display: flex;
+}
+
+.tooltip-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-bottom: 5px;
+}
+
+.tooltip-name {
+    font-family: "Mulish", sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 3px;
+}
+
+.tooltip-damage-type {
+    font-family: "Mulish", sans-serif;
+    font-size: 12px;
+    color: #e6e6e6;
+}
+
+/* Expanded card styles */
+.match-card.expanded {
+    height: auto;
+}
+
+.match-card.expanded .match-btn .drop {
+    transform: rotate(180deg);
+}
