@@ -292,6 +292,9 @@
     
 </script>
 
-
+<script src="{% static 'match_history/js/match-expansion.js' %}"></script>
+{% if debug %}
+<script src="{% static 'match_history/js/match-expansion.test.js' %}"></script>
+{% endif %}
 
 {% endblock %}
