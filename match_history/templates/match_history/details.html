@@ -161,6 +161,21 @@
             return;
         }
 
+        // Function to handle match card expansion
+        function setupMatchCardExpansion() {
+            $('.match-btn').off('click').on('click', function() {
+                const matchCard = $(this).closest('.match-card');
+                matchCard.toggleClass('expanded');
+                
+                // Toggle the chevron icon rotation
+                const chevronIcon = $(this).find('.drop');
+                chevronIcon.toggleClass('expanded');
+            });
+        }
+
+        // Setup initial match cards
+        setupMatchCardExpansion();
+
         $(window).scroll(function() {
             if (!loading && !noMorePages && $(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
                 loading = true;
@@ -181,6 +196,9 @@
                         } else {
                             $('#match-list').append(data);
                             page += 1;
+                            
+                            // Setup expansion for newly loaded match cards
+                            setupMatchCardExpansion();
                         }
                         loading = false;
                     },
