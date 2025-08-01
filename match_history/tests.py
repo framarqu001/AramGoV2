@@ -1,9 +1,11 @@
-from django.test import TransactionTestCase, TestCase
+from django.test import TransactionTestCase, TestCase, Client
 from django.core.cache import cache
+from django.template.loader import render_to_string
 from unittest.mock import patch
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
+import datetime
 
 
 class MatchParticipantDBTest(TransactionTestCase):
@@ -69,6 +71,245 @@ class MatchParticipantTest(TestCase):
     def test_cascade_delete_with_champion(self):
         self.champion.delete()
         self.assertFalse(Participant.objects.filter(pk=self.participant.pk).exists())
+
+
+
+class ExpandedMatchCardTest(TestCase):
+    def setUp(self):
+        # Create profile icon
+        self.profile_icon = ProfileIcon.objects.create(
+            profile_id='1',
+            image_path='profileicon/1.png'
+        )
+        
+        # Create summoner spells
+        self.spell1 = SummonerSpell.objects.create(
+            spell_id=4,
+            name='Flash',
+            image_path='SummonerFlash.png'
+        )
+        
+        self.spell2 = SummonerSpell.objects.create(
+            spell_id=32,
+            name='Mark',
+            image_path='SummonerSnowball.png'
+        )
+        
+        # Create runes
+        self.rune1 = Rune.objects.create(
+            rune_id=8005,
+            name='Press the Attack',
+            image_path='perk-images/Styles/Precision/PressTheAttack/PressTheAttack.png'
+        )
+        
+        self.rune2 = Rune.objects.create(
+            rune_id=8100,
+            name='Domination',
+            image_path='perk-images/Styles/7200_Domination.png'
+        )
+        
+        # Create summoners with different levels
+        self.summoner1 = Summoner.objects.create(
+            puuid='summoner-1-id',
+            game_name='Player1',
+            tag_line='NA1',
+            summoner_level=45,
+            profile_icon=self.profile_icon
+        )
+        
+        self.summoner2 = Summoner.objects.create(
+            puuid='summoner-2-id',
+            game_name='Player2',
+            tag_line='NA1',
+            summoner_level=67,
+            profile_icon=self.profile_icon
+        )
+        
+        # Create champions
+        self.champion1 = Champion.objects.create(
+            champion_id='Jinx',
+            name='Jinx',
+            title='The Loose Cannon',
+            image_path='Jinx.png',
+            splash_image_path='Jinx_0.jpg'
+        )
+        
+        self.champion2 = Champion.objects.create(
+            champion_id='Ashe',
+            name='Ashe',
+            title='The Frost Archer',
+            image_path='Ashe.png',
+            splash_image_path='Ashe_0.jpg'
+        )
+        
+        # Create match
+        self.match = Match.objects.create(
+            match_id='expanded_match_001',
+            game_start=datetime.datetime.now(),
+            game_duration=1200,
+            game_mode='ARAM',
+            game_version='14.17.1',
+            winner=100
+        )
+        
+        # Create participants with different KDA stats
+        self.participant1 = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner1,
+            champion=self.champion1,
+            kills=12,
+            deaths=3,
+            assists=15,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            rune1=self.rune1,
+            rune2=self.rune2,
+            creep_score=120,
+            team=100,
+            win=True,
+            game_name='Player1'
+        )
+        
+        self.participant2 = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner2,
+            champion=self.champion2,
+            kills=8,
+            deaths=5,
+            assists=10,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            rune1=self.rune1,
+            rune2=self.rune2,
+            creep_score=95,
+            team=200,
+            win=False,
+            game_name='Player2'
+        )
+
+    def test_participant_has_expanded_info(self):
+        """Test that participants have all the expanded information available"""
+        # Test summoner level is available
+        self.assertEqual(self.participant1.summoner.summoner_level, 45)
+        self.assertEqual(self.participant2.summoner.summoner_level, 67)
+        
+        # Test profile icon is available
+        self.assertIsNotNone(self.participant1.summoner.profile_icon)
+        self.assertIsNotNone(self.participant2.summoner.profile_icon)
+        
+        # Test KDA stats are available
+        self.assertEqual(self.participant1.kills, 12)
+        self.assertEqual(self.participant1.deaths, 3)
+        self.assertEqual(self.participant1.assists, 15)
+        
+        self.assertEqual(self.participant2.kills, 8)
+        self.assertEqual(self.participant2.deaths, 5)
+        self.assertEqual(self.participant2.assists, 10)
+
+    def test_profile_icon_url_generation(self):
+        """Test that profile icon URLs are generated correctly"""
+        # Mock the cache to return a patch version
+        with patch('django.core.cache.cache.get', return_value='14.17.1'):
+            profile_url = self.participant1.summoner.profile_icon.get_url()
+            expected_url = 'https://ddragon.leagueoflegends.com/cdn/14.17.1/img/profileicon/profileicon/1.png'
+            self.assertEqual(profile_url, expected_url)
+
+    def test_match_card_template_rendering(self):
+        """Test that the match card template renders with expanded user information"""
+        # Prepare match data similar to what the view provides
+        blue_team = [self.participant1] if self.participant1.team == 100 else []
+        red_team = [self.participant2] if self.participant2.team == 200 else []
+        
+        main_stats = {
+            "kda": "9.00",
+            "cs_min": "6.0"
+        }
+        
+        matches = [(self.match, self.participant1, blue_team, red_team, main_stats)]
+        
+        # Render the template
+        rendered_html = render_to_string('match_history/match_list.html', {
+            'matches': matches
+        })
+        
+        # Check that expanded information is present in the rendered HTML
+        self.assertIn('participant-icons', rendered_html)
+        self.assertIn('participant-info', rendered_html)
+        self.assertIn('summoner-level', rendered_html)
+        self.assertIn('participant-kda', rendered_html)
+        
+        # Check that summoner level is displayed
+        self.assertIn('Lv.45', rendered_html)
+        
+        # Check that KDA is displayed
+        self.assertIn('12/3/15', rendered_html)
+        self.assertIn('8/5/10', rendered_html)
+
+    def test_participant_without_profile_icon(self):
+        """Test that participants without profile icons still render correctly"""
+        # Create a summoner without profile icon
+        summoner_no_icon = Summoner.objects.create(
+            puuid='summoner-no-icon',
+            game_name='NoIconPlayer',
+            tag_line='NA1',
+            summoner_level=25,
+            profile_icon=None
+        )
+        
+        participant_no_icon = Participant.objects.create(
+            match=self.match,
+            summoner=summoner_no_icon,
+            champion=self.champion1,
+            kills=5,
+            deaths=7,
+            assists=12,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            rune1=self.rune1,
+            rune2=self.rune2,
+            creep_score=80,
+            team=100,
+            win=True,
+            game_name='NoIconPlayer'
+        )
+        
+        # Test that the participant still has other information
+        self.assertEqual(participant_no_icon.summoner.summoner_level, 25)
+        self.assertIsNone(participant_no_icon.summoner.profile_icon)
+        self.assertEqual(participant_no_icon.kills, 5)
+
+    def test_participant_without_summoner_level(self):
+        """Test that participants without summoner level still render correctly"""
+        # Create a summoner without summoner level
+        summoner_no_level = Summoner.objects.create(
+            puuid='summoner-no-level',
+            game_name='NoLevelPlayer',
+            tag_line='NA1',
+            summoner_level=None,
+            profile_icon=self.profile_icon
+        )
+        
+        participant_no_level = Participant.objects.create(
+            match=self.match,
+            summoner=summoner_no_level,
+            champion=self.champion2,
+            kills=3,
+            deaths=4,
+            assists=8,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            rune1=self.rune1,
+            rune2=self.rune2,
+            creep_score=65,
+            team=200,
+            win=False,
+            game_name='NoLevelPlayer'
+        )
+        
+        # Test that the participant still has other information
+        self.assertIsNone(participant_no_level.summoner.summoner_level)
+        self.assertIsNotNone(participant_no_level.summoner.profile_icon)
+        self.assertEqual(participant_no_level.kills, 3)
 
 
     ##AramGoV2 if user changes there name
