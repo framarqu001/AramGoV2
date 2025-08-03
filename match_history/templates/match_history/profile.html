@@ -1,0 +1,155 @@
+{% extends "match_history/base.html" %}
+{% load static %}
+
+{% block title %}Profile - AramGo{% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'match_history/css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<style>
+    .profile {
+        color: white;
+        background-color: #222433;
+    }
+</style>
+
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-info">
+            <h1>{{ user_profile.get_display_name }}</h1>
+            {% if user_profile.bio %}
+                <p class="profile-bio">{{ user_profile.bio }}</p>
+            {% endif %}
+            <div class="profile-meta">
+                <span class="profile-username">@{{ user.username }}</span>
+                <span class="profile-joined">Joined {{ user.date_joined|date:"M Y" }}</span>
+            </div>
+        </div>
+        <div class="profile-actions">
+            <a href="{% url 'match_history:profile_settings' %}" class="btn btn-primary">Edit Profile</a>
+            <a href="{% url 'match_history:connect_summoner' %}" class="btn btn-success">Connect Summoner</a>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="profile-section">
+            <h2>Connected Riot Games Accounts</h2>
+            
+            {% if connected_summoners %}
+                <div class="summoners-grid">
+                    {% for summoner in connected_summoners %}
+                        <div class="summoner-card {% if summoner == primary_summoner %}primary{% endif %}">
+                            <div class="summoner-info">
+                                <div class="summoner-avatar">
+                                    {% if summoner.profile_icon %}
+                                        <img src="{{ summoner.profile_icon.get_url }}" alt="Profile Icon">
+                                    {% else %}
+                                        <div class="default-avatar">?</div>
+                                    {% endif %}
+                                </div>
+                                <div class="summoner-details">
+                                    <h3>
+                                        <a href="{{ summoner.get_url }}">{{ summoner.get_full_name }}</a>
+                                        {% if summoner == primary_summoner %}
+                                            <span class="primary-badge">Primary</span>
+                                        {% endif %}
+                                    </h3>
+                                    <p class="summoner-level">Level {{ summoner.summoner_level|default:"Unknown" }}</p>
+                                    {% if summoner.last_updated %}
+                                        <p class="last-updated">Last updated: {{ summoner.last_updated|timesince }} ago</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="summoner-actions">
+                                {% if summoner != primary_summoner %}
+                                    <form method="post" action="{% url 'match_history:set_primary_summoner' %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="primary_summoner" value="{{ summoner.puuid }}">
+                                        <button type="submit" class="btn btn-sm btn-outline">Set as Primary</button>
+                                    </form>
+                                {% endif %}
+                                <a href="{% url 'match_history:disconnect_summoner' summoner.puuid %}" 
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Are you sure you want to disconnect this summoner?')">
+                                    Disconnect
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="profile-actions-bottom">
+                    <a href="{% url 'match_history:set_primary_summoner' %}" class="btn btn-outline">Manage Primary Summoner</a>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">🎮</div>
+                    <h3>No Riot Games accounts connected</h3>
+                    <p>Connect your Riot Games account to track your match history and statistics.</p>
+                    <a href="{% url 'match_history:connect_summoner' %}" class="btn btn-primary">Connect Your First Account</a>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if primary_summoner %}
+            <div class="profile-section">
+                <h2>Quick Stats</h2>
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <h4>Primary Account</h4>
+                        <p>{{ primary_summoner.get_full_name }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Level</h4>
+                        <p>{{ primary_summoner.summoner_level|default:"Unknown" }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Total Matches</h4>
+                        <p>{{ primary_summoner.total_matches|default:"0" }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Last Updated</h4>
+                        <p>
+                            {% if primary_summoner.last_updated %}
+                                {{ primary_summoner.last_updated|timesince }} ago
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="profile-actions-bottom">
+                    <a href="{{ primary_summoner.get_url }}" class="btn btn-primary">View Match History</a>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="profile-section">
+            <h2>Profile Settings</h2>
+            <div class="settings-preview">
+                <div class="setting-item">
+                    <span class="setting-label">Profile Visibility:</span>
+                    <span class="setting-value">{{ user_profile.profile_public|yesno:"Public,Private" }}</span>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Show Match History:</span>
+                    <span class="setting-value">{{ user_profile.show_match_history|yesno:"Yes,No" }}</span>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Theme:</span>
+                    <span class="setting-value">{{ user_profile.get_theme_preference_display }}</span>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Matches per page:</span>
+                    <span class="setting-value">{{ user_profile.matches_per_page }}</span>
+                </div>
+            </div>
+            <div class="profile-actions-bottom">
+                <a href="{% url 'match_history:profile_settings' %}" class="btn btn-outline">Edit Settings</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "match_history/base.html" %}
+{% load static %}
+
+{% block title %}Login - AramGo{% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'match_history/css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<style>
+    .login {
+        color: white;
+        background-color: #222433;
+    }
+</style>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Login to AramGo</h2>
+            <p>Access your profile and connect your Riot Games accounts</p>
+        </div>
+        
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Username:</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="form-errors">
+                        {% for error in form.username.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">Password:</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <div class="form-errors">
+                        {% for error in form.password.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    {% for error in form.non_field_errors %}
+                        <span class="error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <button type="submit" class="auth-button">Login</button>
+        </form>
+        
+        <div class="auth-links">
+            <p>Don't have an account? <a href="{% url 'match_history:register' %}">Register here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

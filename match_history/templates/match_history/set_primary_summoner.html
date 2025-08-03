@@ -1,0 +1,99 @@
+{% extends "match_history/base.html" %}
+{% load static %}
+
+{% block title %}Set Primary Summoner - AramGo{% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'match_history/css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-info">
+            <h1>Set Primary Summoner</h1>
+            <p>Choose which connected account to display as your primary summoner</p>
+        </div>
+        <div class="profile-actions">
+            <a href="{% url 'match_history:profile' %}" class="btn btn-outline">Back to Profile</a>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="primary-summoner-section">
+            <div class="primary-info">
+                <h2>About Primary Summoners</h2>
+                <p>
+                    Your primary summoner is the account that will be featured prominently on your profile 
+                    and used for quick stats display. You can change this at any time.
+                </p>
+                <p>
+                    <strong>Current primary summoner:</strong> 
+                    {% if user_profile.primary_summoner %}
+                        {{ user_profile.primary_summoner.get_full_name }}
+                    {% else %}
+                        <em>None selected</em>
+                    {% endif %}
+                </p>
+            </div>
+
+            <form method="post" class="primary-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="{{ form.primary_summoner.id_for_label }}">Select Primary Summoner:</label>
+                    {{ form.primary_summoner }}
+                    {% if form.primary_summoner.errors %}
+                        <div class="form-errors">
+                            {% for error in form.primary_summoner.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {% if form.non_field_errors %}
+                    <div class="form-errors">
+                        {% for error in form.non_field_errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Primary Summoner</button>
+                    <a href="{% url 'match_history:profile' %}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        {% if user_profile.connected_summoners.exists %}
+            <div class="summoners-preview">
+                <h3>Your Connected Summoners</h3>
+                <div class="summoners-list">
+                    {% for summoner in user_profile.connected_summoners.all %}
+                        <div class="summoner-preview {% if summoner == user_profile.primary_summoner %}current-primary{% endif %}">
+                            <div class="summoner-info">
+                                <div class="summoner-avatar">
+                                    {% if summoner.profile_icon %}
+                                        <img src="{{ summoner.profile_icon.get_url }}" alt="Profile Icon">
+                                    {% else %}
+                                        <div class="default-avatar">?</div>
+                                    {% endif %}
+                                </div>
+                                <div class="summoner-details">
+                                    <h4>{{ summoner.get_full_name }}</h4>
+                                    <p>Level {{ summoner.summoner_level|default:"Unknown" }}</p>
+                                    {% if summoner == user_profile.primary_summoner %}
+                                        <span class="primary-badge">Current Primary</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
