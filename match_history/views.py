@@ -3,12 +3,17 @@ import time
 from django.core.cache import cache
 from django.db.models import Prefetch
 from django.http import Http404, JsonResponse, HttpResponseBadRequest
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db import transaction
 
-from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
+from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch, Summoner, UserProfile
+from match_history.forms import CustomUserCreationForm, CustomAuthenticationForm, UserProfileForm, UserForm, SummonerConnectionForm, PrimarySummonerForm
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from match_history.util.populate_data import SummonerManager
@@ -366,3 +371,223 @@ def _get_champions_queryset(summoner):
 def _get_main_champ(summoner):
     queryset = _get_champions_queryset(summoner)
     return queryset.first().champion
+
+
+# Authentication Views
+def user_register(request):
+    """User registration view"""
+    if request.user.is_authenticated:
+        return redirect('match_history:profile')
+    
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Account created for {username}! You can now log in.')
+            return redirect('match_history:login')
+    else:
+        form = CustomUserCreationForm()
+    
+    return render(request, 'match_history/register.html', {'form': form})
+
+
+def user_login(request):
+    """User login view"""
+    if request.user.is_authenticated:
+        return redirect('match_history:profile')
+    
+    if request.method == 'POST':
+        form = CustomAuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Welcome back, {username}!')
+                next_url = request.GET.get('next', 'match_history:profile')
+                return redirect(next_url)
+    else:
+        form = CustomAuthenticationForm()
+    
+    return render(request, 'match_history/login.html', {'form': form})
+
+
+def user_logout(request):
+    """User logout view"""
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('match_history:home')
+
+
+@login_required
+def profile(request):
+    """User profile view"""
+    try:
+        user_profile = request.user.profile
+    except UserProfile.DoesNotExist:
+        # Create profile if it doesn't exist
+        user_profile = UserProfile.objects.create(user=request.user)
+    
+    connected_summoners = user_profile.connected_summoners.all()
+    primary_summoner = user_profile.primary_summoner
+    
+    context = {
+        'user_profile': user_profile,
+        'connected_summoners': connected_summoners,
+        'primary_summoner': primary_summoner,
+    }
+    
+    return render(request, 'match_history/profile.html', context)
+
+
+@login_required
+def profile_settings(request):
+    """Profile settings view"""
+    try:
+        user_profile = request.user.profile
+    except UserProfile.DoesNotExist:
+        user_profile = UserProfile.objects.create(user=request.user)
+    
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user)
+        profile_form = UserProfileForm(request.POST, instance=user_profile)
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('match_history:profile')
+    else:
+        user_form = UserForm(instance=request.user)
+        profile_form = UserProfileForm(instance=user_profile)
+    
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'user_profile': user_profile,
+    }
+    
+    return render(request, 'match_history/profile_settings.html', context)
+
+
+@login_required
+def connect_summoner(request):
+    """Connect a Riot Games account to user profile"""
+    try:
+        user_profile = request.user.profile
+    except UserProfile.DoesNotExist:
+        user_profile = UserProfile.objects.create(user=request.user)
+    
+    if request.method == 'POST':
+        form = SummonerConnectionForm(request.POST)
+        if form.is_valid():
+            summoner_name = form.cleaned_data['summoner_name']
+            set_as_primary = form.cleaned_data['set_as_primary']
+            
+            try:
+                # Parse summoner name
+                game_name, tag = summoner_name.split('#', 1)
+                game_name = game_name.strip().replace(" ", "").lower()
+                tag = tag.strip().lower()
+                
+                # Try to find existing summoner
+                try:
+                    summoner = Summoner.objects.get(
+                        normalized_game_name=game_name, 
+                        normalized_tag_line=tag
+                    )
+                except Summoner.DoesNotExist:
+                    # Create new summoner using Riot API
+                    try:
+                        summoner_manager = SummonerManager("americas", "na1")
+                        summoner = summoner_manager.create_summoner(game_name, tag)
+                        # Start processing matches for new summoner
+                        task = process_matches.delay(summoner.puuid)
+                        summoner.task_id = task.task_id
+                        summoner.save()
+                    except ApiError as e:
+                        messages.error(request, f'Could not find summoner "{summoner_name}". Please check the name and tag.')
+                        return render(request, 'match_history/connect_summoner.html', {'form': form})
+                
+                # Check if already connected
+                if user_profile.connected_summoners.filter(puuid=summoner.puuid).exists():
+                    messages.warning(request, f'Summoner "{summoner_name}" is already connected to your account.')
+                else:
+                    # Connect summoner to user profile
+                    user_profile.connected_summoners.add(summoner)
+                    
+                    # Set as primary if requested or if it's the first connected summoner
+                    if set_as_primary or not user_profile.primary_summoner:
+                        user_profile.primary_summoner = summoner
+                        user_profile.save()
+                    
+                    messages.success(request, f'Successfully connected summoner "{summoner_name}"!')
+                
+                return redirect('match_history:profile')
+                
+            except ValueError:
+                messages.error(request, 'Invalid summoner name format. Please use GameName#Tag format.')
+            except Exception as e:
+                messages.error(request, f'An error occurred while connecting the summoner: {str(e)}')
+    else:
+        form = SummonerConnectionForm()
+    
+    return render(request, 'match_history/connect_summoner.html', {'form': form})
+
+
+@login_required
+def disconnect_summoner(request, summoner_puuid):
+    """Disconnect a summoner from user profile"""
+    try:
+        user_profile = request.user.profile
+        summoner = get_object_or_404(Summoner, puuid=summoner_puuid)
+        
+        if user_profile.connected_summoners.filter(puuid=summoner_puuid).exists():
+            user_profile.connected_summoners.remove(summoner)
+            
+            # If this was the primary summoner, clear it
+            if user_profile.primary_summoner == summoner:
+                user_profile.primary_summoner = None
+                user_profile.save()
+            
+            messages.success(request, f'Successfully disconnected summoner "{summoner.get_full_name()}".')
+        else:
+            messages.error(request, 'This summoner is not connected to your account.')
+            
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'Profile not found.')
+    
+    return redirect('match_history:profile')
+
+
+@login_required
+def set_primary_summoner(request):
+    """Set primary summoner from connected accounts"""
+    try:
+        user_profile = request.user.profile
+    except UserProfile.DoesNotExist:
+        user_profile = UserProfile.objects.create(user=request.user)
+    
+    if request.method == 'POST':
+        form = PrimarySummonerForm(user_profile, request.POST)
+        if form.is_valid():
+            user_profile.primary_summoner = form.cleaned_data['primary_summoner']
+            user_profile.save()
+            
+            if user_profile.primary_summoner:
+                messages.success(request, f'Set "{user_profile.primary_summoner.get_full_name()}" as your primary summoner.')
+            else:
+                messages.success(request, 'Cleared primary summoner.')
+            
+            return redirect('match_history:profile')
+    else:
+        form = PrimarySummonerForm(user_profile)
+    
+    context = {
+        'form': form,
+        'user_profile': user_profile,
+    }
+    
+    return render(request, 'match_history/set_primary_summoner.html', context)

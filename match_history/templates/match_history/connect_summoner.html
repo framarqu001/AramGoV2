@@ -1,0 +1,108 @@
+{% extends "match_history/base.html" %}
+{% load static %}
+
+{% block title %}Connect Summoner - AramGo{% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'match_history/css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-info">
+            <h1>Connect Riot Games Account</h1>
+            <p>Add a new Riot Games summoner to your profile</p>
+        </div>
+        <div class="profile-actions">
+            <a href="{% url 'match_history:profile' %}" class="btn btn-outline">Back to Profile</a>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="connect-summoner-section">
+            <div class="connect-info">
+                <h2>How to connect your account</h2>
+                <ol>
+                    <li>Enter your Riot Games summoner name in the format: <strong>GameName#Tag</strong></li>
+                    <li>For example: <code>PlayerName#NA1</code> or <code>MyUsername#EUW</code></li>
+                    <li>Choose whether to set this as your primary account</li>
+                    <li>Click "Connect Account" to link it to your profile</li>
+                </ol>
+                <p class="note">
+                    <strong>Note:</strong> Your summoner name must be exactly as it appears in-game, 
+                    including the tag line (the part after the #).
+                </p>
+            </div>
+
+            <form method="post" class="connect-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="{{ form.summoner_name.id_for_label }}">Summoner Name:</label>
+                    {{ form.summoner_name }}
+                    {% if form.summoner_name.errors %}
+                        <div class="form-errors">
+                            {% for error in form.summoner_name.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if form.summoner_name.help_text %}
+                        <small class="form-help">{{ form.summoner_name.help_text }}</small>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    {{ form.set_as_primary }}
+                    <label for="{{ form.set_as_primary.id_for_label }}">Set as primary account</label>
+                    {% if form.set_as_primary.help_text %}
+                        <small class="form-help">{{ form.set_as_primary.help_text }}</small>
+                    {% endif %}
+                </div>
+                
+                {% if form.non_field_errors %}
+                    <div class="form-errors">
+                        {% for error in form.non_field_errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Connect Account</button>
+                    <a href="{% url 'match_history:profile' %}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="connect-help">
+            <h3>Need help finding your summoner name?</h3>
+            <div class="help-steps">
+                <div class="help-step">
+                    <h4>1. Open League of Legends</h4>
+                    <p>Launch the League of Legends client and log in to your account.</p>
+                </div>
+                <div class="help-step">
+                    <h4>2. Check your profile</h4>
+                    <p>Your summoner name and tag are displayed in the top right corner of the client.</p>
+                </div>
+                <div class="help-step">
+                    <h4>3. Copy the full name</h4>
+                    <p>Make sure to include both the name and the tag (e.g., "PlayerName#NA1").</p>
+                </div>
+            </div>
+            
+            <div class="help-note">
+                <h4>Common Issues:</h4>
+                <ul>
+                    <li>Make sure you include the # and tag line</li>
+                    <li>Check for typos in your summoner name</li>
+                    <li>Ensure your account is on the North American server (NA1)</li>
+                    <li>If you recently changed your name, wait a few minutes and try again</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
