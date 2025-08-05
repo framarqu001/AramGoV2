@@ -281,17 +281,63 @@ class ChampionStatsPatch(models.Model):
     total_played = models.IntegerField(default=0)
     total_wins = models.IntegerField(default=0)
     total_losses = models.IntegerField(default=0)
+    total_bans = models.IntegerField(default=0)
+    win_rate = models.FloatField(default=0.0)
+    pick_rate = models.FloatField(default=0.0)
+    ban_rate = models.FloatField(default=0.0)
+    last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('champion', 'patch')
+        indexes = [
+            models.Index(fields=['patch']),
+            models.Index(fields=['champion', 'patch']),
+            models.Index(fields=['win_rate']),
+            models.Index(fields=['pick_rate']),
+        ]
 
     def __str__(self):
         return f"Stats {self.champion}:{self.patch}"
 
-    def update_stats(self, participant: Participant):
+    def calculate_win_rate(self):
+        """Calculate win rate as percentage"""
+        if self.total_played > 0:
+            return round((self.total_wins / self.total_played) * 100, 2)
+        return 0.0
+
+    def calculate_pick_rate(self, total_matches_in_patch):
+        """Calculate pick rate as percentage of total matches in patch"""
+        if total_matches_in_patch > 0:
+            return round((self.total_played / total_matches_in_patch) * 100, 2)
+        return 0.0
+
+    def calculate_ban_rate(self, total_matches_in_patch):
+        """Calculate ban rate as percentage of total matches in patch"""
+        if total_matches_in_patch > 0:
+            return round((self.total_bans / total_matches_in_patch) * 100, 2)
+        return 0.0
+
+    def update_calculated_fields(self, total_matches_in_patch=None):
+        """Update all calculated rate fields"""
+        self.win_rate = self.calculate_win_rate()
+        if total_matches_in_patch is not None:
+            self.pick_rate = self.calculate_pick_rate(total_matches_in_patch)
+            self.ban_rate = self.calculate_ban_rate(total_matches_in_patch)
+
+    def update_stats(self, participant: Participant, total_matches_in_patch=None):
+        """Update statistics with new participant data"""
         self.total_played += 1
         if participant.win:
             self.total_wins += 1
         else:
             self.total_losses += 1
+        
+        # Update calculated fields
+        self.update_calculated_fields(total_matches_in_patch)
+        self.save()
+
+    def add_ban(self, total_matches_in_patch=None):
+        """Add a ban for this champion"""
+        self.total_bans += 1
+        self.update_calculated_fields(total_matches_in_patch)
         self.save()

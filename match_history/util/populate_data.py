@@ -190,11 +190,86 @@ class MatchManager():
         )
         account_stats.update_stats(participant, snowballs)
 
+        # Enhanced champion stats with rate calculations
         champ_stats_patch, created = ChampionStatsPatch.objects.update_or_create(
             champion=participant.champion,
             patch=patch
         )
-        champ_stats_patch.update_stats(participant)
+        
+        # Get total matches for this patch to calculate rates
+        total_matches_in_patch = self._get_total_matches_for_patch(patch)
+        champ_stats_patch.update_stats(participant, total_matches_in_patch)
+        
+        # Invalidate related caches
+        self._invalidate_champion_caches(patch, participant.champion.champion_id)
+
+    def _get_total_matches_for_patch(self, patch):
+        """Get total number of matches for a specific patch"""
+        from django.core.cache import cache
+        
+        cache_key = f'total_matches_{patch}'
+        total_matches = cache.get(cache_key)
+        
+        if total_matches is None:
+            total_matches = Match.objects.filter(
+                game_version__startswith=patch
+            ).count()
+            # Cache for 30 minutes
+            cache.set(cache_key, total_matches, 1800)
+            
+        return total_matches
+
+    def _invalidate_champion_caches(self, patch, champion_id):
+        """Invalidate caches related to champion statistics"""
+        from django.core.cache import cache
+        
+        cache_keys_to_delete = [
+            f'champion_stats_patch_{patch}',
+            f'champion_stats_champion_{champion_id}_{patch}',
+            f'champion_stats_all',
+            f'total_matches_{patch}',
+        ]
+        
+        cache.delete_many(cache_keys_to_delete)
+
+    def recalculate_champion_stats(self, patch=None):
+        """
+        Recalculate champion statistics for existing data.
+        Useful for updating historical data with new statistics fields.
+        
+        Args:
+            patch: Specific patch to recalculate (if None, recalculates all)
+        """
+        from match_history.util.stats_manager import ChampionStatsManager
+        
+        stats_manager = ChampionStatsManager()
+        
+        if patch:
+            # Recalculate for specific patch
+            result = stats_manager.update_champion_stats_bulk(patch, recalculate_rates=True)
+            print(f"Recalculated stats for patch {patch}: {result}")
+        else:
+            # Get all unique patches
+            patches = ChampionStatsPatch.objects.values_list('patch', flat=True).distinct()
+            
+            for patch_version in patches:
+                try:
+                    result = stats_manager.update_champion_stats_bulk(patch_version, recalculate_rates=True)
+                    print(f"Recalculated stats for patch {patch_version}: {result}")
+                except Exception as e:
+                    print(f"Error recalculating stats for patch {patch_version}: {e}")
+
+    def populate_missing_ban_data(self):
+        """
+        Populate ban data for champions. 
+        Note: This is a placeholder since ban data isn't currently tracked in matches.
+        In a real implementation, you would need to modify the match parsing to include ban phase data.
+        """
+        print("Ban data population not implemented - ban phase data not available in current match data")
+        print("To implement ban tracking, you would need to:")
+        print("1. Add ban phase data collection to match parsing")
+        print("2. Create a separate Ban model or add ban fields to Match model")
+        print("3. Update this method to process ban data from match info")
 
     def _create_participants(self, match_info: dict, match: Match):
         participants_puid = match_info["metadata"]["participants"]
