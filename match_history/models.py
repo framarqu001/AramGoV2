@@ -193,11 +193,27 @@ class Participant(models.Model):
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
     game_name = models.CharField(max_length=50)
+    
+    # New fields for extended participant statistics
+    kda_ratio = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, help_text="KDA ratio calculated as (kills + assists) / max(deaths, 1)")
+    total_damage_dealt = models.BigIntegerField(null=True, blank=True, help_text="Total damage dealt to all targets")
+    damage_to_champions = models.BigIntegerField(null=True, blank=True, help_text="Total damage dealt to enemy champions")
+    damage_taken = models.BigIntegerField(null=True, blank=True, help_text="Total damage taken from all sources")
 
     def match_result(self):
         if self.win:
             return "Victory"
         return "Defeat"
+    
+    def calculate_kda_ratio(self):
+        """Calculate KDA ratio as (kills + assists) / max(deaths, 1)"""
+        return (self.kills + self.assists) / max(self.deaths, 1)
+    
+    def get_kda_ratio(self):
+        """Get stored KDA ratio or calculate it if not available"""
+        if self.kda_ratio is not None:
+            return float(self.kda_ratio)
+        return self.calculate_kda_ratio()
 
     def __str__(self):
         return f"{self.game_name} playing {self.champion} in match {self.match}"
