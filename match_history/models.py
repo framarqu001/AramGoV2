@@ -171,6 +171,31 @@ class Participant(models.Model):
         (BLUE_TEAM, 'Blue Team'),
         (RED_TEAM, 'Red Team'),
     ]
+
+    # Rank tier choices based on League of Legends ranking system
+    TIER_CHOICES = [
+        ('IRON', 'Iron'),
+        ('BRONZE', 'Bronze'),
+        ('SILVER', 'Silver'),
+        ('GOLD', 'Gold'),
+        ('PLATINUM', 'Platinum'),
+        ('EMERALD', 'Emerald'),
+        ('DIAMOND', 'Diamond'),
+        ('MASTER', 'Master'),
+        ('GRANDMASTER', 'Grandmaster'),
+        ('CHALLENGER', 'Challenger'),
+        ('UNRANKED', 'Unranked'),
+    ]
+
+    # Division choices (I-IV for most tiers)
+    DIVISION_CHOICES = [
+        ('I', 'I'),
+        ('II', 'II'),
+        ('III', 'III'),
+        ('IV', 'IV'),
+        ('', 'N/A'),  # For Master, Grandmaster, Challenger tiers
+    ]
+
     # A match has many participants. Participants belong to one match.
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='participants')
     # A Summoner can be a participant in multiple matches.
@@ -193,14 +218,45 @@ class Participant(models.Model):
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
     game_name = models.CharField(max_length=50)
+    
+    # Rank fields for expanded participant statistics
+    tier = models.CharField(max_length=20, choices=TIER_CHOICES, default='UNRANKED', db_index=True)
+    division = models.CharField(max_length=5, choices=DIVISION_CHOICES, default='', blank=True, db_index=True)
+    lp = models.IntegerField(default=0, db_index=True, help_text="League Points")
 
     def match_result(self):
         if self.win:
             return "Victory"
         return "Defeat"
 
+    def get_rank_display(self):
+        """Return formatted rank string for display"""
+        if self.tier == 'UNRANKED':
+            return 'Unranked'
+        elif self.tier in ['MASTER', 'GRANDMASTER', 'CHALLENGER']:
+            return f"{self.get_tier_display()} {self.lp} LP"
+        else:
+            division_display = self.get_division_display() if self.division else ''
+            return f"{self.get_tier_display()} {division_display} {self.lp} LP"
+
+    def get_rank_data(self):
+        """Return rank data as dictionary for API responses"""
+        return {
+            'tier': self.tier,
+            'division': self.division,
+            'lp': self.lp,
+            'rank_display': self.get_rank_display()
+        }
+
     def __str__(self):
         return f"{self.game_name} playing {self.champion} in match {self.match}"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['tier', 'division']),
+            models.Index(fields=['summoner', 'tier']),
+            models.Index(fields=['match', 'tier']),
+        ]
 
 
 class SummonerChampionStats(models.Model):
