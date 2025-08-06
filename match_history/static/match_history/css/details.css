@@ -142,10 +142,11 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    min-height: 120px;
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
+    padding: 10px 0;
 }
 
 .match-card .stat-section.stats-text{
@@ -486,4 +487,169 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Enhanced Participant Styles */
+.participant-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 200px;
+}
+
+.team-blue, .team-red {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.participant-entry {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    min-height: 24px;
+}
+
+.participant-entry.highlight {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.participant-icons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.profile-icon-tiny {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+}
+
+.champ-icon-small {
+    position: relative;
+}
+
+.champ-icon-small img {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+}
+
+.participant-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.participant-name {
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+}
+
+.participant-stats {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.participant-kda {
+    font-weight: 500;
+}
+
+.participant-level {
+    font-size: 8px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.participant-cs {
+    font-size: 8px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.win-indicator {
+    width: 3px;
+    height: 20px;
+    border-radius: 1px;
+    margin-left: auto;
+}
+
+.win-indicator.win {
+    background-color: #4CAF50;
+}
+
+.win-indicator.loss {
+    background-color: #f44336;
+}
+
+/* Responsive design for enhanced participant info */
+@media (max-width: 768px) {
+    .match-section-container {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .participant-section {
+        min-width: auto;
+    }
+    
+    .participant-name {
+        max-width: 120px;
+    }
+    
+    .participant-stats {
+        flex-wrap: wrap;
+    }
+    
+    .participant-level,
+    .participant-cs {
+        font-size: 7px;
+    }
+}
+
+@media (max-width: 480px) {
+    .match-card {
+        min-height: auto;
+        padding: 8px 0;
+    }
+    
+    .participant-entry {
+        gap: 4px;
+        min-height: 20px;
+    }
+    
+    .profile-icon-tiny {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .champ-icon-small img {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .participant-name {
+        font-size: 10px;
+        max-width: 100px;
+    }
+    
+    .participant-stats {
+        font-size: 8px;
+        gap: 2px;
+    }
+    
+    .participant-level,
+    .participant-cs {
+        font-size: 6px;
+    }
 }
