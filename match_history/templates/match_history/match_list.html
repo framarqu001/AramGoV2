@@ -82,27 +82,51 @@
 
             <div class="team-blue">
                 {% for participant in blue_team %}
-                    <div class="participant-entry">
-                        <div class="champ-icon-small">
-                            <img class = "champ-img" src="{{participant.champion.get_url}}" alt="">
+                    <div class="participant-entry {% if participant == main_participant %}highlight{% endif %}">
+                        <div class="participant-icons">
+                            {% if participant.summoner.profile_icon %}
+                                <img class="profile-icon-tiny" src="{{participant.summoner.profile_icon.get_url}}" alt="">
+                            {% endif %}
+                            <div class="champ-icon-small">
+                                <img class="champ-img" src="{{participant.champion.get_url}}" alt="">
+                            </div>
                         </div>
-                        <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
-                            <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
+                        <div class="participant-info">
+                            <div class="participant-name">
+                                <a href="{{participant.summoner.get_url}}">{{participant.game_name}}</a>
+                            </div>
+                            <div class="participant-stats">
+                                <span class="participant-kda">{{participant.kills}}/{{participant.deaths}}/{{participant.assists}}</span>
+                                <span class="participant-level">Lv{{participant.summoner.summoner_level}}</span>
+                                <span class="participant-cs">{{participant.creep_score}}cs</span>
+                            </div>
                         </div>
-
+                        <div class="win-indicator {% if participant.win %}win{% else %}loss{% endif %}"></div>
                     </div>
                 {% endfor %}
             </div>
             <div class="team-red">
                 {% for participant in red_team %}
-                    <div class="participant-entry">
-                        <div class="champ-icon-small">
-                            <img class = "champ-img" src="{{participant.champion.get_url}}" alt="">
+                    <div class="participant-entry {% if participant == main_participant %}highlight{% endif %}">
+                        <div class="participant-icons">
+                            {% if participant.summoner.profile_icon %}
+                                <img class="profile-icon-tiny" src="{{participant.summoner.profile_icon.get_url}}" alt="">
+                            {% endif %}
+                            <div class="champ-icon-small">
+                                <img class="champ-img" src="{{participant.champion.get_url}}" alt="">
+                            </div>
                         </div>
-                        <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
-                            <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
+                        <div class="participant-info">
+                            <div class="participant-name">
+                                <a href="{{participant.summoner.get_url}}">{{participant.game_name}}</a>
+                            </div>
+                            <div class="participant-stats">
+                                <span class="participant-kda">{{participant.kills}}/{{participant.deaths}}/{{participant.assists}}</span>
+                                <span class="participant-level">Lv{{participant.summoner.summoner_level}}</span>
+                                <span class="participant-cs">{{participant.creep_score}}cs</span>
+                            </div>
                         </div>
-
+                        <div class="win-indicator {% if participant.win %}win{% else %}loss{% endif %}"></div>
                     </div>
                 {% endfor %}
             </div>
