@@ -77,6 +77,23 @@
             <div class="kda">{{main_participant.kills}} / <span class ="death-color">{{main_participant.deaths}}</span> / {{main_participant.assists}}</div>
             <div class="calculated-kda sub-text">KDA: {{main_stats.kda}}</div>
             <div class="cs sub-text">{{main_participant.creep_score}} CS ({{main_stats.cs_min}})</div>
+            <div class="kill-participation sub-text">KP: {{main_stats.kill_participation}}</div>
+        </div>
+        <div class="stats-section">
+            <div class="expanded-stats">
+                <div class="stat-row">
+                    <span class="stat-label sub-text">Level:</span>
+                    <span class="stat-value">{{main_participant.summoner.summoner_level|default:"N/A"}}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label sub-text">Rank:</span>
+                    <span class="stat-value">{{main_participant.summoner.get_rank_display}}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label sub-text">Total CS:</span>
+                    <span class="stat-value">{{main_stats.total_cs}}</span>
+                </div>
+            </div>
         </div>
         <div class="participant-section">
 
@@ -86,10 +103,15 @@
                         <div class="champ-icon-small">
                             <img class = "champ-img" src="{{participant.champion.get_url}}" alt="">
                         </div>
-                        <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
-                            <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
+                        <div class="participant-info">
+                            <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
+                                <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
+                            </div>
+                            <div class="participant-stats sub-text">
+                                <span class="level-badge">{{participant.summoner.summoner_level|default:"?"}}</span>
+                                <span class="rank-badge">{{participant.summoner.get_rank_display}}</span>
+                            </div>
                         </div>
-
                     </div>
                 {% endfor %}
             </div>
@@ -99,10 +121,15 @@
                         <div class="champ-icon-small">
                             <img class = "champ-img" src="{{participant.champion.get_url}}" alt="">
                         </div>
-                        <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
-                            <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
+                        <div class="participant-info">
+                            <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
+                                <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
+                            </div>
+                            <div class="participant-stats sub-text">
+                                <span class="level-badge">{{participant.summoner.summoner_level|default:"?"}}</span>
+                                <span class="rank-badge">{{participant.summoner.get_rank_display}}</span>
+                            </div>
                         </div>
-
                     </div>
                 {% endfor %}
             </div>
