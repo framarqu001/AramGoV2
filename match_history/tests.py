@@ -77,7 +77,23 @@ class MatchParticipantTest(TestCase):
 
 class PatchVersionCacheTest(TestCase):
     @patch('AramGoV2.util.current_patch.get_patch')
-    def test_patch_version_cache_timeout(self, mock_get_patch):
+    @patch('match_history.apps.cache')
+    def test_patch_version_cache_timeout(self, mock_cache, mock_get_patch):
+        # Mock the get_patch function to return a fixed value
+        mock_get_patch.return_value = '13.15.1'
+        
+        # Initialize the app config which should cache the patch version
+        app_config = MatchHistoryConfig('match_history', None)
+        app_config.ready()
+        
+        # Verify that cache.set was called with the correct timeout (3 weeks = 1814400 seconds)
+        mock_cache.set.assert_called_once_with('PATCH', '13.15.1', timeout=1814400)
+        
+        # Verify that the mock was called
+        mock_get_patch.assert_called_once()
+    
+    @patch('AramGoV2.util.current_patch.get_patch')
+    def test_patch_version_cache_functionality(self, mock_get_patch):
         # Mock the get_patch function to return a fixed value
         mock_get_patch.return_value = '13.15.1'
         
@@ -91,9 +107,6 @@ class PatchVersionCacheTest(TestCase):
         # Verify that the patch version was cached
         cached_patch = cache.get('PATCH')
         self.assertEqual(cached_patch, '13.15.1')
-        
-        # Check the timeout value (this requires accessing internal cache details)
-        # We can't directly check the timeout, but we can verify the patch is cached
         self.assertIsNotNone(cached_patch)
         
         # Verify that the mock was called
