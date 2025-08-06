@@ -108,8 +108,96 @@
             </div>
         </div>
     </div>
+    
+    <!-- Expandable content section -->
+    <div class="match-expandable-content">
+        <div class="expanded-details">
+            <div class="expanded-teams">
+                <div class="expanded-team-section">
+                    <h4 class="team-header blue-team-header">Blue Team</h4>
+                    <div class="expanded-team-list">
+                        {% for participant in blue_team %}
+                            <div class="expanded-participant {% if participant == main_participant %}main-participant{% endif %}">
+                                <div class="participant-champion">
+                                    <img class="expanded-champ-img" src="{{participant.champion.get_url}}" alt="{{participant.champion.name}}">
+                                    <span class="champion-name">{{participant.champion.name}}</span>
+                                </div>
+                                <div class="participant-summoner">
+                                    <a href="{{participant.summoner.get_url}}" class="summoner-link">{{participant.game_name}}</a>
+                                </div>
+                                <div class="participant-kda">
+                                    {{participant.kills}}/{{participant.deaths}}/{{participant.assists}}
+                                </div>
+                                <div class="participant-cs">
+                                    {{participant.creep_score}} CS
+                                </div>
+                                <div class="participant-items">
+                                    {% if participant.item1 %}<img class="expanded-item-img" src="{{participant.item1.get_url}}" alt="{{participant.item1.name}}" title="{{participant.item1.name}}">{% endif %}
+                                    {% if participant.item2 %}<img class="expanded-item-img" src="{{participant.item2.get_url}}" alt="{{participant.item2.name}}" title="{{participant.item2.name}}">{% endif %}
+                                    {% if participant.item3 %}<img class="expanded-item-img" src="{{participant.item3.get_url}}" alt="{{participant.item3.name}}" title="{{participant.item3.name}}">{% endif %}
+                                    {% if participant.item4 %}<img class="expanded-item-img" src="{{participant.item4.get_url}}" alt="{{participant.item4.name}}" title="{{participant.item4.name}}">{% endif %}
+                                    {% if participant.item5 %}<img class="expanded-item-img" src="{{participant.item5.get_url}}" alt="{{participant.item5.name}}" title="{{participant.item5.name}}">{% endif %}
+                                    {% if participant.item6 %}<img class="expanded-item-img" src="{{participant.item6.get_url}}" alt="{{participant.item6.name}}" title="{{participant.item6.name}}">{% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="expanded-team-section">
+                    <h4 class="team-header red-team-header">Red Team</h4>
+                    <div class="expanded-team-list">
+                        {% for participant in red_team %}
+                            <div class="expanded-participant {% if participant == main_participant %}main-participant{% endif %}">
+                                <div class="participant-champion">
+                                    <img class="expanded-champ-img" src="{{participant.champion.get_url}}" alt="{{participant.champion.name}}">
+                                    <span class="champion-name">{{participant.champion.name}}</span>
+                                </div>
+                                <div class="participant-summoner">
+                                    <a href="{{participant.summoner.get_url}}" class="summoner-link">{{participant.game_name}}</a>
+                                </div>
+                                <div class="participant-kda">
+                                    {{participant.kills}}/{{participant.deaths}}/{{participant.assists}}
+                                </div>
+                                <div class="participant-cs">
+                                    {{participant.creep_score}} CS
+                                </div>
+                                <div class="participant-items">
+                                    {% if participant.item1 %}<img class="expanded-item-img" src="{{participant.item1.get_url}}" alt="{{participant.item1.name}}" title="{{participant.item1.name}}">{% endif %}
+                                    {% if participant.item2 %}<img class="expanded-item-img" src="{{participant.item2.get_url}}" alt="{{participant.item2.name}}" title="{{participant.item2.name}}">{% endif %}
+                                    {% if participant.item3 %}<img class="expanded-item-img" src="{{participant.item3.get_url}}" alt="{{participant.item3.name}}" title="{{participant.item3.name}}">{% endif %}
+                                    {% if participant.item4 %}<img class="expanded-item-img" src="{{participant.item4.get_url}}" alt="{{participant.item4.name}}" title="{{participant.item4.name}}">{% endif %}
+                                    {% if participant.item5 %}<img class="expanded-item-img" src="{{participant.item5.get_url}}" alt="{{participant.item5.name}}" title="{{participant.item5.name}}">{% endif %}
+                                    {% if participant.item6 %}<img class="expanded-item-img" src="{{participant.item6.get_url}}" alt="{{participant.item6.name}}" title="{{participant.item6.name}}">{% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="expanded-match-info">
+                <div class="match-details-section">
+                    <h4>Match Details</h4>
+                    <div class="match-detail-item">
+                        <span class="detail-label">Duration:</span>
+                        <span class="detail-value">{{match.get_duration}}</span>
+                    </div>
+                    <div class="match-detail-item">
+                        <span class="detail-label">Game Mode:</span>
+                        <span class="detail-value">ARAM</span>
+                    </div>
+                    <div class="match-detail-item">
+                        <span class="detail-label">Result:</span>
+                        <span class="detail-value {% if main_participant.win%}win-text{% else %}loss-text{% endif %}">{{main_participant.match_result}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
-        <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
+        <svg class = "drop chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
 </div>
