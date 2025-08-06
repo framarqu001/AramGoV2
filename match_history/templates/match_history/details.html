@@ -292,6 +292,22 @@
     
 </script>
 
+<script>
+    // Expandable match card functionality
+    $(document).ready(function() {
+        // Use event delegation to handle clicks on dynamically loaded match cards
+        $(document).on('click', '.match-btn', function(e) {
+            e.preventDefault();
+            
+            const matchCard = $(this).closest('.match-card');
+            const expandableContent = matchCard.find('.expandable-content');
+            
+            // Toggle expanded state
+            matchCard.toggleClass('match-card-expanded');
+            expandableContent.toggleClass('content-expanded');
+        });
+    });
+</script>
 
 
 {% endblock %}

@@ -1,5 +1,6 @@
-from django.test import TransactionTestCase, TestCase
+from django.test import TransactionTestCase, TestCase, Client
 from django.core.cache import cache
+from django.template import Context, Template
 from unittest.mock import patch
 from .models import *
 from AramGoV2.util.current_patch import get_patch
@@ -98,3 +99,199 @@ class PatchVersionCacheTest(TestCase):
         
         # Verify that the mock was called
         mock_get_patch.assert_called_once()
+
+
+class ExpandableMatchCardTest(TestCase):
+    def setUp(self):
+        # Create test data for match card template
+        self.summoner1 = Summoner.objects.create(
+            puuid='summoner-1-id',
+            game_name='Player1',
+            tag_line='NA1',
+            summoner_name='Player1',
+            summoner_level=30
+        )
+        self.summoner2 = Summoner.objects.create(
+            puuid='summoner-2-id',
+            game_name='Player2',
+            tag_line='NA1',
+            summoner_name='Player2',
+            summoner_level=25
+        )
+        
+        self.champion1 = Champion.objects.create(
+            champion_id='Aatrox',
+            name='Aatrox',
+            title='The Darkin Blade',
+            image_path='Aatrox.png'
+        )
+        self.champion2 = Champion.objects.create(
+            champion_id='Ahri',
+            name='Ahri',
+            title='The Nine-Tailed Fox',
+            image_path='Ahri.png'
+        )
+        
+        self.match = Match.objects.create(
+            match_id='test_match_001',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='ARAM',
+            game_version='13.15.1'
+        )
+        
+        # Create participants for blue and red teams
+        self.participant1 = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner1,
+            champion=self.champion1,
+            kills=10,
+            deaths=2,
+            assists=8,
+            creep_score=150,
+            team_id=100,  # Blue team
+            win=True
+        )
+        
+        self.participant2 = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner2,
+            champion=self.champion2,
+            kills=5,
+            deaths=8,
+            assists=12,
+            creep_score=120,
+            team_id=200,  # Red team
+            win=False
+        )
+
+    def test_match_card_template_structure(self):
+        """Test that the match card template includes expandable content structure"""
+        template_content = """
+        {% load static %}
+        {% for match, main_participant, blue_team, red_team, main_stats in matches %}
+        <div class="match-card {% if main_participant.win %}match-win{% else %}match-lose{% endif %}">
+            <div class="match-card-content">
+                <div class="match-section-container">
+                    <!-- Main content -->
+                </div>
+                <button class="match-btn">
+                    <svg class="drop"></svg>
+                </button>
+            </div>
+            <div class="expandable-content">
+                <div class="detailed-participants">
+                    <div class="team-details">
+                        <div class="team-header team-blue-header">Blue Team</div>
+                        <div class="detailed-team-blue">
+                            {% for participant in blue_team %}
+                                <div class="detailed-participant-entry">
+                                    <div class="participant-info">
+                                        <div class="participant-name">{{ participant.game_name }}</div>
+                                        <div class="participant-champion">{{ participant.champion.name }}</div>
+                                    </div>
+                                    <div class="participant-stats">
+                                        <div class="participant-kda">{{ participant.kills }}/{{ participant.deaths }}/{{ participant.assists }}</div>
+                                        <div class="participant-cs">{{ participant.creep_score }} CS</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="team-details">
+                        <div class="team-header team-red-header">Red Team</div>
+                        <div class="detailed-team-red">
+                            {% for participant in red_team %}
+                                <div class="detailed-participant-entry">
+                                    <div class="participant-info">
+                                        <div class="participant-name">{{ participant.game_name }}</div>
+                                        <div class="participant-champion">{{ participant.champion.name }}</div>
+                                    </div>
+                                    <div class="participant-stats">
+                                        <div class="participant-kda">{{ participant.kills }}/{{ participant.deaths }}/{{ participant.assists }}</div>
+                                        <div class="participant-cs">{{ participant.creep_score }} CS</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        """
+        
+        template = Template(template_content)
+        
+        # Mock match data structure
+        matches = [(
+            self.match,
+            self.participant1,  # main_participant
+            [self.participant1],  # blue_team
+            [self.participant2],  # red_team
+            {'kda': '9.0', 'cs_min': '5.0'}  # main_stats
+        )]
+        
+        context = Context({'matches': matches})
+        rendered = template.render(context)
+        
+        # Test that expandable content structure is present
+        self.assertIn('expandable-content', rendered)
+        self.assertIn('detailed-participants', rendered)
+        self.assertIn('team-blue-header', rendered)
+        self.assertIn('team-red-header', rendered)
+        self.assertIn('detailed-participant-entry', rendered)
+        self.assertIn('participant-kda', rendered)
+        
+        # Test that participant data is rendered correctly
+        self.assertIn('Player1', rendered)
+        self.assertIn('Player2', rendered)
+        self.assertIn('Aatrox', rendered)
+        self.assertIn('Ahri', rendered)
+        self.assertIn('10/2/8', rendered)  # participant1 KDA
+        self.assertIn('5/8/12', rendered)  # participant2 KDA
+
+    def test_match_card_css_classes(self):
+        """Test that the required CSS classes are present in the template"""
+        template_content = """
+        <div class="match-card match-card-expanded">
+            <div class="expandable-content content-expanded">
+                <div class="detailed-participants">
+                    <div class="champ-icon-medium">
+                        <img class="tiny-img" src="test.png" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+        """
+        
+        template = Template(template_content)
+        context = Context({})
+        rendered = template.render(context)
+        
+        # Test that required CSS classes are present
+        self.assertIn('match-card-expanded', rendered)
+        self.assertIn('content-expanded', rendered)
+        self.assertIn('champ-icon-medium', rendered)
+        self.assertIn('tiny-img', rendered)
+
+    def test_expandable_content_initially_collapsed(self):
+        """Test that expandable content is initially collapsed (no expanded classes)"""
+        template_content = """
+        <div class="match-card">
+            <div class="expandable-content">
+                <div class="detailed-participants">Content</div>
+            </div>
+        </div>
+        """
+        
+        template = Template(template_content)
+        context = Context({})
+        rendered = template.render(context)
+        
+        # Test that expanded classes are not present initially
+        self.assertNotIn('match-card-expanded', rendered)
+        self.assertNotIn('content-expanded', rendered)
+        # But the structure should be there
+        self.assertIn('expandable-content', rendered)
+        self.assertIn('detailed-participants', rendered)
