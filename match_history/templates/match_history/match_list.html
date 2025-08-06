@@ -108,7 +108,128 @@
             </div>
         </div>
     </div>
-    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+    
+    <!-- Collapsible Detailed Participant Stats Section -->
+    <div class="participant-stats-expanded" style="display: none;">
+        <div class="participant-stats-container">
+            <div class="team-stats team-blue-stats">
+                <div class="team-header">
+                    <span class="team-label {% if main_participant.team == 100 %}team-win{% else %}team-lose{% endif %}">Blue Team {% if match.winner == 100 %}(Victory){% else %}(Defeat){% endif %}</span>
+                </div>
+                {% for participant in blue_team %}
+                    <div class="participant-detailed-entry {% if participant == main_participant %}main-participant{% endif %}">
+                        <div class="participant-champion">
+                            <div class="champion-icon-expanded">
+                                <img class="champ-img-expanded" src="{{participant.champion.get_url}}" alt="{{participant.champion.name}}">
+                            </div>
+                            <div class="participant-info">
+                                <div class="participant-name {% if participant == main_participant %}highlight{% endif %}">
+                                    <a href="{{participant.summoner.get_url}}">{{participant.game_name}}</a>
+                                </div>
+                                <div class="champion-name">{{participant.champion.name}}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="participant-build">
+                            <div class="participant-spells">
+                                <img class="spell-img" src="{{participant.spell1.get_url}}" alt="{{participant.spell1.name}}">
+                                <img class="spell-img" src="{{participant.spell2.get_url}}" alt="{{participant.spell2.name}}">
+                            </div>
+                            <div class="participant-runes">
+                                <img class="rune-img" src="{{participant.rune1.get_url}}" alt="{{participant.rune1.name}}">
+                                <img class="rune-img sub-rune" src="{{participant.rune2.get_url}}" alt="{{participant.rune2.name}}">
+                            </div>
+                        </div>
+                        
+                        <div class="participant-items">
+                            {% if participant.item1 %}<img class="item-img" src="{{participant.item1.get_url}}" alt="{{participant.item1.name}}">{% else %}<div class="item-empty"></div>{% endif %}
+                            {% if participant.item2 %}<img class="item-img" src="{{participant.item2.get_url}}" alt="{{participant.item2.name}}">{% else %}<div class="item-empty"></div>{% endif %}
+                            {% if participant.item3 %}<img class="item-img" src="{{participant.item3.get_url}}" alt="{{participant.item3.name}}">{% else %}<div class="item-empty"></div>{% endif %}
+                            {% if participant.item4 %}<img class="item-img" src="{{participant.item4.get_url}}" alt="{{participant.item4.name}}">{% else %}<div class="item-empty"></div>{% endif %}
+                            {% if participant.item5 %}<img class="item-img" src="{{participant.item5.get_url}}" alt="{{participant.item5.name}}">{% else %}<div class="item-empty"></div>{% endif %}
+                            {% if participant.item6 %}<img class="item-img" src="{{participant.item6.get_url}}" alt="{{participant.item6.name}}">{% else %}<div class="item-empty"></div>{% endif %}
+                        </div>
+                        
+                        <div class="participant-stats">
+                            <div class="stat-kda">
+                                <span class="kda-text">{{participant.kills}}/{{participant.deaths}}/{{participant.assists}}</span>
+                                <span class="kda-ratio">
+                                    {% if participant.deaths > 0 %}
+                                        {{ participant.kills|add:participant.assists|floatformat:1 }}/{{ participant.deaths }} KDA
+                                    {% else %}
+                                        Perfect KDA
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="stat-cs">
+                                <span class="cs-text">{{participant.creep_score}} CS</span>
+                                <span class="cs-min">{% if match.get_minutes > 0 %}{{ participant.creep_score|floatformat:1 }}/min{% endif %}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="team-stats team-red-stats">
+                <div class="team-header">
+                    <span class="team-label {% if main_participant.team == 200 %}team-win{% else %}team-lose{% endif %}">Red Team {% if match.winner == 200 %}(Victory){% else %}(Defeat){% endif %}</span>
+                </div>
+                {% for participant in red_team %}
+                    <div class="participant-detailed-entry {% if participant == main_participant %}main-participant{% endif %}">
+                        <div class="participant-champion">
+                            <div class="champion-icon-expanded">
+                                <img class="champ-img-expanded" src="{{participant.champion.get_url}}" alt="{{participant.champion.name}}">
+                            </div>
+                            <div class="participant-info">
+                                <div class="participant-name {% if participant == main_participant %}highlight{% endif %}">
+                                    <a href="{{participant.summoner.get_url}}">{{participant.game_name}}</a>
+                                </div>
+                                <div class="champion-name">{{participant.champion.name}}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="participant-build">
+                            <div class="participant-spells">
+                                <img class="spell-img" src="{{participant.spell1.get_url}}" alt="{{participant.spell1.name}}">
+                                <img class="spell-img" src="{{participant.spell2.get_url}}" alt="{{participant.spell2.name}}">
+                            </div>
+                            <div class="participant-runes">
+                                <img class="rune-img" src="{{participant.rune1.get_url}}" alt="{{participant.rune1.name}}">
+                                <img class="rune-img sub-rune" src="{{participant.rune2.get_url}}" alt="{{participant.rune2.name}}">
+                            </div>
+                        </div>
+                        
+                        <div class="participant-items">
+                            {% if participant.item1 %}<img class="item-img" src="{{participant.item1.get_url}}" alt="{{participant.item1.name}}">{% else %}<div class="item-empty"></div>{% endif %}
+                            {% if participant.item2 %}<img class="item-img" src="{{participant.item2.get_url}}" alt="{{participant.item2.name}}">{% else %}<div class="item-empty"></div>{% endif %}
+                            {% if participant.item3 %}<img class="item-img" src="{{participant.item3.get_url}}" alt="{{participant.item3.name}}">{% else %}<div class="item-empty"></div>{% endif %}
+                            {% if participant.item4 %}<img class="item-img" src="{{participant.item4.get_url}}" alt="{{participant.item4.name}}">{% else %}<div class="item-empty"></div>{% endif %}
+                            {% if participant.item5 %}<img class="item-img" src="{{participant.item5.get_url}}" alt="{{participant.item5.name}}">{% else %}<div class="item-empty"></div>{% endif %}
+                            {% if participant.item6 %}<img class="item-img" src="{{participant.item6.get_url}}" alt="{{participant.item6.name}}">{% else %}<div class="item-empty"></div>{% endif %}
+                        </div>
+                        
+                        <div class="participant-stats">
+                            <div class="stat-kda">
+                                <span class="kda-text">{{participant.kills}}/{{participant.deaths}}/{{participant.assists}}</span>
+                                <span class="kda-ratio">
+                                    {% if participant.deaths > 0 %}
+                                        {{ participant.kills|add:participant.assists|floatformat:1 }}/{{ participant.deaths }} KDA
+                                    {% else %}
+                                        Perfect KDA
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="stat-cs">
+                                <span class="cs-text">{{participant.creep_score}} CS</span>
+                                <span class="cs-min">{% if match.get_minutes > 0 %}{{ participant.creep_score|floatformat:1 }}/min{% endif %}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" onclick="toggleMatchDetails(this)" aria-expanded="false" aria-label="Toggle match details">
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
