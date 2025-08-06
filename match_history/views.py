@@ -224,10 +224,23 @@ def _get_new_match_data(summoner):
         kda = (
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        
+        # Calculate additional stats for expanded display
+        kill_participation = 0
+        team_kills = 0
+        for participant in match.all_participants:
+            if participant.team == main_participant.team:
+                team_kills += participant.kills
+        
+        if team_kills > 0:
+            kill_participation = ((main_participant.kills + main_participant.assists) / team_kills) * 100
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "kill_participation": f"{kill_participation:.0f}%",
+            "total_cs": main_participant.creep_score,
+            "damage_ratio": "N/A"  # Placeholder for damage data if available
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
@@ -251,10 +264,23 @@ def _get_match_data(summoner, page_obj):
         kda = (
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        
+        # Calculate additional stats for expanded display
+        kill_participation = 0
+        team_kills = 0
+        for participant in match.all_participants:
+            if participant.team == main_participant.team:
+                team_kills += participant.kills
+        
+        if team_kills > 0:
+            kill_participation = ((main_participant.kills + main_participant.assists) / team_kills) * 100
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "kill_participation": f"{kill_participation:.0f}%",
+            "total_cs": main_participant.creep_score,
+            "damage_ratio": "N/A"  # Placeholder for damage data if available
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data

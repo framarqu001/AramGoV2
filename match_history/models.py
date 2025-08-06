@@ -75,6 +75,26 @@ class Rune(models.Model):
 
 
 class Summoner(models.Model):
+    TIER_CHOICES = [
+        ('IRON', 'Iron'),
+        ('BRONZE', 'Bronze'),
+        ('SILVER', 'Silver'),
+        ('GOLD', 'Gold'),
+        ('PLATINUM', 'Platinum'),
+        ('EMERALD', 'Emerald'),
+        ('DIAMOND', 'Diamond'),
+        ('MASTER', 'Master'),
+        ('GRANDMASTER', 'Grandmaster'),
+        ('CHALLENGER', 'Challenger'),
+    ]
+    
+    DIVISION_CHOICES = [
+        ('I', 'I'),
+        ('II', 'II'),
+        ('III', 'III'),
+        ('IV', 'IV'),
+    ]
+    
     puuid = models.CharField(max_length=100, primary_key=True)
     game_name = models.CharField(max_length=50, blank=True, default="")
     normalized_game_name = models.CharField(max_length=50, blank=True, default="")
@@ -88,6 +108,10 @@ class Summoner(models.Model):
     being_parsed = models.BooleanField(default=False)
     parsed_matches = models.IntegerField(default=False)
     total_matches = models.IntegerField(default=0)
+    # New rank fields
+    tier = models.CharField(max_length=20, choices=TIER_CHOICES, blank=True, null=True)
+    division = models.CharField(max_length=5, choices=DIVISION_CHOICES, blank=True, null=True)
+    league_points = models.IntegerField(blank=True, null=True, default=0)
 
     def get_matches_queryset(self):
         return Match.objects.filter(participants__summoner=self)
@@ -99,6 +123,14 @@ class Summoner(models.Model):
 
     def get_full_name(self):
         return f"{self.game_name}#{self.tag_line}"
+    
+    def get_rank_display(self):
+        """Return formatted rank string like 'Gold II' or 'Unranked'"""
+        if self.tier and self.division:
+            return f"{self.get_tier_display()} {self.division}"
+        elif self.tier:
+            return self.get_tier_display()
+        return "Unranked"
     
     def __str__(self):
         return f"Summoner:{self.game_name} {self.puuid}"

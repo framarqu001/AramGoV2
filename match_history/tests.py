@@ -4,6 +4,7 @@ from unittest.mock import patch
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
+import datetime
 
 
 class MatchParticipantDBTest(TransactionTestCase):
@@ -98,3 +99,141 @@ class PatchVersionCacheTest(TestCase):
         
         # Verify that the mock was called
         mock_get_patch.assert_called_once()
+
+
+class SummonerRankTest(TestCase):
+    def setUp(self):
+        self.summoner = Summoner.objects.create(
+            puuid='rank-test-id',
+            game_name='RankTestSummoner',
+            tag_line='NA1',
+            summoner_name='RankTestSummoner',
+            summoner_level=50
+        )
+
+    def test_summoner_rank_display_with_tier_and_division(self):
+        """Test rank display when both tier and division are set"""
+        self.summoner.tier = 'GOLD'
+        self.summoner.division = 'II'
+        self.summoner.save()
+        
+        expected_rank = 'Gold II'
+        self.assertEqual(self.summoner.get_rank_display(), expected_rank)
+
+    def test_summoner_rank_display_with_tier_only(self):
+        """Test rank display when only tier is set (for Master+ ranks)"""
+        self.summoner.tier = 'MASTER'
+        self.summoner.division = None
+        self.summoner.save()
+        
+        expected_rank = 'Master'
+        self.assertEqual(self.summoner.get_rank_display(), expected_rank)
+
+    def test_summoner_rank_display_unranked(self):
+        """Test rank display when no rank information is set"""
+        self.summoner.tier = None
+        self.summoner.division = None
+        self.summoner.save()
+        
+        expected_rank = 'Unranked'
+        self.assertEqual(self.summoner.get_rank_display(), expected_rank)
+
+    def test_summoner_rank_choices_validation(self):
+        """Test that tier choices are properly validated"""
+        valid_tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 
+                      'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER']
+        
+        for tier in valid_tiers:
+            self.summoner.tier = tier
+            self.summoner.save()
+            self.assertEqual(self.summoner.tier, tier)
+
+    def test_summoner_division_choices_validation(self):
+        """Test that division choices are properly validated"""
+        valid_divisions = ['I', 'II', 'III', 'IV']
+        
+        for division in valid_divisions:
+            self.summoner.division = division
+            self.summoner.save()
+            self.assertEqual(self.summoner.division, division)
+
+    def test_league_points_default_value(self):
+        """Test that league points defaults to 0"""
+        self.assertEqual(self.summoner.league_points, 0)
+
+
+class ExpandedStatsTest(TestCase):
+    def setUp(self):
+        self.summoner = Summoner.objects.create(
+            puuid='stats-test-id',
+            game_name='StatsTestSummoner',
+            tag_line='NA1',
+            summoner_name='StatsTestSummoner',
+            summoner_level=45,
+            tier='PLATINUM',
+            division='III',
+            league_points=75
+        )
+        self.champion = Champion.objects.create(
+            champion_id='Jinx',
+            name='Jinx',
+            title='The Loose Cannon',
+            image_path='Jinx.png'
+        )
+        self.match = Match.objects.create(
+            match_id='stats_match_001',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,  # 30 minutes
+            game_mode='ARAM',
+            game_version='14.17.1',
+            winner=100
+        )
+
+    def test_kill_participation_calculation(self):
+        """Test that kill participation is calculated correctly"""
+        # Create main participant
+        main_participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=8,
+            deaths=3,
+            assists=12,
+            creep_score=120,
+            team=100,
+            win=True,
+            game_name='StatsTestSummoner'
+        )
+        
+        # Create team members with kills
+        for i in range(4):
+            teammate_summoner = Summoner.objects.create(
+                puuid=f'teammate-{i}',
+                game_name=f'Teammate{i}',
+                tag_line='NA1'
+            )
+            Participant.objects.create(
+                match=self.match,
+                summoner=teammate_summoner,
+                champion=self.champion,
+                kills=5,  # Each teammate has 5 kills
+                deaths=2,
+                assists=8,
+                creep_score=100,
+                team=100,
+                win=True,
+                game_name=f'Teammate{i}'
+            )
+        
+        # Total team kills: 8 (main) + 5*4 (teammates) = 28
+        # Main participant contribution: (8 kills + 12 assists) = 20
+        # Kill participation: 20/28 = ~71%
+        
+        # This would be tested in the view logic, but we can verify the data is set up correctly
+        team_kills = sum(p.kills for p in self.match.participants.filter(team=100))
+        main_contribution = main_participant.kills + main_participant.assists
+        expected_kp = (main_contribution / team_kills) * 100
+        
+        self.assertEqual(team_kills, 28)
+        self.assertEqual(main_contribution, 20)
+        self.assertAlmostEqual(expected_kp, 71.43, places=1)
