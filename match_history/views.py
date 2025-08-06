@@ -7,6 +7,7 @@ from django.shortcuts import render, get_object_or_404
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
+import hashlib
 
 from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
 from django.http import HttpResponse, HttpResponseRedirect
@@ -18,6 +19,47 @@ from collections import defaultdict
 from .tasks import *
 
 patch = "14.17"
+
+# Cache timeout settings (in seconds)
+PARTICIPANT_STATS_CACHE_TIMEOUT = 300  # 5 minutes
+MATCH_DATA_CACHE_TIMEOUT = 600  # 10 minutes
+
+
+def _get_participant_stats_cache_key(summoner_id, match_id):
+    """Generate cache key for participant stats"""
+    return f"participant_stats_{summoner_id}_{match_id}"
+
+
+def _get_match_data_cache_key(summoner_id, page_number):
+    """Generate cache key for match data"""
+    return f"match_data_{summoner_id}_page_{page_number}"
+
+
+def _cache_participant_stats(participant):
+    """Cache participant stats data"""
+    cache_key = _get_participant_stats_cache_key(participant.summoner.puuid, participant.match.match_id)
+    participant_data = {
+        'rank_data': participant.get_rank_data(),
+        'kda_ratio': (participant.kills + participant.assists) / participant.deaths if participant.deaths else float('inf'),
+        'cs_per_min': participant.creep_score / (participant.match.game_duration / 60) if participant.match.game_duration > 0 else 0,
+        'kills': participant.kills,
+        'deaths': participant.deaths,
+        'assists': participant.assists,
+        'creep_score': participant.creep_score,
+    }
+    cache.set(cache_key, participant_data, timeout=PARTICIPANT_STATS_CACHE_TIMEOUT)
+    return participant_data
+
+
+def _get_cached_participant_stats(participant):
+    """Get participant stats from cache or calculate and cache them"""
+    cache_key = _get_participant_stats_cache_key(participant.summoner.puuid, participant.match.match_id)
+    cached_data = cache.get(cache_key)
+    
+    if cached_data is None:
+        cached_data = _cache_participant_stats(participant)
+    
+    return cached_data
 
 
 def home(request):
@@ -216,18 +258,30 @@ def _get_new_match_data(summoner):
         for participant in match.all_participants:
             if participant.summoner == summoner:
                 main_participant = participant
+            
+            # Get cached participant stats or calculate and cache them
+            cached_stats = _get_cached_participant_stats(participant)
+            participant_data = {
+                'participant': participant,
+                'rank_data': cached_stats['rank_data'],
+                'kda_ratio': cached_stats['kda_ratio'],
+                'cs_per_min': cached_stats['cs_per_min']
+            }
+            
             if participant.team == 100:
-                blue_team_list.append(participant)
+                blue_team_list.append(participant_data)
             else:
-                red_team_list.append(participant)
+                red_team_list.append(participant_data)
 
-        kda = (
-                      main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
-        cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        # Get main participant cached stats
+        main_cached_stats = _get_cached_participant_stats(main_participant)
+        kda = main_cached_stats['kda_ratio'] if main_cached_stats['kda_ratio'] != float('inf') else 0
+        cs_min = main_cached_stats['cs_per_min']
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "rank_data": main_cached_stats['rank_data']
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
@@ -235,6 +289,14 @@ def _get_new_match_data(summoner):
 
 
 def _get_match_data(summoner, page_obj):
+    # Try to get cached match data first
+    page_number = getattr(page_obj, 'number', 1)
+    cache_key = _get_match_data_cache_key(summoner.puuid, page_number)
+    cached_match_data = cache.get(cache_key)
+    
+    if cached_match_data is not None:
+        return cached_match_data
+    
     match_data = []
 
     for match in page_obj:
@@ -243,20 +305,35 @@ def _get_match_data(summoner, page_obj):
         for participant in match.all_participants:
             if participant.summoner == summoner:
                 main_participant = participant
+            
+            # Get cached participant stats or calculate and cache them
+            cached_stats = _get_cached_participant_stats(participant)
+            participant_data = {
+                'participant': participant,
+                'rank_data': cached_stats['rank_data'],
+                'kda_ratio': cached_stats['kda_ratio'],
+                'cs_per_min': cached_stats['cs_per_min']
+            }
+            
             if participant.team == 100:
-                blue_team_list.append(participant)
+                blue_team_list.append(participant_data)
             else:
-                red_team_list.append(participant)
+                red_team_list.append(participant_data)
 
-        kda = (
-                      main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
-        cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        # Get main participant cached stats
+        main_cached_stats = _get_cached_participant_stats(main_participant)
+        kda = main_cached_stats['kda_ratio'] if main_cached_stats['kda_ratio'] != float('inf') else 0
+        cs_min = main_cached_stats['cs_per_min']
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "rank_data": main_cached_stats['rank_data']
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
+    
+    # Cache the match data
+    cache.set(cache_key, match_data, timeout=MATCH_DATA_CACHE_TIMEOUT)
     return match_data
 
 

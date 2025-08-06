@@ -4,6 +4,7 @@ from unittest.mock import patch
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
+import datetime
 
 
 class MatchParticipantDBTest(TransactionTestCase):
@@ -30,14 +31,26 @@ class MatchParticipantTest(TestCase):
             champion_id='Aatrox',
             name='Aatrox',
             title='The Darkin Blade',
-            image_path='Aatrox.png'
+            image_path='Aatrox.png',
+            splash_image_path='Aatrox_0.jpg'
+        )
+        self.spell1 = SummonerSpell.objects.create(
+            spell_id=4,
+            name='Flash',
+            image_path='SummonerFlash.png'
+        )
+        self.spell2 = SummonerSpell.objects.create(
+            spell_id=32,
+            name='Mark',
+            image_path='SummonerSnowball.png'
         )
         self.match = Match.objects.create(
             match_id='match_001',
             game_start=datetime.datetime.now(),
             game_duration=1800,
             game_mode='Classic',
-            game_version='13.15.1'
+            game_version='13.15.1',
+            winner=100
         )
         self.participant = Participant.objects.create(
             match=self.match,
@@ -46,7 +59,12 @@ class MatchParticipantTest(TestCase):
             kills=10,
             deaths=2,
             assists=8,
-            creep_score=150
+            creep_score=150,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            team=100,
+            win=True,
+            game_name='testSummoner#NA1'
         )
 
     def test_participant_relationships(self):
@@ -69,6 +87,287 @@ class MatchParticipantTest(TestCase):
     def test_cascade_delete_with_champion(self):
         self.champion.delete()
         self.assertFalse(Participant.objects.filter(pk=self.participant.pk).exists())
+
+
+class ParticipantRankTest(TestCase):
+    def setUp(self):
+        self.summoner = Summoner.objects.create(
+            puuid='rank-test-id',
+            game_name='rankTestSummoner',
+            tag_line='NA1',
+            summoner_name='rankTestSummoner',
+            summoner_level=30
+        )
+        self.champion = Champion.objects.create(
+            champion_id='Jinx',
+            name='Jinx',
+            title='The Loose Cannon',
+            image_path='Jinx.png',
+            splash_image_path='Jinx_0.jpg'
+        )
+        self.spell1 = SummonerSpell.objects.create(
+            spell_id=4,
+            name='Flash',
+            image_path='SummonerFlash.png'
+        )
+        self.spell2 = SummonerSpell.objects.create(
+            spell_id=32,
+            name='Mark',
+            image_path='SummonerSnowball.png'
+        )
+        self.match = Match.objects.create(
+            match_id='rank_match_001',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='Classic',
+            game_version='13.15.1',
+            winner=100
+        )
+
+    def test_default_rank_values(self):
+        """Test that default rank values are set correctly"""
+        participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=5,
+            deaths=3,
+            assists=7,
+            creep_score=120,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            team=100,
+            win=True,
+            game_name='rankTestSummoner#NA1'
+        )
+        
+        self.assertEqual(participant.tier, 'UNRANKED')
+        self.assertEqual(participant.division, '')
+        self.assertEqual(participant.lp, 0)
+
+    def test_rank_display_unranked(self):
+        """Test rank display for unranked participant"""
+        participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=5,
+            deaths=3,
+            assists=7,
+            creep_score=120,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            team=100,
+            win=True,
+            game_name='rankTestSummoner#NA1'
+        )
+        
+        self.assertEqual(participant.get_rank_display(), 'Unranked')
+
+    def test_rank_display_with_division(self):
+        """Test rank display for participant with tier and division"""
+        participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=5,
+            deaths=3,
+            assists=7,
+            creep_score=120,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            team=100,
+            win=True,
+            game_name='rankTestSummoner#NA1',
+            tier='GOLD',
+            division='II',
+            lp=75
+        )
+        
+        self.assertEqual(participant.get_rank_display(), 'Gold II 75 LP')
+
+    def test_rank_display_master_tier(self):
+        """Test rank display for Master tier (no division)"""
+        participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=5,
+            deaths=3,
+            assists=7,
+            creep_score=120,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            team=100,
+            win=True,
+            game_name='rankTestSummoner#NA1',
+            tier='MASTER',
+            division='',
+            lp=150
+        )
+        
+        self.assertEqual(participant.get_rank_display(), 'Master 150 LP')
+
+    def test_get_rank_data(self):
+        """Test get_rank_data method returns correct dictionary"""
+        participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=5,
+            deaths=3,
+            assists=7,
+            creep_score=120,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            team=100,
+            win=True,
+            game_name='rankTestSummoner#NA1',
+            tier='PLATINUM',
+            division='IV',
+            lp=25
+        )
+        
+        rank_data = participant.get_rank_data()
+        expected_data = {
+            'tier': 'PLATINUM',
+            'division': 'IV',
+            'lp': 25,
+            'rank_display': 'Platinum IV 25 LP'
+        }
+        
+        self.assertEqual(rank_data, expected_data)
+
+    def test_tier_choices_validation(self):
+        """Test that tier choices are properly validated"""
+        valid_tiers = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 
+                      'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 
+                      'CHALLENGER', 'UNRANKED']
+        
+        for tier in valid_tiers:
+            participant = Participant.objects.create(
+                match=self.match,
+                summoner=self.summoner,
+                champion=self.champion,
+                kills=5,
+                deaths=3,
+                assists=7,
+                creep_score=120,
+                spell1=self.spell1,
+                spell2=self.spell2,
+                team=100,
+                win=True,
+                game_name=f'test{tier}#NA1',
+                tier=tier
+            )
+            self.assertEqual(participant.tier, tier)
+
+    def test_division_choices_validation(self):
+        """Test that division choices are properly validated"""
+        valid_divisions = ['I', 'II', 'III', 'IV', '']
+        
+        for division in valid_divisions:
+            participant = Participant.objects.create(
+                match=self.match,
+                summoner=self.summoner,
+                champion=self.champion,
+                kills=5,
+                deaths=3,
+                assists=7,
+                creep_score=120,
+                spell1=self.spell1,
+                spell2=self.spell2,
+                team=100,
+                win=True,
+                game_name=f'test{division}#NA1',
+                division=division
+            )
+            self.assertEqual(participant.division, division)
+
+
+class ParticipantCachingTest(TestCase):
+    def setUp(self):
+        cache.clear()  # Clear cache before each test
+        
+        self.summoner = Summoner.objects.create(
+            puuid='cache-test-id',
+            game_name='cacheTestSummoner',
+            tag_line='NA1',
+            summoner_name='cacheTestSummoner',
+            summoner_level=30
+        )
+        self.champion = Champion.objects.create(
+            champion_id='Yasuo',
+            name='Yasuo',
+            title='The Unforgiven',
+            image_path='Yasuo.png',
+            splash_image_path='Yasuo_0.jpg'
+        )
+        self.spell1 = SummonerSpell.objects.create(
+            spell_id=4,
+            name='Flash',
+            image_path='SummonerFlash.png'
+        )
+        self.spell2 = SummonerSpell.objects.create(
+            spell_id=32,
+            name='Mark',
+            image_path='SummonerSnowball.png'
+        )
+        self.match = Match.objects.create(
+            match_id='cache_match_001',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='Classic',
+            game_version='13.15.1',
+            winner=100
+        )
+        self.participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=8,
+            deaths=4,
+            assists=12,
+            creep_score=180,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            team=100,
+            win=True,
+            game_name='cacheTestSummoner#NA1',
+            tier='DIAMOND',
+            division='III',
+            lp=50
+        )
+
+    def test_participant_stats_caching(self):
+        """Test that participant stats are properly cached"""
+        from match_history.views import _get_cached_participant_stats, _get_participant_stats_cache_key
+        
+        # First call should cache the data
+        cached_stats = _get_cached_participant_stats(self.participant)
+        
+        # Verify the cached data structure
+        self.assertIn('rank_data', cached_stats)
+        self.assertIn('kda_ratio', cached_stats)
+        self.assertIn('cs_per_min', cached_stats)
+        
+        # Verify the cache key exists
+        cache_key = _get_participant_stats_cache_key(self.participant.summoner.puuid, self.participant.match.match_id)
+        cached_data = cache.get(cache_key)
+        self.assertIsNotNone(cached_data)
+        
+        # Verify cached data matches expected values
+        expected_kda_ratio = (8 + 12) / 4  # (kills + assists) / deaths
+        expected_cs_per_min = 180 / (1800 / 60)  # creep_score / (game_duration / 60)
+        
+        self.assertEqual(cached_stats['kda_ratio'], expected_kda_ratio)
+        self.assertEqual(cached_stats['cs_per_min'], expected_cs_per_min)
+        self.assertEqual(cached_stats['rank_data']['tier'], 'DIAMOND')
+        self.assertEqual(cached_stats['rank_data']['division'], 'III')
+        self.assertEqual(cached_stats['rank_data']['lp'], 50)
+
+    def tearDown(self):
+        cache.clear()  # Clean up cache after each test
 
 
     ##AramGoV2 if user changes there name
