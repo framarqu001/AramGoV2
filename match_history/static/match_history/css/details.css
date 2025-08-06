@@ -487,3 +487,301 @@ hr {
 .death-color {
     color: #ff4e50
 }
+
+/* Expanded Participant Stats Section */
+.participant-stats-expanded {
+    background-color: var(--secondary-color);
+    border-radius: 0 0 5px 5px;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+    max-height: 0;
+    opacity: 0;
+}
+
+.participant-stats-expanded.expanded {
+    max-height: 1000px;
+    opacity: 1;
+    padding: 1rem;
+}
+
+.participant-stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.team-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.team-header {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.team-label {
+    font-family: "Mulish", sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.team-label.team-win {
+    color: #4b6bc3;
+}
+
+.team-label.team-lose {
+    color: #f46bf4;
+}
+
+.participant-detailed-entry {
+    display: grid;
+    grid-template-columns: 200px 80px 180px 120px;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    font-size: 12px;
+}
+
+.participant-detailed-entry:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.participant-detailed-entry.main-participant {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.participant-champion {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.champion-icon-expanded {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.champ-img-expanded {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.1);
+}
+
+.participant-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.participant-name {
+    font-family: "Mulish", sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: #e6e6e6;
+}
+
+.participant-name.highlight {
+    color: white;
+    font-weight: 800;
+}
+
+.participant-name a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.participant-name a:hover {
+    color: #4b6bc3;
+}
+
+.champion-name {
+    font-size: 11px;
+    color: #87888a;
+    font-weight: 400;
+}
+
+.participant-build {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.participant-spells,
+.participant-runes {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.spell-img,
+.rune-img {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+}
+
+.rune-img.sub-rune {
+    transform: scale(0.8);
+}
+
+.participant-items {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.25rem;
+    justify-items: center;
+}
+
+.item-img {
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    background-color: rgba(145, 166, 179, 0.2);
+}
+
+.item-empty {
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.participant-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+}
+
+.stat-kda,
+.stat-cs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.kda-text,
+.cs-text {
+    font-weight: 600;
+    color: #e6e6e6;
+    font-size: 12px;
+}
+
+.kda-ratio,
+.cs-min {
+    font-size: 10px;
+    color: #87888a;
+    font-weight: 400;
+}
+
+/* Match card modifications for expanded state */
+.match-card {
+    transition: all 0.3s ease;
+}
+
+.match-card.expanded {
+    height: auto;
+    border-radius: 5px 5px 0 0;
+}
+
+.match-btn {
+    transition: transform 0.3s ease;
+}
+
+.match-btn.expanded .drop {
+    transform: rotate(180deg);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .participant-detailed-entry {
+        grid-template-columns: 180px 70px 160px 100px;
+        gap: 0.75rem;
+        font-size: 11px;
+    }
+    
+    .champion-icon-expanded {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .item-img,
+    .item-empty {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .spell-img,
+    .rune-img {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+@media (max-width: 768px) {
+    .participant-stats-container {
+        gap: 1rem;
+    }
+    
+    .participant-detailed-entry {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        text-align: center;
+        padding: 0.5rem;
+    }
+    
+    .participant-champion {
+        justify-content: center;
+    }
+    
+    .participant-build {
+        flex-direction: row;
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    .participant-items {
+        justify-self: center;
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .participant-stats-expanded.expanded {
+        padding: 0.75rem;
+    }
+    
+    .participant-detailed-entry {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .champion-icon-expanded {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .item-img,
+    .item-empty {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .spell-img,
+    .rune-img {
+        width: 16px;
+        height: 16px;
+    }
+}
