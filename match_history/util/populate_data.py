@@ -233,6 +233,29 @@ class MatchManager():
                     "spell2": spell2,
                     "rune1": rune1,
                     "rune2": rune2,
+                    # Damage Statistics
+                    "total_damage_dealt_to_champions": participant_data.get("totalDamageDealtToChampions", 0),
+                    "total_damage_taken": participant_data.get("totalDamageTaken", 0),
+                    "magic_damage_dealt_to_champions": participant_data.get("magicDamageDealtToChampions", 0),
+                    "physical_damage_dealt_to_champions": participant_data.get("physicalDamageDealtToChampions", 0),
+                    "true_damage_dealt_to_champions": participant_data.get("trueDamageDealtToChampions", 0),
+                    "damage_self_mitigated": participant_data.get("damageSelfMitigated", 0),
+                    # Vision Statistics
+                    "vision_score": participant_data.get("visionScore", 0),
+                    "wards_placed": participant_data.get("wardsPlaced", 0),
+                    "wards_killed": participant_data.get("wardsKilled", 0),
+                    "vision_wards_bought_in_game": participant_data.get("visionWardsBoughtInGame", 0),
+                    # Objective Statistics
+                    "turret_kills": participant_data.get("turretKills", 0),
+                    "inhibitor_kills": participant_data.get("inhibitorKills", 0),
+                    "dragon_kills": participant_data.get("dragonKills", 0),
+                    "baron_kills": participant_data.get("baronKills", 0),
+                    # Economy Statistics
+                    "gold_earned": participant_data.get("goldEarned", 0),
+                    "gold_spent": participant_data.get("goldSpent", 0),
+                    # Healing Statistics
+                    "total_heal": participant_data.get("totalHeal", 0),
+                    "total_units_healed": participant_data.get("totalUnitsHealed", 0),
                 }
             )
             total_snowballs = 0
