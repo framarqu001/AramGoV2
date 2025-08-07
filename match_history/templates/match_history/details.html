@@ -292,6 +292,49 @@
     
 </script>
 
+<script>
+function toggleMatchDetails(button) {
+    const matchCard = button.closest('.match-card');
+    const detailsContainer = matchCard.querySelector('.match-details-container');
+    const matchId = matchCard.dataset.matchId;
+    const summonerPuuid = matchCard.dataset.summonerPuuid;
+    const dropIcon = button.querySelector('.drop');
+    
+    if (detailsContainer.style.display === 'none') {
+        // Show details
+        if (detailsContainer.innerHTML.trim() === '') {
+            // Load details via AJAX if not already loaded
+            fetch(`/match/${matchId}/?summoner=${summonerPuuid}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                detailsContainer.innerHTML = html;
+                detailsContainer.style.display = 'block';
+                dropIcon.style.transform = 'rotate(180deg)';
+                dropIcon.style.transition = 'transform 0.3s ease';
+            })
+            .catch(error => {
+                console.error('Error loading match details:', error);
+                detailsContainer.innerHTML = '<div class="error-message" style="padding: 20px; text-align: center; color: #ff4e50;">Failed to load match details</div>';
+                detailsContainer.style.display = 'block';
+            });
+        } else {
+            detailsContainer.style.display = 'block';
+            dropIcon.style.transform = 'rotate(180deg)';
+            dropIcon.style.transition = 'transform 0.3s ease';
+        }
+    } else {
+        // Hide details
+        detailsContainer.style.display = 'none';
+        dropIcon.style.transform = 'rotate(0deg)';
+        dropIcon.style.transition = 'transform 0.3s ease';
+    }
+}
+</script>
+
 
 
 {% endblock %}
