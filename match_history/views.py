@@ -213,6 +213,9 @@ def _get_new_match_data(summoner):
     for match in matches_queryset:
         blue_team_list = []
         red_team_list = []
+        main_participant = None
+        
+        # Organize participants by team for efficient calculations
         for participant in match.all_participants:
             if participant.summoner == summoner:
                 main_participant = participant
@@ -221,13 +224,37 @@ def _get_new_match_data(summoner):
             else:
                 red_team_list.append(participant)
 
+        # Get the main participant's team for calculations
+        main_team_participants = blue_team_list if main_participant.team == 100 else red_team_list
+
         kda = (
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        
+        # Calculate damage share percentage with optimized team data
+        damage_share = main_participant.get_damage_share_percentage(main_team_participants)
+        
+        # Calculate kill participation percentage with optimized team data
+        kill_participation = main_participant.get_kill_participation_percentage(main_team_participants)
+        
+        # Calculate gold per minute
+        gold_per_min = main_participant.gold_earned / (match.game_duration / 60) if match.game_duration > 0 else 0
+        
+        # Calculate damage per minute
+        damage_per_min = main_participant.total_damage_dealt_to_champions / (match.game_duration / 60) if match.game_duration > 0 else 0
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "damage_share": f"{damage_share:.1f}%",
+            "kill_participation": f"{kill_participation:.1f}%",
+            "gold_per_min": f"{gold_per_min:.0f}",
+            "damage_per_min": f"{damage_per_min:.0f}",
+            "vision_score": main_participant.vision_score,
+            "total_damage": main_participant.total_damage_dealt_to_champions,
+            "gold_earned": main_participant.gold_earned,
+            "wards_placed": main_participant.wards_placed,
+            "wards_killed": main_participant.wards_killed,
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     matches_queryset.update(new_match=False)
@@ -240,6 +267,9 @@ def _get_match_data(summoner, page_obj):
     for match in page_obj:
         blue_team_list = []
         red_team_list = []
+        main_participant = None
+        
+        # Organize participants by team for efficient calculations
         for participant in match.all_participants:
             if participant.summoner == summoner:
                 main_participant = participant
@@ -248,13 +278,37 @@ def _get_match_data(summoner, page_obj):
             else:
                 red_team_list.append(participant)
 
+        # Get the main participant's team for calculations
+        main_team_participants = blue_team_list if main_participant.team == 100 else red_team_list
+
         kda = (
                       main_participant.kills + main_participant.assists) / main_participant.deaths if main_participant.deaths else 0
         cs_min = main_participant.creep_score / (match.game_duration / 60) if match.game_duration > 0 else 0
+        
+        # Calculate damage share percentage with optimized team data
+        damage_share = main_participant.get_damage_share_percentage(main_team_participants)
+        
+        # Calculate kill participation percentage with optimized team data
+        kill_participation = main_participant.get_kill_participation_percentage(main_team_participants)
+        
+        # Calculate gold per minute
+        gold_per_min = main_participant.gold_earned / (match.game_duration / 60) if match.game_duration > 0 else 0
+        
+        # Calculate damage per minute
+        damage_per_min = main_participant.total_damage_dealt_to_champions / (match.game_duration / 60) if match.game_duration > 0 else 0
 
         main_stats = {
             "kda": f"{kda:.2f}",
-            "cs_min": f"{cs_min:.1f}"
+            "cs_min": f"{cs_min:.1f}",
+            "damage_share": f"{damage_share:.1f}%",
+            "kill_participation": f"{kill_participation:.1f}%",
+            "gold_per_min": f"{gold_per_min:.0f}",
+            "damage_per_min": f"{damage_per_min:.0f}",
+            "vision_score": main_participant.vision_score,
+            "total_damage": main_participant.total_damage_dealt_to_champions,
+            "gold_earned": main_participant.gold_earned,
+            "wards_placed": main_participant.wards_placed,
+            "wards_killed": main_participant.wards_killed,
         }
         match_data.append((match, main_participant, blue_team_list.copy(), red_team_list.copy(), main_stats))
     return match_data
