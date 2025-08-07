@@ -292,6 +292,115 @@
     
 </script>
 
+<script>
+// Match Card Expansion Functionality
+function toggleMatchExpansion(button) {
+    const matchCard = button.closest('.match-card');
+    const expandedContent = matchCard.querySelector('.match-expanded-content');
+    const isExpanded = matchCard.classList.contains('expanded');
+    
+    if (isExpanded) {
+        // Collapse the card
+        matchCard.classList.remove('expanded');
+        expandedContent.style.maxHeight = '0';
+        expandedContent.style.opacity = '0';
+        
+        // Reset scroll position
+        setTimeout(() => {
+            expandedContent.scrollTop = 0;
+        }, 300);
+    } else {
+        // Expand the card
+        matchCard.classList.add('expanded');
+        expandedContent.style.maxHeight = expandedContent.scrollHeight + 'px';
+        expandedContent.style.opacity = '1';
+        
+        // Smooth scroll to show expanded content
+        setTimeout(() => {
+            matchCard.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest' 
+            });
+        }, 100);
+    }
+}
+
+// Close other expanded cards when opening a new one (optional)
+function closeOtherExpandedCards(currentCard) {
+    const allMatchCards = document.querySelectorAll('.match-card.expanded');
+    allMatchCards.forEach(card => {
+        if (card !== currentCard) {
+            const button = card.querySelector('.match-btn');
+            toggleMatchExpansion(button);
+        }
+    });
+}
+
+// Enhanced click handler with single expansion mode
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.match-btn')) {
+        const button = e.target.closest('.match-btn');
+        const matchCard = button.closest('.match-card');
+        
+        // Optional: Close other cards first (uncomment to enable)
+        // closeOtherExpandedCards(matchCard);
+        
+        toggleMatchExpansion(button);
+    }
+});
+
+// Keyboard accessibility
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+        if (e.target.classList.contains('match-btn')) {
+            e.preventDefault();
+            toggleMatchExpansion(e.target);
+        }
+    }
+});
+
+// Performance optimization: Lazy load expanded content
+function initializeLazyLoading() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const matchCard = entry.target;
+                const expandedContent = matchCard.querySelector('.match-expanded-content');
+                
+                // Add loading class for visual feedback
+                expandedContent.classList.add('loading');
+                
+                // Simulate content loading (remove in production if not needed)
+                setTimeout(() => {
+                    expandedContent.classList.remove('loading');
+                }, 200);
+                
+                observer.unobserve(matchCard);
+            }
+        });
+    }, {
+        rootMargin: '50px'
+    });
+    
+    document.querySelectorAll('.match-card').forEach(card => {
+        observer.observe(card);
+    });
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    initializeLazyLoading();
+    
+    // Add smooth transitions to expanded content
+    document.querySelectorAll('.match-expanded-content').forEach(content => {
+        content.style.maxHeight = '0';
+        content.style.opacity = '0';
+        content.style.overflow = 'hidden';
+        content.style.transition = 'max-height 0.3s ease, opacity 0.3s ease';
+    });
+});
+</script>
+
 
 
 {% endblock %}
