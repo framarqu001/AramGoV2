@@ -8,7 +8,7 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
-from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch
+from match_history.models import Participant, Match, AccountStats, SummonerChampionStats, ChampionStatsPatch, Summoner
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from match_history.util.populate_data import SummonerManager
@@ -168,6 +168,62 @@ def champions(request):
         champion_data.append((champion_stat.champion.name, champion_stat_tuple))
     context = {'champion_query': champion_data}
     return render(request, 'match_history/champions.html', context)
+
+
+def match_details(request, match_id):
+    """
+    View to serve expanded match details for a specific match
+    """
+    try:
+        match = get_object_or_404(Match, match_id=match_id)
+        participants = match.participants.select_related(
+            'summoner', 'champion', 'spell1', 'spell2', 'rune1', 'rune2',
+            'item1', 'item2', 'item3', 'item4', 'item5', 'item6'
+        ).all()
+        
+        # Separate teams and calculate totals
+        blue_team = []
+        red_team = []
+        blue_team_kills = 0
+        red_team_kills = 0
+        main_participant = None
+        
+        # Get the main participant if summoner is specified
+        summoner_puuid = request.GET.get('summoner')
+        
+        for participant in participants:
+            if summoner_puuid and participant.summoner.puuid == summoner_puuid:
+                main_participant = participant
+                
+            if participant.team == Match.BLUE_TEAM:
+                blue_team.append(participant)
+                blue_team_kills += participant.kills
+            else:
+                red_team.append(participant)
+                red_team_kills += participant.kills
+        
+        # If no specific summoner, use first participant as main
+        if not main_participant and participants:
+            main_participant = participants[0]
+        
+        context = {
+            'match': match,
+            'blue_team': blue_team,
+            'red_team': red_team,
+            'blue_team_kills': blue_team_kills,
+            'red_team_kills': red_team_kills,
+            'main_participant': main_participant,
+        }
+        
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            # Return just the template for AJAX requests
+            return render(request, 'match_history/match_details.html', context)
+        else:
+            # Return full page for direct access
+            return render(request, 'match_history/match_details.html', context)
+            
+    except Match.DoesNotExist:
+        raise Http404("Match not found")
 
 
 # ----------------------------------------------------------------------------------------------------------------------
