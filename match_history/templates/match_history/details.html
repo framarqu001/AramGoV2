@@ -292,6 +292,29 @@
     
 </script>
 
+<script>
+// Toggle expanded stats functionality
+function toggleExpandedStats(button) {
+    const matchCard = button.closest('.match-card');
+    const expandedStats = matchCard.querySelector('.expanded-stats');
+    
+    if (expandedStats.classList.contains('show')) {
+        // Collapse
+        expandedStats.classList.remove('show');
+        matchCard.classList.remove('expanded');
+        expandedStats.style.maxHeight = '0';
+        setTimeout(() => {
+            expandedStats.style.display = 'none';
+        }, 300);
+    } else {
+        // Expand
+        expandedStats.style.display = 'block';
+        expandedStats.classList.add('show');
+        matchCard.classList.add('expanded');
+        expandedStats.style.maxHeight = expandedStats.scrollHeight + 'px';
+    }
+}
+</script>
 
 
 {% endblock %}

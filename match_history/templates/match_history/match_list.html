@@ -108,7 +108,120 @@
             </div>
         </div>
     </div>
-    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+    
+    <!-- Expanded Stats Section -->
+    <div class="expanded-stats {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+        <div class="expanded-stats-grid">
+            <!-- Damage Stats Section -->
+            <div class="damage-stats-section">
+                <div class="stats-header">Damage Statistics</div>
+                <div class="damage-stats-grid">
+                    <div class="damage-stat">
+                        <div class="stat-label">Damage Dealt</div>
+                        <div class="stat-value">18,450</div>
+                    </div>
+                    <div class="damage-stat">
+                        <div class="stat-label">Damage Taken</div>
+                        <div class="stat-value">15,230</div>
+                    </div>
+                    <div class="damage-stat">
+                        <div class="stat-label">Damage to Champions</div>
+                        <div class="stat-value">12,890</div>
+                    </div>
+                    <div class="damage-stat">
+                        <div class="stat-label">Healing Done</div>
+                        <div class="stat-value">3,420</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vision and Objectives Section -->
+            <div class="vision-objectives-section">
+                <div class="stats-header">Vision & Objectives</div>
+                <div class="vision-stats-grid">
+                    <div class="vision-stat">
+                        <div class="stat-label">Vision Score</div>
+                        <div class="stat-value">32</div>
+                    </div>
+                    <div class="vision-stat">
+                        <div class="stat-label">Wards Placed</div>
+                        <div class="stat-value">12</div>
+                    </div>
+                    <div class="vision-stat">
+                        <div class="stat-label">Wards Destroyed</div>
+                        <div class="stat-value">5</div>
+                    </div>
+                    <div class="vision-stat">
+                        <div class="stat-label">Objective Participation</div>
+                        <div class="stat-value">{% if main_participant.win %}75%{% else %}45%{% endif %}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gold and CS Breakdown Section -->
+            <div class="gold-cs-section">
+                <div class="stats-header">Gold & CS Breakdown</div>
+                <div class="gold-cs-grid">
+                    <div class="gold-stat">
+                        <div class="stat-label">Gold Earned</div>
+                        <div class="stat-value">14,250</div>
+                    </div>
+                    <div class="gold-stat">
+                        <div class="stat-label">Gold per Minute</div>
+                        <div class="stat-value">485</div>
+                    </div>
+                    <div class="gold-stat">
+                        <div class="stat-label">Minions Killed</div>
+                        <div class="stat-value">{{main_participant.creep_score}}</div>
+                    </div>
+                    <div class="gold-stat">
+                        <div class="stat-label">Jungle Monsters</div>
+                        <div class="stat-value">15</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- All Participants Detailed Stats -->
+        <div class="all-participants-stats">
+            <div class="stats-header">All Participants</div>
+            <div class="participants-stats-table">
+                <div class="participants-header">
+                    <div class="participant-name">Player</div>
+                    <div class="participant-kda">KDA</div>
+                    <div class="participant-damage">Damage</div>
+                    <div class="participant-gold">Gold</div>
+                    <div class="participant-cs">CS</div>
+                </div>
+                {% for participant in blue_team %}
+                <div class="participant-stats-row {% if participant == main_participant %}highlight{% endif %}">
+                    <div class="participant-name">
+                        <img class="champ-img-small" src="{{participant.champion.get_url}}" alt="">
+                        <span>{{participant.game_name}}</span>
+                    </div>
+                    <div class="participant-kda">{{participant.kills}}/{{participant.deaths}}/{{participant.assists}}</div>
+                    <div class="participant-damage">18,450</div>
+                    <div class="participant-gold">14,250</div>
+                    <div class="participant-cs">{{participant.creep_score}}</div>
+                </div>
+                {% endfor %}
+                {% for participant in red_team %}
+                <div class="participant-stats-row {% if participant == main_participant %}highlight{% endif %}">
+                    <div class="participant-name">
+                        <img class="champ-img-small" src="{{participant.champion.get_url}}" alt="">
+                        <span>{{participant.game_name}}</span>
+                    </div>
+                    <div class="participant-kda">{{participant.kills}}/{{participant.deaths}}/{{participant.assists}}</div>
+                    <div class="participant-damage">15,320</div>
+                    <div class="participant-gold">12,890</div>
+                    <div class="participant-cs">{{participant.creep_score}}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" onclick="toggleExpandedStats(this)">
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
