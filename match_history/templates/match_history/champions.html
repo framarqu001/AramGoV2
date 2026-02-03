@@ -1,4 +1,5 @@
 {% extends "match_history/base.html" %}
+{% load custom_filters %}
 {% load static  %}
 {% block extra_styles %}
     <link rel="stylesheet" href="{% static 'match_history/css/champions.css' %}">
@@ -8,14 +9,74 @@
 {% endblock %}
 
 {% block content %}
-<style>
-    .champions {
-        color: white;
-        background-color: #222433;
-    }
-</style>
-    <h1 style="text-align: center"> COMING SOON</h1>
-    {% for champ, stat in champion_query %}
-        <p>{{champ}}</p>
-    {% endfor %}
+<div class="champions-container">
+    <h1 class="page-title">Champion Win Rates by Patch</h1>
+    
+    {% if champions %}
+        <div class="champions-table-container">
+            <table class="champions-table">
+                <thead>
+                    <tr>
+                        <th class="champion-header">Champion</th>
+                        {% for patch in patches %}
+                            <th class="patch-header">{{ patch }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for champion_name, champion_info in champions %}
+                        <tr class="champion-row">
+                            <td class="champion-cell">
+                                <div class="champion-info">
+                                    <img src="{{ champion_info.champion.get_url }}" 
+                                         alt="{{ champion_name }}" 
+                                         class="champion-icon">
+                                    <span class="champion-name">{{ champion_name }}</span>
+                                </div>
+                            </td>
+                            {% for patch in patches %}
+                                <td class="patch-cell">
+                                    {% if patch in champion_info.patches %}
+                                        {% with stats=champion_info.patches|get_item:patch %}
+                                            <div class="win-rate-container">
+                                                <div class="win-rate 
+                                                    {% if stats.win_rate >= 55 %}high-winrate
+                                                    {% elif stats.win_rate >= 50 %}medium-winrate
+                                                    {% elif stats.win_rate >= 45 %}low-winrate
+                                                    {% else %}very-low-winrate{% endif %}">
+                                                    {{ stats.win_rate }}%
+                                                </div>
+                                                <div class="games-played">
+                                                    {{ stats.total_played }} games
+                                                </div>
+                                                <div class="win-loss">
+                                                    {{ stats.total_wins }}W / {{ stats.total_losses }}L
+                                                </div>
+                                            </div>
+                                        {% endwith %}
+                                    {% else %}
+                                        <div class="no-data">-</div>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="legend">
+            <h3>Win Rate Legend:</h3>
+            <span class="legend-item high-winrate">55%+ High</span>
+            <span class="legend-item medium-winrate">50-54% Medium</span>
+            <span class="legend-item low-winrate">45-49% Low</span>
+            <span class="legend-item very-low-winrate">&lt;45% Very Low</span>
+        </div>
+    {% else %}
+        <div class="no-champions">
+            <h2>No champion data available</h2>
+            <p>Champion statistics will appear here once match data is processed.</p>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}
