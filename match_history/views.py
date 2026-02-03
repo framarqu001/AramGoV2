@@ -155,18 +155,36 @@ def summoner(request):
 
 
 def champions(request):
-    champion_query = ChampionStatsPatch.objects.filter(patch__iexact=patch).prefetch_related('champion')
-    champion_data = []
-
-    for champion_stat in champion_query:
-        champion_stat_tuple = (
-            champion_stat.patch,
-            champion_stat.total_played,
-            champion_stat.total_wins,
-            champion_stat.total_losses,
-        )
-        champion_data.append((champion_stat.champion.name, champion_stat_tuple))
-    context = {'champion_query': champion_data}
+    # Get all champion stats across all patches
+    champion_stats = ChampionStatsPatch.objects.select_related('champion').all()
+    
+    # Get all unique patches and sort them
+    patches = sorted(set(stat.patch for stat in champion_stats), reverse=True)
+    
+    # Organize data by champion and patch
+    champion_data = {}
+    for stat in champion_stats:
+        champion_name = stat.champion.name
+        if champion_name not in champion_data:
+            champion_data[champion_name] = {
+                'champion': stat.champion,
+                'patches': {}
+            }
+        
+        # Calculate win rate
+        win_rate = (stat.total_wins / stat.total_played * 100) if stat.total_played > 0 else 0
+        
+        champion_data[champion_name]['patches'][stat.patch] = {
+            'total_played': stat.total_played,
+            'total_wins': stat.total_wins,
+            'total_losses': stat.total_losses,
+            'win_rate': round(win_rate, 1)
+        }
+    
+    # Sort champions alphabetically
+    sorted_champions = sorted(champion_data.items())
+    
+    context = {'champions': sorted_champions, 'patches': patches}
     return render(request, 'match_history/champions.html', context)
 
 
