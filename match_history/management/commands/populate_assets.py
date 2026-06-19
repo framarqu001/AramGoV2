@@ -106,7 +106,7 @@ class Command(BaseCommand):
             spell_id = int(info["key"])
             name = info["name"]
             image = info["image"]["full"]
-            spell, created = SummonerSpell.objects.get_or_create(
+            spell, created = SummonerSpell.objects.update_or_create(
                 spell_id=spell_id,
                 defaults={
                     "name": name,
@@ -124,7 +124,7 @@ class Command(BaseCommand):
             category_id = category["id"]
             category_name = category["name"]
             category_image = category["icon"]
-            rune, created = Rune.objects.get_or_create(
+            rune, created = Rune.objects.update_or_create(
                 rune_id=category_id,
                 defaults={
                     "name": category_name,
@@ -142,7 +142,7 @@ class Command(BaseCommand):
                     rune_id = rune['id']
                     name = rune["name"]
                     image_path = rune["icon"]
-                    rune, created = Rune.objects.get_or_create(
+                    rune, created = Rune.objects.update_or_create(
                         rune_id=rune_id,
                         defaults={
                             "name": name,

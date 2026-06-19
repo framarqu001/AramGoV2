@@ -48,7 +48,10 @@ class SummonerManager():
             raise ApiError(f"Error during summoner creation for {summoner_name}#{tag}: {err}") from err
         level = account_info["summonerLevel"]
         icon_id = account_info["profileIconId"]
-        icon = ProfileIcon.objects.get(profile_id=icon_id)
+        try:
+            icon = ProfileIcon.objects.get(profile_id=icon_id)
+        except ProfileIcon.DoesNotExist:
+            icon = None
         summoner, created = Summoner.objects.update_or_create(
             puuid=account_info["puuid"],
             defaults={
@@ -206,11 +209,21 @@ class MatchManager():
         for i in range(len(participants_puid)):
             participant_data = match_info["info"]["participants"][i]
             summoner: Summoner = self.create_summoner_match(participant_data, match.game_start)
-            champion: Champion = Champion.objects.get(champion_id__iexact=participant_data["championName"])
+            try:
+                champion: Champion = Champion.objects.get(champion_id__iexact=participant_data["championName"])
+            except Champion.DoesNotExist:
+                print(f"Champion {participant_data['championName']} not in DB, skipping participant")
+                continue
             team_id = participant_data["teamId"]
             win = True if participant_data["win"] is True else False
-            spell1 = SummonerSpell.objects.get(spell_id=participant_data["summoner1Id"])
-            spell2 = SummonerSpell.objects.get(spell_id=participant_data["summoner2Id"])
+            try:
+                spell1 = SummonerSpell.objects.get(spell_id=participant_data["summoner1Id"])
+            except SummonerSpell.DoesNotExist:
+                spell1 = None
+            try:
+                spell2 = SummonerSpell.objects.get(spell_id=participant_data["summoner2Id"])
+            except SummonerSpell.DoesNotExist:
+                spell2 = None
             try:
                 rune1 = Rune.objects.get(
                     rune_id=participant_data["perks"]["styles"][0]["selections"][0]["perk"])
@@ -240,9 +253,9 @@ class MatchManager():
                 }
             )
             total_snowballs = 0
-            if participant.spell1.spell_id == 32:
+            if participant.spell1 and participant.spell1.spell_id == 32:
                 total_snowballs = participant_data["summoner1Casts"]
-            elif participant.spell2.spell_id == 32:
+            elif participant.spell2 and participant.spell2.spell_id == 32:
                 total_snowballs = participant_data["summoner2Casts"]
             challenges = participant_data.get("challenges", {})
             snowball_hits = challenges.get('snowballsHit', 0)
