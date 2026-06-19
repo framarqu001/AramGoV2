@@ -15,6 +15,7 @@ from match_history.util.populate_data import SummonerManager
 from riotwatcher import ApiError
 from django.core.paginator import Paginator
 from collections import defaultdict
+from datetime import datetime
 from .tasks import *
 
 patch = "14.17"
@@ -32,18 +33,24 @@ def handlerException(request, exception=None):
     print(exception)
     message = ""
     strType = ''
-    if isinstance(exception, Http404):
+    if exception is None:
+        message = "Something went wrong"
+        strType = "500"
+    elif isinstance(exception, Http404):
         message = "This Page Does Not Exist"
         strType = "404"
     elif isinstance(exception, HttpResponseBadRequest):
         message = "Bad Request"
         strType = "400"
+    else:
+        message = "This Page Does Not Exist"
+        strType = "404"
     context = {
         'type': strType,
         'error': message
     }
     response = render(request, "match_history/exception.html", context)
-    response.status_code = 404
+    response.status_code = int(strType)
     return response
 
 
@@ -102,10 +109,10 @@ def details(request, game_name: str, tag: str):
     page_obj = paginator.get_page(page_number)
 
     summoner_champion_stats = _get_champions_queryset(summoner)
-    main_champ = summoner_champion_stats[0].champion
+    main_champ = summoner_champion_stats[0].champion if summoner_champion_stats else None
 
     if request.GET.get('section') == 'update' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        update_page(summoner)
+        return update_page(summoner)
     elif request.GET.get('section') == 'paginate' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         if int(page_number) <= paginator.num_pages:
             context = {"matches": _get_match_data(summoner, page_obj)}
@@ -192,9 +199,11 @@ def _validate_summoner(game_name, tag):
     except Http404:
         try:
             summoner_manager = SummonerManager("americas", "na1")
-            puuid = summoner_manager._get_puid(game_name, tag)
-            Summoner.objects.update_or_create(
-                game_name=game_name, tag_line=tag, defaults={'puuid': puuid}
+            account_info = summoner_manager._get_puid(game_name, tag)
+            summoner, _ = Summoner.objects.update_or_create(
+                puuid=account_info["puuid"],
+                defaults={'game_name': game_name, 'tag_line': tag,
+                          'normalized_game_name': game_name, 'normalized_tag_line': tag}
             )
         except ApiError:
             raise Http404(f"Summoner with game name {game_name} and tag {tag} could not be found and API call failed.")
@@ -324,15 +333,18 @@ def _get_champion_stats_data(summoner, summoner_champion_stats):
 
 
 def _get_account_stats(summoner):
-    account_stats = AccountStats.objects.filter(summoner=summoner, year=2024).first()
+    current_year = datetime.now().year
+    account_stats = AccountStats.objects.filter(summoner=summoner, year=current_year).first()
     if not account_stats:
-        return
-    win_rate = (account_stats.total_wins / account_stats.total_played * 100) if account_stats.total_played > 0 else 0
+        return None
+    if account_stats.total_played == 0:
+        return None
+    win_rate = (account_stats.total_wins / account_stats.total_played * 100)
     average_kills = account_stats.total_kills / account_stats.total_played
     average_deaths = account_stats.total_deaths / account_stats.total_played
     average_assists = account_stats.total_assists / account_stats.total_played
     kda = (average_kills + average_assists) / average_deaths if average_deaths else 0
-    account_stats = {
+    stats = {
         "total_played": account_stats.total_played,
         "total_wins": account_stats.total_wins,
         "total_losses": account_stats.total_losses,
@@ -344,7 +356,7 @@ def _get_account_stats(summoner):
         "snowballs_hitrate": account_stats.get_snowball_percent(),
         'snowballs_thrown': account_stats.snowballs_thrown
     }
-    return account_stats
+    return stats
 
 
 def _get_match_queryset(summoner):
@@ -358,7 +370,8 @@ def _get_match_queryset(summoner):
 
 
 def _get_champions_queryset(summoner):
-    summoner_champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=2024).order_by(
+    current_year = datetime.now().year
+    summoner_champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=current_year).order_by(
         '-total_played')[:7].prefetch_related('champion')
     return summoner_champion_stats
 

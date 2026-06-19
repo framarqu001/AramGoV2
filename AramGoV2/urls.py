@@ -22,6 +22,7 @@ from django.conf.urls.static import static
 
 handler404 = 'match_history.views.handlerException'
 handler400 = 'match_history.views.handlerException'
+handler500 = 'match_history.views.handlerException'
 
 urlpatterns = [
     path('admin/', admin.site.urls),

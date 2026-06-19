@@ -13,8 +13,6 @@ import os
 import sys
 from pathlib import Path
 
-from tornado import web
-
 import AramGoV2
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -106,7 +104,6 @@ DATABASES = {
     }
 }
 
-print(DATABASES)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -162,6 +159,14 @@ CELERY_RESULT_BACKEND = os.getenv('CELERY_BACKEND_URL')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_WORKER_CONCURRENCY = 1
+
+# Cache
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': os.getenv('CELERY_BROKER_URL', 'redis://redis:6379'),
+    }
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

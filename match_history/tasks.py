@@ -26,6 +26,7 @@ def process_matches(self, summoner_id):
 @shared_task(bind=True)
 def update_matches(self, summoner_id):
     print("task is being started")
+    summoner = None
     try:
         progress_recorder = ProgressRecorder(self)
         summoner = Summoner.objects.get(puuid=summoner_id)
@@ -33,3 +34,7 @@ def update_matches(self, summoner_id):
         match_builder.last_20(progress_recorder=progress_recorder)
     except Summoner.DoesNotExist:
         print(f"Summoner with id {summoner_id} does not exist")
+    finally:
+        if summoner:
+            summoner.being_parsed = False
+            summoner.save()

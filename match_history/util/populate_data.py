@@ -150,8 +150,8 @@ class MatchManager():
                 'game_name': info_dict.get("riotIdGameName", ""),
                 'normalized_game_name': info_dict.get("riotIdGameName", "").replace(" ", "").lower(),
                 'summoner_name': info_dict["summonerName"],
-                'tag_line': info_dict.get("riotIdTagline" ""),
-                'normalized_tag_line': info_dict.get("riotIdTagline" "").replace(" ", "").lower(),
+                'tag_line': info_dict.get("riotIdTagline", ""),
+                'normalized_tag_line': info_dict.get("riotIdTagline", "").replace(" ", "").lower(),
                 'summoner_level': info_dict["summonerLevel"],
                 'profile_icon': icon,
                 'last_updated': game_creation,
@@ -240,7 +240,8 @@ class MatchManager():
                 total_snowballs = participant_data["summoner1Casts"]
             elif participant.spell2.spell_id == 32:
                 total_snowballs = participant_data["summoner2Casts"]
-            snowball_hits = participant_data["challenges"]['snowballsHit']
+            challenges = participant_data.get("challenges", {})
+            snowball_hits = challenges.get('snowballsHit', 0)
             snowballs = (snowball_hits, total_snowballs)
 
             self._add_items(participant, participant_data)
