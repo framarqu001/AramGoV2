@@ -1,4 +1,5 @@
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import django
 from datetime import datetime as dt
@@ -161,15 +162,18 @@ class MatchManager():
         return summoner
 
     def _add_items(self, participant, participant_data):
+        changed = False
         for j in range(6):
             item_id = participant_data[f"item{j}"]
             if item_id != 0:
                 try:
-                    item = Item.objects.get(pk=participant_data[f"item{j}"])
+                    item = Item.objects.get(pk=item_id)
                     setattr(participant, f"item{j}", item)
-                    participant.save()
+                    changed = True
                 except Item.DoesNotExist:
-                    print('ok')
+                    pass
+        if changed:
+            participant.save()
 
     def _increment_models(self, participant, match, snowballs):
         patch = match.get_patch()
@@ -248,31 +252,70 @@ class MatchManager():
 
             self._increment_models(participant, match, snowballs)
 
+    def _fetch_matches_parallel(self, match_ids, max_workers=8):
+        """Fetch match details from Riot API in parallel."""
+        results = {}
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(self._get_match_info, mid): mid for mid in match_ids}
+            for future in as_completed(futures):
+                match_id = futures[future]
+                try:
+                    data = future.result()
+                    if data:
+                        results[match_id] = data
+                except Exception as e:
+                    print(f"Error fetching {match_id}: {e}")
+        return results
+
     def process_matches(self, progress_recorder=None):
         self._matches = self._get_all()
+        if not self._matches:
+            return
+
         with transaction.atomic():
             total_matches = len(self._matches)
             self._summoner.being_parsed = True
             self._summoner.total_matches = total_matches
             self._summoner.save()
 
-        for i, match in enumerate(self._matches):
-            with transaction.atomic():
-                if not Match.objects.filter(match_id=match).exists():
-                    match_info = self._get_match_info(match)
-                    match_model, created = self._create_match(match, match_info["info"])
+        # Filter out matches already in DB
+        existing = set(Match.objects.filter(match_id__in=self._matches).values_list('match_id', flat=True))
+        new_match_ids = [m for m in self._matches if m not in existing]
+
+        # Fetch new matches in parallel batches
+        batch_size = 20
+        for batch_start in range(0, len(new_match_ids), batch_size):
+            batch = new_match_ids[batch_start:batch_start + batch_size]
+            match_data = self._fetch_matches_parallel(batch)
+
+            for match_id in batch:
+                if match_id not in match_data:
+                    self._processed_matches += 1
+                    self._summoner.parsed_matches += 1
+                    continue
+                match_info = match_data[match_id]
+                with transaction.atomic():
+                    match_model, created = self._create_match(match_id, match_info["info"])
                     self._create_participants(match_info, match_model)
 
                 self._processed_matches += 1
-                self._summoner.parsed_matches += 1;
+                self._summoner.parsed_matches += 1
 
                 if progress_recorder:
-
                     progress_recorder.set_progress(
                         self._summoner.parsed_matches,
                         self._summoner.total_matches,
                         description="matches processed")
                     self._summoner.save()
+
+        # Count already-existing matches toward progress
+        already_processed = len(existing)
+        self._summoner.parsed_matches += already_processed
+        if progress_recorder and already_processed:
+            progress_recorder.set_progress(
+                self._summoner.total_matches,
+                self._summoner.total_matches,
+                description="matches processed")
 
         with transaction.atomic():
             self._summoner.being_parsed = False
@@ -280,16 +323,26 @@ class MatchManager():
 
     def last_20(self, progress_recorder=None):
         self._matches = self._get_20()
+        if not self._matches:
+            return
         total_matches = len(self._matches)
 
-        for i, match in enumerate(self._matches):
+        # Filter out existing
+        existing = set(Match.objects.filter(match_id__in=self._matches).values_list('match_id', flat=True))
+        new_match_ids = [m for m in self._matches if m not in existing]
+
+        # Fetch all new matches in parallel
+        match_data = self._fetch_matches_parallel(new_match_ids)
+
+        for i, match_id in enumerate(new_match_ids):
+            if match_id not in match_data:
+                continue
+            match_info = match_data[match_id]
             with transaction.atomic():
-                if not Match.objects.filter(match_id=match).exists():
-                    match_info = self._get_match_info(match)
-                    match_model, created = self._create_match(match, match_info["info"], new=True)
-                    self._create_participants(match_info, match_model)
-                if progress_recorder:
-                    progress_recorder.set_progress(i,total_matches,description="matches processed")
+                match_model, created = self._create_match(match_id, match_info["info"], new=True)
+                self._create_participants(match_info, match_model)
+            if progress_recorder:
+                progress_recorder.set_progress(i, total_matches, description="matches processed")
 
 
 
