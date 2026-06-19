@@ -333,8 +333,7 @@ def _get_champion_stats_data(summoner, summoner_champion_stats):
 
 
 def _get_account_stats(summoner):
-    current_year = datetime.now().year
-    account_stats = AccountStats.objects.filter(summoner=summoner, year=current_year).first()
+    account_stats = AccountStats.objects.filter(summoner=summoner).order_by('-year').first()
     if not account_stats:
         return None
     if account_stats.total_played == 0:
@@ -370,8 +369,10 @@ def _get_match_queryset(summoner):
 
 
 def _get_champions_queryset(summoner):
-    current_year = datetime.now().year
-    summoner_champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=current_year).order_by(
+    latest_year = SummonerChampionStats.objects.filter(summoner=summoner).order_by('-year').values_list('year', flat=True).first()
+    if not latest_year:
+        return SummonerChampionStats.objects.none()
+    summoner_champion_stats = SummonerChampionStats.objects.filter(summoner=summoner, year=latest_year).order_by(
         '-total_played')[:7].prefetch_related('champion')
     return summoner_champion_stats
 
