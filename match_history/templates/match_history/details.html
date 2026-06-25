@@ -292,6 +292,31 @@
     
 </script>
 
+<script>
+// Match card expand/collapse functionality
+function toggleMatchDetails(button) {
+    const matchCard = button.closest('.match-card');
+    const detailsSection = matchCard.querySelector('.match-details-expanded');
+    const isExpanded = matchCard.classList.contains('expanded');
+    
+    if (isExpanded) {
+        // Collapse
+        matchCard.classList.remove('expanded');
+        detailsSection.style.display = 'none';
+    } else {
+        // Expand
+        matchCard.classList.add('expanded');
+        detailsSection.style.display = 'block';
+    }
+}
+
+// Handle dynamically loaded content (for pagination)
+$(document).on('click', '.match-btn', function(e) {
+    e.preventDefault();
+    toggleMatchDetails(this);
+});
+</script>
+
 
 
 {% endblock %}
