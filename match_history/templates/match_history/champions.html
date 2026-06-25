@@ -14,8 +14,106 @@
         background-color: #222433;
     }
 </style>
-    <h1 style="text-align: center"> COMING SOON</h1>
-    {% for champ, stat in champion_query %}
-        <p>{{champ}}</p>
-    {% endfor %}
+<div class="champions-container">
+    <h1 class="champions-title">Champion Statistics</h1>
+    
+    <!-- Filter and Sort Controls -->
+    <div class="controls-container">
+        <div class="filter-container">
+            <form id="filter-form" method="get" action="{% url 'match_history:champions' %}">
+                <label for="patch-select">Patch:</label>
+                <select id="patch-select" name="patch" onchange="this.form.submit()">
+                    {% for available_patch in available_patches %}
+                        <option value="{{ available_patch }}" {% if available_patch == selected_patch %}selected{% endif %}>
+                            {{ available_patch }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <input type="hidden" name="sort" value="{{ sort_by }}">
+            </form>
+        </div>
+    </div>
+    
+    <!-- Champions Table -->
+    <div class="champions-table-container">
+        <table class="champions-table">
+            <thead>
+                <tr>
+                    <th class="rank-column">#</th>
+                    <th class="champion-column">Champion</th>
+                    <th class="stats-column">
+                        <a href="{% url 'match_history:champions' %}?patch={{ selected_patch }}&sort=win_rate" 
+                           class="sort-link {% if sort_by == 'win_rate' %}active{% endif %}">
+                            Win Rate
+                        </a>
+                    </th>
+                    <th class="stats-column">
+                        <a href="{% url 'match_history:champions' %}?patch={{ selected_patch }}&sort=games_played" 
+                           class="sort-link {% if sort_by == 'games_played' %}active{% endif %}">
+                            Games Played
+                        </a>
+                    </th>
+                    <th class="stats-column">Wins</th>
+                    <th class="stats-column">Losses</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for champion_item in champion_data %}
+                    <tr>
+                        <td class="rank-column">{{ forloop.counter|add:champion_data.start_index|add:-1 }}</td>
+                        <td class="champion-column">
+                            <div class="champion-info">
+                                <div class="champion-portrait">
+                                    <img src="{{ champion_item.champion.get_url }}" alt="{{ champion_item.champion.name }}">
+                                </div>
+                                <span class="champion-name">{{ champion_item.champion.name }}</span>
+                            </div>
+                        </td>
+                        <td class="stats-column win-rate">{{ champion_item.win_rate|floatformat:1 }}%</td>
+                        <td class="stats-column">{{ champion_item.games_played }}</td>
+                        <td class="stats-column">{{ champion_item.wins }}</td>
+                        <td class="stats-column">{{ champion_item.losses }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="no-data">No champion data available for this patch.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if champion_data.has_other_pages %}
+    <div class="pagination">
+        {% if champion_data.has_previous %}
+            <a href="?page={{ champion_data.previous_page_number }}&patch={{ selected_patch }}&sort={{ sort_by }}" class="pagination-arrow">&laquo;</a>
+        {% else %}
+            <span class="pagination-arrow disabled">&laquo;</span>
+        {% endif %}
+        
+        {% for i in champion_data.paginator.page_range %}
+            {% if champion_data.number == i %}
+                <span class="pagination-number active">{{ i }}</span>
+            {% else %}
+                <a href="?page={{ i }}&patch={{ selected_patch }}&sort={{ sort_by }}" class="pagination-number">{{ i }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if champion_data.has_next %}
+            <a href="?page={{ champion_data.next_page_number }}&patch={{ selected_patch }}&sort={{ sort_by }}" class="pagination-arrow">&raquo;</a>
+        {% else %}
+            <span class="pagination-arrow disabled">&raquo;</span>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add any JavaScript functionality here if needed
+    });
+</script>
 {% endblock %}
