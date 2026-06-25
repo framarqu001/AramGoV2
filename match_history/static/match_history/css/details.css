@@ -142,10 +142,13 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    min-height: 100px;
     display: flex;
+    flex-direction: column;
     font-weight: 1000;
     border-radius: 5px;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .match-card .stat-section.stats-text{
@@ -164,6 +167,7 @@ hr {
     grid-template-columns: .6fr 1fr 1fr 1fr;
     padding: 0 .5rem;
     place-items: center;
+    flex-shrink: 0;
 }
 .result-section {
     justify-self: start;
@@ -254,6 +258,192 @@ hr {
 .match-btn.match-lose {
     background-color: #f46bf447; 
     transition: background-color 0.3s ease;
+}
+
+/* Expandable content styles */
+.match-expandable-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.match-card.expanded .match-expandable-content {
+    max-height: 500px;
+}
+
+.expanded-details {
+    padding: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s ease 0.1s;
+}
+
+.match-card.expanded .expanded-details {
+    opacity: 1;
+}
+
+.expanded-teams {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+
+.expanded-team-section {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.team-header {
+    font-family: "Mulish", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.blue-team-header {
+    color: #4b6bc3;
+}
+
+.red-team-header {
+    color: #f46bf4;
+}
+
+.expanded-team-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.expanded-participant {
+    display: grid;
+    grid-template-columns: 120px 100px 80px 60px 1fr;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.03);
+    font-size: 12px;
+}
+
+.expanded-participant.main-participant {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.participant-champion {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.expanded-champ-img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.champion-name {
+    font-family: "Mulish", sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    color: #e6e6e6;
+}
+
+.participant-summoner {
+    font-family: "Mulish", sans-serif;
+    font-size: 11px;
+}
+
+.summoner-link {
+    color: #87888a;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.summoner-link:hover {
+    color: #e6e6e6;
+}
+
+.participant-kda {
+    font-family: "Mulish", sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    color: #e6e6e6;
+}
+
+.participant-cs {
+    font-family: "Mulish", sans-serif;
+    font-size: 11px;
+    color: #87888a;
+}
+
+.participant-items {
+    display: flex;
+    gap: 2px;
+    justify-content: flex-start;
+}
+
+.expanded-item-img {
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.expanded-match-info {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.match-details-section h4 {
+    font-family: "Mulish", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: #e6e6e6;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.match-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0;
+    font-family: "Mulish", sans-serif;
+    font-size: 12px;
+}
+
+.detail-label {
+    color: #87888a;
+    font-weight: 500;
+}
+
+.detail-value {
+    color: #e6e6e6;
+    font-weight: 600;
+}
+
+.win-text {
+    color: #4b6bc3;
+}
+
+.loss-text {
+    color: #f46bf4;
+}
+
+/* Chevron rotation animation */
+.chevron-icon {
+    transition: transform 0.3s ease;
+}
+
+.match-card.expanded .chevron-icon {
+    transform: rotate(180deg);
 }
 
 

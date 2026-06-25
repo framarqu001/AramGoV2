@@ -290,6 +290,27 @@
         }
     });
     
+    // Match card expand/collapse functionality
+    $(document).on('click', '.match-btn', function(e) {
+        e.preventDefault();
+        
+        const matchCard = $(this).closest('.match-card');
+        const expandableContent = matchCard.find('.match-expandable-content');
+        
+        // Toggle expanded class
+        matchCard.toggleClass('expanded');
+        
+        // Handle smooth animation
+        if (matchCard.hasClass('expanded')) {
+            // Expanding
+            const scrollHeight = expandableContent[0].scrollHeight;
+            expandableContent.css('max-height', scrollHeight + 'px');
+        } else {
+            // Collapsing
+            expandableContent.css('max-height', '0px');
+        }
+    });
+    
 </script>
 
 
