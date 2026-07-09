@@ -1,6 +1,6 @@
 {% for match, main_participant, blue_team, red_team, main_stats in matches%}
 
-<div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+<div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" data-expanded="false">
 
     <div class="match-section-container">
         <div class="result-section">
