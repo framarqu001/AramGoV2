@@ -142,10 +142,17 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: auto;
     display: flex;
+    flex-direction: column;
     font-weight: 1000;
     border-radius: 5px;
+    overflow: hidden;
+}
+
+.match-card-header {
+    display: flex;
+    height: 100px;
 }
 
 .match-card .stat-section.stats-text{
@@ -224,6 +231,12 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.match-btn.expanded .drop {
+    transform: rotate(180deg);
 }
 
 
@@ -486,4 +499,63 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Match details expansion styles */
+.match-details-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.match-card.expanded .match-details-container {
+    max-height: 500px; /* Adjust as needed */
+    padding: 15px;
+}
+
+.match-details-content {
+    padding: 10px;
+}
+
+.match-details-header {
+    margin-bottom: 15px;
+}
+
+.match-details-header h3 {
+    margin: 0;
+    font-family: "Mulish", sans-serif;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.match-details-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.stat-item {
+    flex: 1;
+    padding: 8px;
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #87888a;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-weight: 700;
+    font-size: 16px;
 }
