@@ -161,6 +161,26 @@
             return;
         }
 
+        // Match card expand/collapse functionality
+        $(document).on('click', '.match-btn', function(e) {
+            e.preventDefault();
+            const matchCard = $(this).closest('.match-card');
+            const chevron = $(this).find('.drop');
+            const isExpanded = matchCard.attr('data-expanded') === 'true';
+            
+            if (isExpanded) {
+                // Collapse the card
+                matchCard.attr('data-expanded', 'false');
+                matchCard.removeClass('match-card-expanded');
+                chevron.removeClass('rotated');
+            } else {
+                // Expand the card
+                matchCard.attr('data-expanded', 'true');
+                matchCard.addClass('match-card-expanded');
+                chevron.addClass('rotated');
+            }
+        });
+
         $(window).scroll(function() {
             if (!loading && !noMorePages && $(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
                 loading = true;
