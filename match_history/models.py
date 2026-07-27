@@ -171,6 +171,24 @@ class Participant(models.Model):
         (BLUE_TEAM, 'Blue Team'),
         (RED_TEAM, 'Red Team'),
     ]
+    
+    # Role choices for ARAM
+    TANK = 'TANK'
+    BRUISER = 'BRUISER'
+    MAGE = 'MAGE'
+    MARKSMAN = 'MARKSMAN'
+    SUPPORT = 'SUPPORT'
+    ASSASSIN = 'ASSASSIN'
+    
+    ROLE_CHOICES = [
+        (TANK, 'Tank'),
+        (BRUISER, 'Bruiser'),
+        (MAGE, 'Mage'),
+        (MARKSMAN, 'Marksman'),
+        (SUPPORT, 'Support'),
+        (ASSASSIN, 'Assassin'),
+    ]
+    
     # A match has many participants. Participants belong to one match.
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='participants')
     # A Summoner can be a participant in multiple matches.
@@ -193,11 +211,33 @@ class Participant(models.Model):
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
     game_name = models.CharField(max_length=50)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=True, null=True)
 
     def match_result(self):
         if self.win:
             return "Victory"
         return "Defeat"
+        
+    def get_kda(self):
+        """Calculate KDA (Kills + Assists / Deaths)"""
+        return (self.kills + self.assists) / self.deaths if self.deaths else self.kills + self.assists
+        
+    def get_cs_per_min(self, match_duration):
+        """Calculate CS per minute"""
+        return self.creep_score / (match_duration / 60) if match_duration > 0 else 0
+        
+    def compare_stats(self, other_participant):
+        """Compare stats with another participant"""
+        if not other_participant:
+            return None
+            
+        return {
+            'kills_diff': self.kills - other_participant.kills,
+            'deaths_diff': self.deaths - other_participant.deaths,
+            'assists_diff': self.assists - other_participant.assists,
+            'cs_diff': self.creep_score - other_participant.creep_score,
+            'kda_diff': self.get_kda() - other_participant.get_kda(),
+        }
 
     def __str__(self):
         return f"{self.game_name} playing {self.champion} in match {self.match}"

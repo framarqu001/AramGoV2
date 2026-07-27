@@ -1,4 +1,4 @@
-{% for match, main_participant, blue_team, red_team, main_stats in matches%}
+{% for match, main_participant, blue_team, red_team, main_stats, role_counterpart, role_comparison in matches%}
 
 <div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
 
@@ -113,4 +113,30 @@
     </button>
 
 </div>
+
+<!-- Role comparison section (expanded panel) -->
+<div class="role-comparison-panel hidden">
+    {% include "match_history/role_comparison.html" %}
+</div>
 {% endfor %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const matchButtons = document.querySelectorAll('.match-btn');
+        
+        matchButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const matchCard = this.closest('.match-card');
+                const comparisonPanel = matchCard.nextElementSibling;
+                
+                if (comparisonPanel.classList.contains('hidden')) {
+                    comparisonPanel.classList.remove('hidden');
+                    this.querySelector('.drop').style.transform = 'rotate(180deg)';
+                } else {
+                    comparisonPanel.classList.add('hidden');
+                    this.querySelector('.drop').style.transform = 'rotate(0deg)';
+                }
+            });
+        });
+    });
+</script>

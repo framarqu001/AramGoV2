@@ -1,3 +1,110 @@
+/* Role comparison styling */
+.role-comparison-panel {
+    width: 100%;
+    margin-bottom: 10px;
+    border-radius: 0 0 5px 5px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.role-comparison-panel.hidden {
+    display: none;
+}
+
+.role-comparison {
+    padding: 15px;
+    background-color: var(--primary-color);
+    color: #e6e6e6;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.role-comparison-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.role-comparison-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.role-players {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.role-player {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.role-player .champ-img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.player-name {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.vs {
+    font-size: 12px;
+    font-weight: 700;
+    color: #87888a;
+}
+
+.comparison-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 14px;
+    text-align: center;
+}
+
+.diff-indicator {
+    font-size: 12px;
+    margin-left: 5px;
+    color: #87888a;
+}
+
+.stat-better {
+    color: #4b6bc3;
+}
+
+.stat-worse {
+    color: #f46bf4;
+}
+
+.no-counterpart {
+    text-align: center;
+    padding: 20px;
+    color: #87888a;
+}
+
+/* Original CSS */
 .content {
    flex-direction: column;
 
@@ -22,6 +129,7 @@ hr {
 .drop {
     width: 30px;
     margin-bottom: 5px;
+    transition: transform 0.3s ease;
 }
 .profile-icon-container {
     display: flex;
