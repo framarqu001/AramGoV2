@@ -98,3 +98,16 @@ class PatchVersionCacheTest(TestCase):
         
         # Verify that the mock was called
         mock_get_patch.assert_called_once()
+        
+    @patch('django.core.cache.cache.set')
+    @patch('AramGoV2.util.current_patch.get_patch')
+    def test_patch_cache_timeout_value(self, mock_get_patch, mock_cache_set):
+        # Mock the get_patch function to return a fixed value
+        mock_get_patch.return_value = '13.15.1'
+        
+        # Initialize the app config which should cache the patch version
+        app_config = MatchHistoryConfig('match_history', None)
+        app_config.ready()
+        
+        # Verify that cache.set was called with the correct timeout value (2 weeks = 1209600 seconds)
+        mock_cache_set.assert_called_once_with('PATCH', '13.15.1', timeout=1209600)
