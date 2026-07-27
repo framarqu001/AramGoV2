@@ -1,0 +1,208 @@
+{% extends "todo/base.html" %}
+
+{% block todo_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Todo List</h2>
+    <a href="{% url 'todo:create' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i> Add Task
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">
+            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                <i class="fas fa-filter me-2"></i> Filters
+            </button>
+        </h5>
+    </div>
+    <div class="collapse" id="filterCollapse">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <label for="id_search" class="form-label">Search</label>
+                    {{ filter_form.search }}
+                </div>
+                <div class="col-md-3">
+                    <label for="id_status" class="form-label">Status</label>
+                    {{ filter_form.status }}
+                </div>
+                <div class="col-md-3">
+                    <label for="id_priority" class="form-label">Priority</label>
+                    {{ filter_form.priority }}
+                </div>
+                <div class="col-md-4">
+                    <label for="id_category" class="form-label">Category</label>
+                    {{ filter_form.category }}
+                </div>
+                <div class="col-md-4">
+                    <label for="id_tag" class="form-label">Tag</label>
+                    {{ filter_form.tag }}
+                </div>
+                <div class="col-md-2">
+                    <label for="id_due_date_start" class="form-label">Due From</label>
+                    {{ filter_form.due_date_start }}
+                </div>
+                <div class="col-md-2">
+                    <label for="id_due_date_end" class="form-label">Due To</label>
+                    {{ filter_form.due_date_end }}
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="{% url 'todo:list' %}" class="btn btn-outline-secondary">Clear Filters</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Sorting Options -->
+<div class="mb-3">
+    <div class="btn-group">
+        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+            <i class="fas fa-sort me-2"></i> Sort By
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'sort_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}sort_by=due_date">Due Date</a></li>
+            <li><a class="dropdown-item" href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'sort_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}sort_by=-priority">Priority (High to Low)</a></li>
+            <li><a class="dropdown-item" href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'sort_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}sort_by=priority">Priority (Low to High)</a></li>
+            <li><a class="dropdown-item" href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'sort_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}sort_by=-created_date">Newest First</a></li>
+            <li><a class="dropdown-item" href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'sort_by' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}sort_by=created_date">Oldest First</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- Todo Items List -->
+{% if todo_items %}
+    <div class="todo-list">
+        {% for todo in todo_items %}
+            <div class="card todo-card priority-{{ todo.priority }} {% if todo.status == 'completed' %}completed{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title todo-title">
+                            <a href="{% url 'todo:detail' todo.pk %}">{{ todo.title }}</a>
+                            
+                            {% if todo.is_overdue %}
+                                <span class="badge bg-danger ms-2">Overdue</span>
+                            {% endif %}
+                        </h5>
+                        <div>
+                            <span id="status-badge-{{ todo.pk }}" class="badge {% if todo.status == 'pending' %}bg-warning{% elif todo.status == 'in_progress' %}bg-info{% elif todo.status == 'completed' %}bg-success{% elif todo.status == 'deferred' %}bg-secondary{% elif todo.status == 'cancelled' %}bg-danger{% endif %}">
+                                {{ todo.get_status_display }}
+                            </span>
+                            
+                            <span class="badge {% if todo.priority == 1 %}bg-success{% elif todo.priority == 2 %}bg-info{% elif todo.priority == 3 %}bg-warning{% elif todo.priority == 4 %}bg-danger{% endif %}">
+                                {{ todo.get_priority_display }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    {% if todo.description %}
+                        <p class="card-text text-muted">{{ todo.description|truncatechars:100 }}</p>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            {% if todo.category %}
+                                <span class="category-badge" style="background-color: {{ todo.category.color }}">
+                                    {% if todo.category.icon %}<i class="fas fa-{{ todo.category.icon }} me-1"></i>{% endif %}
+                                    {{ todo.category.name }}
+                                </span>
+                            {% endif %}
+                            
+                            {% for tag in todo.tags.all %}
+                                <span class="tag-badge">{{ tag.name }}</span>
+                            {% endfor %}
+                        </div>
+                        
+                        <div>
+                            {% if todo.due_date %}
+                                <small class="text-muted me-3">
+                                    <i class="far fa-calendar-alt me-1"></i>
+                                    {% if todo.is_overdue %}
+                                        <span class="overdue">{{ todo.due_date|date:"M d, Y" }}</span>
+                                    {% else %}
+                                        {{ todo.due_date|date:"M d, Y" }}
+                                    {% endif %}
+                                </small>
+                            {% endif %}
+                            
+                            <div class="btn-group">
+                                {% if todo.status != 'completed' %}
+                                    <a href="{% url 'todo:complete' todo.pk %}" class="btn btn-sm btn-success" title="Mark as completed">
+                                        <i class="fas fa-check"></i>
+                                    </a>
+                                    
+                                    <button class="btn btn-sm btn-info toggle-status" 
+                                            data-url="{% url 'todo:toggle_status' todo.pk %}" 
+                                            data-task-id="{{ todo.pk }}"
+                                            title="Toggle status">
+                                        <i id="status-icon-{{ todo.pk }}" class="fas {% if todo.status == 'pending' %}fa-clock{% elif todo.status == 'in_progress' %}fa-spinner{% endif %}"></i>
+                                    </button>
+                                {% endif %}
+                                
+                                <a href="{% url 'todo:update' todo.pk %}" class="btn btn-sm btn-primary" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                
+                                <a href="{% url 'todo:delete' todo.pk %}" class="btn btn-sm btn-danger" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i> No todo items found. 
+        <a href="{% url 'todo:create' %}" class="alert-link">Create a new task</a>.
+    </div>
+{% endif %}
+{% endblock %}
