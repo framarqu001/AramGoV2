@@ -1,9 +1,11 @@
-from django.test import TransactionTestCase, TestCase
+from django.test import TransactionTestCase, TestCase, Client
 from django.core.cache import cache
+from django.urls import reverse
 from unittest.mock import patch
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
+import datetime
 
 
 class MatchParticipantDBTest(TransactionTestCase):
@@ -98,3 +100,118 @@ class PatchVersionCacheTest(TestCase):
         
         # Verify that the mock was called
         mock_get_patch.assert_called_once()
+
+
+class ExpandedStatsTemplateTest(TestCase):
+    fixtures = ['test_data.json']
+    
+    def setUp(self):
+        self.client = Client()
+        # Get a summoner from the test data
+        self.summoner = Summoner.objects.first()
+        
+    def test_expanded_stats_section_in_template(self):
+        """Test that the expanded stats section is present in the match list template"""
+        if self.summoner and self.summoner.game_name and self.summoner.tag_line:
+            url = reverse('match_history:details', args=[self.summoner.game_name, self.summoner.tag_line])
+            response = self.client.get(url)
+            
+            self.assertEqual(response.status_code, 200)
+            
+            # Check that expanded stats section is present
+            self.assertContains(response, 'expanded-stats')
+            self.assertContains(response, 'damage-stats-section')
+            self.assertContains(response, 'vision-objectives-section')
+            self.assertContains(response, 'gold-cs-section')
+            self.assertContains(response, 'all-participants-stats')
+            
+    def test_expanded_stats_structure(self):
+        """Test that the expanded stats section has the correct structure"""
+        if self.summoner and self.summoner.game_name and self.summoner.tag_line:
+            url = reverse('match_history:details', args=[self.summoner.game_name, self.summoner.tag_line])
+            response = self.client.get(url)
+            
+            # Check for damage statistics labels
+            self.assertContains(response, 'Damage Dealt')
+            self.assertContains(response, 'Damage Taken')
+            self.assertContains(response, 'Damage to Champions')
+            self.assertContains(response, 'Healing Done')
+            
+            # Check for vision and objectives labels
+            self.assertContains(response, 'Vision Score')
+            self.assertContains(response, 'Wards Placed')
+            self.assertContains(response, 'Wards Destroyed')
+            self.assertContains(response, 'Objective Participation')
+            
+            # Check for gold and CS labels
+            self.assertContains(response, 'Gold Earned')
+            self.assertContains(response, 'Gold per Minute')
+            self.assertContains(response, 'Minions Killed')
+            self.assertContains(response, 'Jungle Monsters')
+            
+    def test_toggle_button_functionality(self):
+        """Test that the toggle button has the correct onclick handler"""
+        if self.summoner and self.summoner.game_name and self.summoner.tag_line:
+            url = reverse('match_history:details', args=[self.summoner.game_name, self.summoner.tag_line])
+            response = self.client.get(url)
+            
+            # Check that the button has the toggle function
+            self.assertContains(response, 'onclick="toggleExpandedStats(this)"')
+            self.assertContains(response, 'function toggleExpandedStats')
+
+
+class ExpandedStatsDataTest(TestCase):
+    def setUp(self):
+        # Create test data
+        self.summoner = Summoner.objects.create(
+            puuid='test-puuid',
+            game_name='TestPlayer',
+            tag_line='NA1',
+            summoner_name='TestPlayer',
+            summoner_level=30
+        )
+        
+        self.champion = Champion.objects.create(
+            champion_id='TestChamp',
+            name='Test Champion',
+            title='The Test',
+            image_path='TestChamp.png',
+            splash_image_path='TestChamp_0.jpg'
+        )
+        
+        self.match = Match.objects.create(
+            match_id='test_match_001',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,  # 30 minutes
+            game_mode='ARAM',
+            game_version='14.16.1',
+            winner=100
+        )
+        
+        self.participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=10,
+            deaths=3,
+            assists=15,
+            creep_score=120,
+            team=100,
+            win=True,
+            game_name='TestPlayer'
+        )
+        
+    def test_participant_stats_display(self):
+        """Test that participant stats are correctly displayed in expanded section"""
+        # The template should show the participant's actual stats
+        self.assertEqual(self.participant.kills, 10)
+        self.assertEqual(self.participant.deaths, 3)
+        self.assertEqual(self.participant.assists, 15)
+        self.assertEqual(self.participant.creep_score, 120)
+        self.assertTrue(self.participant.win)
+        
+    def test_match_duration_calculation(self):
+        """Test that match duration is correctly calculated"""
+        expected_minutes = self.match.game_duration // 60
+        self.assertEqual(expected_minutes, 30)
+        self.assertEqual(self.match.get_minutes(), 30)

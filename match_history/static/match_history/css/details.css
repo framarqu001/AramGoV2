@@ -142,10 +142,12 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    min-height: 100px;
     display: flex;
+    flex-direction: column;
     font-weight: 1000;
     border-radius: 5px;
+    transition: all 0.3s ease;
 }
 
 .match-card .stat-section.stats-text{
@@ -486,4 +488,260 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Expanded Stats Section */
+.expanded-stats {
+    display: none;
+    padding: 1rem;
+    margin-top: 10px;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+}
+
+.expanded-stats.show {
+    display: block;
+    opacity: 1;
+    max-height: 1000px;
+    animation: expandStats 0.3s ease-out;
+}
+
+@keyframes expandStats {
+    from {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        max-height: 1000px;
+        transform: translateY(0);
+    }
+}
+
+.expanded-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.stats-header {
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 1rem;
+    color: #e6e6e6;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+/* Damage Stats Section */
+.damage-stats-section {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #ff6b6b;
+}
+
+.damage-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+}
+
+.damage-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #87888a;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #e6e6e6;
+}
+
+/* Vision and Objectives Section */
+.vision-objectives-section {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #4ecdc4;
+}
+
+.vision-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+}
+
+.vision-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+/* Gold and CS Section */
+.gold-cs-section {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #ffd93d;
+}
+
+.gold-cs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+}
+
+.gold-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+/* All Participants Stats Table */
+.all-participants-stats {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.participants-stats-table {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.participants-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    font-weight: 700;
+    font-size: 12px;
+    color: #87888a;
+    text-transform: uppercase;
+}
+
+.participant-stats-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background-color 0.2s ease;
+}
+
+.participant-stats-row:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.participant-stats-row.highlight {
+    background-color: rgba(255, 255, 255, 0.1);
+    font-weight: 700;
+}
+
+.participant-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.champ-img-small {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+.participant-name span {
+    font-size: 13px;
+    color: #e6e6e6;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.participant-kda,
+.participant-damage,
+.participant-gold,
+.participant-cs {
+    font-size: 13px;
+    color: #e6e6e6;
+    text-align: center;
+}
+
+/* Match button animation */
+.match-btn .drop {
+    transition: transform 0.3s ease;
+}
+
+.match-card.expanded .match-btn .drop {
+    transform: rotate(180deg);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .expanded-stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .gold-cs-section {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .expanded-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .damage-stats-grid,
+    .vision-stats-grid,
+    .gold-cs-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .participants-header,
+    .participant-stats-row {
+        grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+        gap: 0.5rem;
+    }
+    
+    .participant-name span {
+        max-width: 60px;
+    }
+}
+
+@media (max-width: 480px) {
+    .participants-header,
+    .participant-stats-row {
+        grid-template-columns: 1fr 0.8fr 0.8fr 0.8fr 0.8fr;
+        gap: 0.3rem;
+        font-size: 11px;
+    }
+    
+    .participant-name span {
+        max-width: 50px;
+    }
+    
+    .champ-img-small {
+        width: 16px;
+        height: 16px;
+    }
 }
