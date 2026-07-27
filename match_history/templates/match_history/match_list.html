@@ -107,10 +107,100 @@
                 {% endfor %}
             </div>
         </div>
+        <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" onclick="toggleMatchExpansion(this)">
+            <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
+        </button>
     </div>
-    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
-        <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
-    </button>
+
+    <!-- Expanded Content Section -->
+    <div class="match-expanded-content">
+        <div class="expanded-stats-grid">
+            <div class="detailed-stats-section">
+                <div class="stats-header">Performance Stats</div>
+                <div class="stat-row">
+                    <span class="stat-label">Damage Dealt</span>
+                    <span class="stat-value highlight">{{main_participant.total_damage_dealt_to_champions|default:"N/A"}}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Damage Taken</span>
+                    <span class="stat-value">{{main_participant.total_damage_taken|default:"N/A"}}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Healing Done</span>
+                    <span class="stat-value good">{{main_participant.total_heal|default:"N/A"}}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Gold Earned</span>
+                    <span class="stat-value">{{main_participant.gold_earned|default:"N/A"}}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Vision Score</span>
+                    <span class="stat-value">{{main_participant.vision_score|default:"N/A"}}</span>
+                </div>
+            </div>
+            
+            <div class="detailed-stats-section">
+                <div class="stats-header">Combat Stats</div>
+                <div class="stat-row">
+                    <span class="stat-label">Largest Killing Spree</span>
+                    <span class="stat-value excellent">{{main_participant.largest_killing_spree|default:"0"}}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Largest Multi Kill</span>
+                    <span class="stat-value excellent">{{main_participant.largest_multi_kill|default:"0"}}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Time Spent Dead</span>
+                    <span class="stat-value poor">{{main_participant.total_time_spent_dead|default:"0"}}s</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Damage per Minute</span>
+                    <span class="stat-value highlight">{{main_stats.damage_per_min|default:"N/A"}}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">KDA Ratio</span>
+                    <span class="stat-value {% if main_stats.kda > 2.0 %}excellent{% elif main_stats.kda > 1.5 %}good{% else %}poor{% endif %}">{{main_stats.kda}}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="team-comparison">
+            <div class="team-comparison-header">Team Comparison</div>
+            <div class="teams-container">
+                <div class="team-section blue-team">
+                    <div class="team-header">Blue Team</div>
+                    {% for participant in blue_team %}
+                        <div class="player-row {% if participant == main_participant %}highlight{% endif %}">
+                            <div class="player-champion">
+                                <img src="{{participant.champion.get_url}}" alt="{{participant.champion.name}}">
+                            </div>
+                            <a href="{{participant.summoner.get_url}}" class="player-name">{{participant.game_name}}</a>
+                            <div class="player-kda">{{participant.kills}}/{{participant.deaths}}/{{participant.assists}}</div>
+                            <div class="player-damage">{{participant.total_damage_dealt_to_champions|default:"0"}}</div>
+                            <div class="player-cs">{{participant.creep_score}}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="vs-divider">VS</div>
+                
+                <div class="team-section red-team">
+                    <div class="team-header">Red Team</div>
+                    {% for participant in red_team %}
+                        <div class="player-row {% if participant == main_participant %}highlight{% endif %}">
+                            <div class="player-champion">
+                                <img src="{{participant.champion.get_url}}" alt="{{participant.champion.name}}">
+                            </div>
+                            <a href="{{participant.summoner.get_url}}" class="player-name">{{participant.game_name}}</a>
+                            <div class="player-kda">{{participant.kills}}/{{participant.deaths}}/{{participant.assists}}</div>
+                            <div class="player-damage">{{participant.total_damage_dealt_to_champions|default:"0"}}</div>
+                            <div class="player-cs">{{participant.creep_score}}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 {% endfor %}
