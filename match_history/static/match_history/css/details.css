@@ -487,3 +487,133 @@ hr {
 .death-color {
     color: #ff4e50
 }
+
+/* Expanded Match Card Styles */
+.expanded-card-container {
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.expanded-match-card {
+    padding: 15px;
+    font-family: "Mulish", sans-serif;
+}
+
+.expanded-section-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    font-family: "Space Mono", monospace;
+}
+
+/* Detailed Stats Section */
+.detailed-stats-section {
+    padding: 10px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.stats-group {
+    margin-bottom: 15px;
+}
+
+.stats-group h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #87888a;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #e6e6e6;
+}
+
+.stat-value {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Runes Section */
+.runes-section {
+    padding: 10px;
+}
+
+.runes-container {
+    display: flex;
+    justify-content: space-around;
+}
+
+.primary-rune, .secondary-rune {
+    text-align: center;
+}
+
+.rune-icon {
+    margin-top: 10px;
+}
+
+.medium-img {
+    width: 40px;
+}
+
+.placeholder-rune {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #87888a;
+}
+
+/* Item Build Timeline */
+.item-build-section {
+    padding: 10px;
+}
+
+.timeline-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.timeline-marker {
+    font-size: 12px;
+    color: #87888a;
+    width: 50px;
+}
+
+.item-icon {
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.no-items-message {
+    color: #87888a;
+    font-style: italic;
+    font-size: 13px;
+}

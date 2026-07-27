@@ -1,0 +1,163 @@
+{% comment %}
+    Expanded Match Card Template
+    This template is included in match_list.html and displays detailed match statistics
+    when a user clicks the expand button on a match card.
+{% endcomment %}
+
+<div class="expanded-match-card">
+    <div class="expanded-section-container">
+        <!-- Detailed Player Stats Section -->
+        <div class="detailed-stats-section">
+            <h3 class="section-title">Detailed Player Stats</h3>
+            <div class="stats-grid">
+                <!-- Combat Stats -->
+                <div class="stats-group">
+                    <h4>Combat Stats</h4>
+                    <div class="stat-row">
+                        <span class="stat-label">Damage Dealt:</span>
+                        <span class="stat-value">{{ main_stats.damage_dealt|default:"N/A" }}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Damage Taken:</span>
+                        <span class="stat-value">{{ main_stats.damage_taken|default:"N/A" }}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Healing Done:</span>
+                        <span class="stat-value">{{ main_stats.healing|default:"N/A" }}</span>
+                    </div>
+                </div>
+                
+                <!-- Economy Stats -->
+                <div class="stats-group">
+                    <h4>Economy</h4>
+                    <div class="stat-row">
+                        <span class="stat-label">Gold Earned:</span>
+                        <span class="stat-value">{{ main_stats.gold_earned|default:"N/A" }}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Gold Spent:</span>
+                        <span class="stat-value">{{ main_stats.gold_spent|default:"N/A" }}</span>
+                    </div>
+                </div>
+                
+                <!-- Objective Stats -->
+                <div class="stats-group">
+                    <h4>Objectives</h4>
+                    <div class="stat-row">
+                        <span class="stat-label">Turret Damage:</span>
+                        <span class="stat-value">{{ main_stats.turret_damage|default:"N/A" }}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Objective Participation:</span>
+                        <span class="stat-value">{{ main_stats.objective_participation|default:"N/A" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Runes Section -->
+        <div class="runes-section">
+            <h3 class="section-title">Runes</h3>
+            <div class="runes-container">
+                <div class="primary-rune">
+                    <h4>Primary</h4>
+                    <div class="rune-icon">
+                        {% if main_participant.rune1 %}
+                            <img class="medium-img {% if main_participant.win %}match-win{% else %}match-lose{% endif %}" 
+                                 src="{{ main_participant.rune1.get_url }}" alt="{{ main_participant.rune1.name }}">
+                        {% else %}
+                            <div class="placeholder-rune">N/A</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="secondary-rune">
+                    <h4>Secondary</h4>
+                    <div class="rune-icon">
+                        {% if main_participant.rune2 %}
+                            <img class="medium-img sub-rune {% if main_participant.win %}match-win{% else %}match-lose{% endif %}" 
+                                 src="{{ main_participant.rune2.get_url }}" alt="{{ main_participant.rune2.name }}">
+                        {% else %}
+                            <div class="placeholder-rune">N/A</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Item Build Timeline -->
+        <div class="item-build-section">
+            <h3 class="section-title">Item Build Timeline</h3>
+            <div class="item-timeline">
+                {% if main_participant.item1 or main_participant.item2 or main_participant.item3 or main_participant.item4 or main_participant.item5 or main_participant.item6 %}
+                    <div class="timeline-container">
+                        <!-- Starting Item -->
+                        <div class="timeline-item">
+                            <div class="timeline-marker">Start</div>
+                            <div class="item-icon {% if main_participant.win %}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="https://ddragon.leagueoflegends.com/cdn/14.16.1/img/item/2052.png" alt="Starting Item">
+                            </div>
+                        </div>
+                        
+                        <!-- Core Items -->
+                        {% if main_participant.item1 %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker">Core 1</div>
+                            <div class="item-icon {% if main_participant.win %}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{ main_participant.item1.get_url }}" alt="{{ main_participant.item1.name }}">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if main_participant.item2 %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker">Core 2</div>
+                            <div class="item-icon {% if main_participant.win %}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{ main_participant.item2.get_url }}" alt="{{ main_participant.item2.name }}">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if main_participant.item3 %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker">Core 3</div>
+                            <div class="item-icon {% if main_participant.win %}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{ main_participant.item3.get_url }}" alt="{{ main_participant.item3.name }}">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Additional Items -->
+                        {% if main_participant.item4 %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker">Item 4</div>
+                            <div class="item-icon {% if main_participant.win %}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{ main_participant.item4.get_url }}" alt="{{ main_participant.item4.name }}">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if main_participant.item5 %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker">Item 5</div>
+                            <div class="item-icon {% if main_participant.win %}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{ main_participant.item5.get_url }}" alt="{{ main_participant.item5.name }}">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if main_participant.item6 %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker">Item 6</div>
+                            <div class="item-icon {% if main_participant.win %}match-win{% else %}match-lose{% endif %}">
+                                <img class="small-img" src="{{ main_participant.item6.get_url }}" alt="{{ main_participant.item6.name }}">
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="no-items-message">No item data available</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
