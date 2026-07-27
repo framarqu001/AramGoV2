@@ -290,6 +290,22 @@
         }
     });
     
+    // Match card expansion functionality
+    $(document).on('click', '.match-btn', function() {
+        const matchCard = $(this).closest('.match-card');
+        const expandedStats = matchCard.find('.match-expanded-stats');
+        const chevronIcon = $(this).find('.drop');
+        
+        // Toggle the expanded stats section
+        expandedStats.slideToggle(200);
+        
+        // Rotate the chevron icon
+        if (chevronIcon.css('transform') === 'none' || chevronIcon.css('transform') === '') {
+            chevronIcon.css('transform', 'rotate(180deg)');
+        } else {
+            chevronIcon.css('transform', '');
+        }
+    });
 </script>
 
 
