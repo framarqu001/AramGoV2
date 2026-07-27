@@ -19,55 +19,55 @@
                     <img class="champ-img " src="{{main_participant.champion.get_url}}" alt="" >
                 </div>
                 <div class="icon-2stack">
-                    <div class="spells-wrapper">
-                        <img class ="small-img" src="{{main_participant.spell1.get_url}}" alt="">
+                    <div class="spells-wrapper" title="{{main_participant.spell1.name}} - Cooldown: {{main_participant.spell1_cooldown|default:'N/A'}}s">
+                        <img class ="small-img" src="{{main_participant.spell1.get_url}}" alt="{{main_participant.spell1.name}}">
                     </div>
-                    <div class="spells-wrapper">
-                        <img class ="small-img" src="{{main_participant.spell2.get_url}}" alt="">
+                    <div class="spells-wrapper" title="{{main_participant.spell2.name}} - Cooldown: {{main_participant.spell2_cooldown|default:'N/A'}}s">
+                        <img class ="small-img" src="{{main_participant.spell2.get_url}}" alt="{{main_participant.spell2.name}}">
                     </div>
                 </div>
                 <div class="icon-2stack">
-                    <div class="spells-wrapper">
-                        <img class ="small-img {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" src="{{main_participant.rune1.get_url}}" alt="">
+                    <div class="spells-wrapper" title="{{main_participant.rune1.name}}">
+                        <img class ="small-img {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" src="{{main_participant.rune1.get_url}}" alt="{{main_participant.rune1.name}}">
                     </div>
-                    <div class="spells-wrapper">
-                        <img class ="small-img sub-rune {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" src="{{main_participant.rune2.get_url}}" alt="">
+                    <div class="spells-wrapper" title="{{main_participant.rune2.name}}">
+                        <img class ="small-img sub-rune {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" src="{{main_participant.rune2.get_url}}" alt="{{main_participant.rune2.name}}">
                     </div>
                 </div>
                 <div class="spells-wrapper">
-                    <img class ="small-img {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" src="https://ddragon.leagueoflegends.com/cdn/14.16.1/img/item/2052.png" alt="">
+                    <img class ="small-img {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" src="https://ddragon.leagueoflegends.com/cdn/14.16.1/img/item/2052.png" alt="Poro Snack">
                 </div>
             </div>
 
             <div class="items">
                 <div class="item1 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                     {% if main_participant.item1  %}
-                        <img class="small-img" src="{{main_participant.item1.get_url}}" alt="">
+                        <img class="small-img" src="{{main_participant.item1.get_url}}" alt="{{main_participant.item1.name}}" title="{{main_participant.item1.name}}">
                     {% endif %}
                 </div>
                 <div class="item2 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                     {% if main_participant.item2 %}
-                        <img class="small-img" src="{{main_participant.item2.get_url}}" alt="">
+                        <img class="small-img" src="{{main_participant.item2.get_url}}" alt="{{main_participant.item2.name}}" title="{{main_participant.item2.name}}">
                     {% endif %}
                 </div>
                 <div class="item3 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                     {% if main_participant.item3 %}
-                        <img class="small-img" src="{{main_participant.item3.get_url}}" alt="">
+                        <img class="small-img" src="{{main_participant.item3.get_url}}" alt="{{main_participant.item3.name}}" title="{{main_participant.item3.name}}">
                     {% endif %}
                 </div>
                 <div class="item4 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                     {% if main_participant.item4 %}
-                        <img class="small-img" src="{{main_participant.item4.get_url}}" alt="">
+                        <img class="small-img" src="{{main_participant.item4.get_url}}" alt="{{main_participant.item4.name}}" title="{{main_participant.item4.name}}">
                     {% endif %}
                 </div>
                 <div class="item5 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                     {% if main_participant.item5 %}
-                        <img class="small-img" src="{{main_participant.item5.get_url}}" alt="">
+                        <img class="small-img" src="{{main_participant.item5.get_url}}" alt="{{main_participant.item5.name}}" title="{{main_participant.item5.name}}">
                     {% endif %}
                 </div>
                 <div class="item6 {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
                     {% if main_participant.item6 %}
-                        <img class="small-img" src="{{main_participant.item6.get_url}}" alt="">
+                        <img class="small-img" src="{{main_participant.item6.get_url}}" alt="{{main_participant.item6.name}}" title="{{main_participant.item6.name}}">
                     {% endif %}
                 </div>
                 <div class="item7"></div>
@@ -112,5 +112,63 @@
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
+    <!-- Expanded View Section -->
+    <div class="expanded-view" style="display: none;">
+        <div class="expanded-container">
+            <div class="expanded-stats-section">
+                <h3>Detailed Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stats-column">
+                        <div class="stat-item">
+                            <span class="stat-label">Gold Earned:</span>
+                            <span class="stat-value">{{main_participant.gold_earned|default:"N/A"|intcomma}} gold</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Damage Dealt:</span>
+                            <span class="stat-value">{{main_participant.damage_dealt|default:"N/A"|intcomma}}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Damage Taken:</span>
+                            <span class="stat-value">{{main_participant.damage_taken|default:"N/A"|intcomma}}</span>
+                        </div>
+                    </div>
+                    <div class="stats-column">
+                        <div class="stat-item">
+                            <span class="stat-label">Vision Score:</span>
+                            <span class="stat-value">{{main_participant.vision_score|default:"N/A"}}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">CS per Minute:</span>
+                            <span class="stat-value">{{main_stats.cs_min}}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Kill Participation:</span>
+                            <span class="stat-value">{{main_stats.kp|default:"N/A"}}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="expanded-spells-section">
+                <h3>Summoner Spells</h3>
+                <div class="spells-details">
+                    <div class="spell-detail">
+                        <img class="spell-icon" src="{{main_participant.spell1.get_url}}" alt="{{main_participant.spell1.name}}">
+                        <div class="spell-info">
+                            <span class="spell-name">{{main_participant.spell1.name}}</span>
+                            <span class="spell-cooldown">Cooldown: {{main_participant.spell1_cooldown|default:"N/A"}}s</span>
+                        </div>
+                    </div>
+                    <div class="spell-detail">
+                        <img class="spell-icon" src="{{main_participant.spell2.get_url}}" alt="{{main_participant.spell2.name}}">
+                        <div class="spell-info">
+                            <span class="spell-name">{{main_participant.spell2.name}}</span>
+                            <span class="spell-cooldown">Cooldown: {{main_participant.spell2_cooldown|default:"N/A"}}s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endfor %}
