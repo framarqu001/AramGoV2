@@ -1,0 +1,92 @@
+{% comment %}
+    Team Composition Partial Template
+    This template displays team composition analysis for both teams in a match.
+    
+    Expected context variables:
+    - blue_team_comp: Dictionary containing blue team composition data
+    - red_team_comp: Dictionary containing red team composition data
+{% endcomment %}
+
+<div class="team-composition-container">
+    <!-- Blue Team Composition -->
+    <div class="team-composition blue-team">
+        <div class="team-composition-title">Blue Team Composition</div>
+        
+        <!-- Champions Row -->
+        <div class="champions-row">
+            {% for champion in blue_team_comp.champions %}
+                <div class="champion-icon-container">
+                    <img src="{{ champion.icon_url }}" alt="{{ champion.name }}">
+                    {% if champion.has_synergy %}
+                        <div class="champion-synergy" title="{{ champion.synergy_description }}">+</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Damage Composition -->
+        <div class="damage-composition">
+            <div class="damage-title">Damage Composition</div>
+            <div class="damage-bar">
+                <div class="damage-ap" style="width: {{ blue_team_comp.damage_distribution.ap }}%"></div>
+                <div class="damage-ad" style="width: {{ blue_team_comp.damage_distribution.ad }}%"></div>
+                <div class="damage-true" style="width: {{ blue_team_comp.damage_distribution.true }}%"></div>
+            </div>
+            <div class="damage-legend">
+                <div class="legend-item">
+                    <div class="legend-color legend-ap"></div>
+                    <span>AP: {{ blue_team_comp.damage_distribution.ap }}%</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-ad"></div>
+                    <span>AD: {{ blue_team_comp.damage_distribution.ad }}%</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-true"></div>
+                    <span>True: {{ blue_team_comp.damage_distribution.true }}%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Red Team Composition -->
+    <div class="team-composition red-team">
+        <div class="team-composition-title">Red Team Composition</div>
+        
+        <!-- Champions Row -->
+        <div class="champions-row">
+            {% for champion in red_team_comp.champions %}
+                <div class="champion-icon-container">
+                    <img src="{{ champion.icon_url }}" alt="{{ champion.name }}">
+                    {% if champion.has_synergy %}
+                        <div class="champion-synergy" title="{{ champion.synergy_description }}">+</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Damage Composition -->
+        <div class="damage-composition">
+            <div class="damage-title">Damage Composition</div>
+            <div class="damage-bar">
+                <div class="damage-ap" style="width: {{ red_team_comp.damage_distribution.ap }}%"></div>
+                <div class="damage-ad" style="width: {{ red_team_comp.damage_distribution.ad }}%"></div>
+                <div class="damage-true" style="width: {{ red_team_comp.damage_distribution.true }}%"></div>
+            </div>
+            <div class="damage-legend">
+                <div class="legend-item">
+                    <div class="legend-color legend-ap"></div>
+                    <span>AP: {{ red_team_comp.damage_distribution.ap }}%</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-ad"></div>
+                    <span>AD: {{ red_team_comp.damage_distribution.ad }}%</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-true"></div>
+                    <span>True: {{ red_team_comp.damage_distribution.true }}%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

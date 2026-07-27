@@ -8,6 +8,7 @@
 
 {% block extra_styles %}
     <link rel="stylesheet" href="{% static 'match_history/css/details.css' %}">
+    <link rel="stylesheet" href="{% static 'match_history/css/team_composition.css' %}">
 {% endblock %}
 
 
@@ -290,6 +291,23 @@
         }
     });
     
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Match button click handler for expanding/collapsing match details
+        $(document).on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            const expandedPanel = matchCard.find('.expanded-panel');
+            
+            // Toggle the expanded panel
+            expandedPanel.slideToggle(300);
+            
+            // Rotate the chevron icon
+            const chevron = $(this).find('.drop');
+            chevron.toggleClass('rotated');
+        });
+    });
 </script>
 
 
