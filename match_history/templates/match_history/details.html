@@ -293,5 +293,162 @@
 </script>
 
 
+<!-- Match card expansion script -->
+<script>
+    $(document).ready(function() {
+        // Match card expansion functionality
+        $(document).on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            
+            // Toggle expanded class
+            matchCard.toggleClass('expanded');
+            
+            // If this is the first time expanding this card and it doesn't have expanded content yet
+            if (matchCard.hasClass('expanded') && !matchCard.find('.expanded-content').length) {
+                // Create expanded content
+                createExpandedContent(matchCard);
+            }
+        });
+        
+        // Function to create expanded content for a match card
+        function createExpandedContent(matchCard) {
+            // Get match data from the card
+            const isWin = matchCard.hasClass('match-win');
+            const resultClass = isWin ? 'match-win' : 'match-lose';
+            const resultColor = isWin ? '#4b6bc3' : '#ff4e50';
+            
+            // Create expanded content container
+            const expandedContent = $('<div class="expanded-content"></div>');
+            
+            // Create stats grid
+            const statsGrid = $('<div class="stats-grid"></div>');
+            
+            // Add stats sections (example data - in a real app, this would come from the backend)
+            statsGrid.append(`
+                <div class="stats-section">
+                    <h4>Damage Dealt</h4>
+                    <div class="stats-value">24,567</div>
+                </div>
+                <div class="stats-section">
+                    <h4>Gold Earned</h4>
+                    <div class="stats-value">14,320</div>
+                </div>
+                <div class="stats-section">
+                    <h4>Vision Score</h4>
+                    <div class="stats-value">18</div>
+                </div>
+                <div class="stats-section">
+                    <h4>CS</h4>
+                    <div class="stats-value">187</div>
+                </div>
+            `);
+            
+            // Create damage graph
+            const damageGraph = $(`
+                <div class="graph-container damage-graph">
+                    <div class="graph-header">
+                        <div class="graph-title">Damage Dealt</div>
+                    </div>
+                    <div class="graph-content">
+                        <!-- Graph bars would be dynamically generated based on match data -->
+                    </div>
+                </div>
+            `);
+            
+            // Create gold graph
+            const goldGraph = $(`
+                <div class="graph-container gold-graph">
+                    <div class="graph-header">
+                        <div class="graph-title">Gold Earned</div>
+                    </div>
+                    <div class="graph-content">
+                        <!-- Graph bars would be dynamically generated based on match data -->
+                    </div>
+                </div>
+            `);
+            
+            // Create player comparison section
+            const playerComparison = $(`
+                <div class="player-comparison">
+                    <div class="team-stats team-blue-stats">
+                        <h4>Blue Team</h4>
+                        <!-- Player stats rows would be dynamically generated -->
+                    </div>
+                    <div class="team-stats team-red-stats">
+                        <h4>Red Team</h4>
+                        <!-- Player stats rows would be dynamically generated -->
+                    </div>
+                </div>
+            `);
+            
+            // Append all sections to expanded content
+            expandedContent.append(statsGrid);
+            expandedContent.append(damageGraph);
+            expandedContent.append(goldGraph);
+            expandedContent.append(playerComparison);
+            
+            // Append expanded content to match card
+            matchCard.append(expandedContent);
+            
+            // In a real implementation, you would make an AJAX call to get the detailed match data
+            // and then populate the expanded content with that data
+            simulateGraphData(damageGraph, goldGraph);
+            simulatePlayerData(playerComparison);
+        }
+        
+        // Function to simulate graph data (in a real app, this would come from the backend)
+        function simulateGraphData(damageGraph, goldGraph) {
+            const damageContent = damageGraph.find('.graph-content');
+            const goldContent = goldGraph.find('.graph-content');
+            
+            // Simulate 10 players' data
+            for (let i = 0; i < 10; i++) {
+                const damageHeight = Math.floor(Math.random() * 80) + 20; // Random height between 20-100px
+                const goldHeight = Math.floor(Math.random() * 80) + 20;
+                
+                const damageBar = $(`<div class="graph-bar" style="height: ${damageHeight}px; left: ${i * 30 + 15}px;"></div>`);
+                const goldBar = $(`<div class="graph-bar" style="height: ${goldHeight}px; left: ${i * 30 + 15}px;"></div>`);
+                
+                damageContent.append(damageBar);
+                goldContent.append(goldBar);
+            }
+        }
+        
+        // Function to simulate player data (in a real app, this would come from the backend)
+        function simulatePlayerData(playerComparison) {
+            const blueTeam = playerComparison.find('.team-blue-stats');
+            const redTeam = playerComparison.find('.team-red-stats');
+            
+            // Simulate 5 players for each team
+            for (let i = 0; i < 5; i++) {
+                const bluePlayerRow = $(`
+                    <div class="player-stats-row">
+                        <div class="player-champion"><img src="https://ddragon.leagueoflegends.com/cdn/14.16.1/img/champion/Aatrox.png" alt="Champion"></div>
+                        <div class="player-name ${i === 0 ? 'highlight' : ''}">Player ${i+1}</div>
+                        <div class="player-stat">${Math.floor(Math.random() * 15)}-${Math.floor(Math.random() * 10)}-${Math.floor(Math.random() * 20)}</div>
+                        <div class="player-stat">${Math.floor(Math.random() * 25000)}</div>
+                        <div class="player-stat">${Math.floor(Math.random() * 15000)}</div>
+                        <div class="player-stat">${Math.floor(Math.random() * 200)}</div>
+                    </div>
+                `);
+                
+                const redPlayerRow = $(`
+                    <div class="player-stats-row">
+                        <div class="player-champion"><img src="https://ddragon.leagueoflegends.com/cdn/14.16.1/img/champion/Ahri.png" alt="Champion"></div>
+                        <div class="player-name">Player ${i+6}</div>
+                        <div class="player-stat">${Math.floor(Math.random() * 15)}-${Math.floor(Math.random() * 10)}-${Math.floor(Math.random() * 20)}</div>
+                        <div class="player-stat">${Math.floor(Math.random() * 25000)}</div>
+                        <div class="player-stat">${Math.floor(Math.random() * 15000)}</div>
+                        <div class="player-stat">${Math.floor(Math.random() * 200)}</div>
+                    </div>
+                `);
+                
+                blueTeam.append(bluePlayerRow);
+                redTeam.append(redPlayerRow);
+            }
+        }
+    });
+</script>
+
 
 {% endblock %}
