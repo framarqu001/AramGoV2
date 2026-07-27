@@ -181,6 +181,8 @@
                         } else {
                             $('#match-list').append(data);
                             page += 1;
+                            // Re-attach event handlers to new match cards
+                            attachMatchCardHandlers();
                         }
                         loading = false;
                     },
@@ -191,6 +193,25 @@
                 });
             }
         });
+        
+        // Function to handle match card expansion
+        function attachMatchCardHandlers() {
+            $('.match-btn').off('click').on('click', function() {
+                const matchCard = $(this).closest('.match-card');
+                matchCard.toggleClass('expanded');
+                $(this).toggleClass('expanded');
+                
+                // Scroll to show the expanded content if needed
+                if (matchCard.hasClass('expanded')) {
+                    $('html, body').animate({
+                        scrollTop: matchCard.offset().top - 50
+                    }, 300);
+                }
+            });
+        }
+        
+        // Initial attachment of event handlers
+        attachMatchCardHandlers();
     });
 </script>
 <script>
