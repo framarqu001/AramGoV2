@@ -191,6 +191,22 @@
                 });
             }
         });
+        
+        // Match timeline toggle functionality
+        $(document).on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            const timelineSection = matchCard.find('.match-timeline-section');
+            
+            // Toggle the expanded class on the match card
+            matchCard.toggleClass('expanded');
+            
+            // Toggle the timeline section visibility with a slide animation
+            if (timelineSection.is(':visible')) {
+                timelineSection.slideUp(300);
+            } else {
+                timelineSection.slideDown(300);
+            }
+        });
     });
 </script>
 <script>

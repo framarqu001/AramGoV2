@@ -120,6 +120,7 @@ class Match(models.Model):
     game_version = models.CharField(max_length=50)
     winner = models.IntegerField(choices=WINNER_CHOICES)
     new_match = models.BooleanField(default=False)
+    timeline_data = models.JSONField(null=True, blank=True)
 
     def get_patch(self):
         return '.'.join(self.game_version.split('.')[:2])
@@ -155,6 +156,33 @@ class Match(models.Model):
             return f"{int(days)} days ago"
         else:
             return self.game_start.strftime('%m-%d-%Y')
+            
+    @property
+    def timeline_events(self):
+        """
+        Process and return timeline events from the stored timeline_data
+        """
+        if not self.timeline_data:
+            return []
+            
+        events = []
+        for event in self.timeline_data:
+            # Format timestamp as MM:SS
+            timestamp_seconds = event.get('timestamp', 0) // 1000  # Convert from milliseconds to seconds
+            minutes = timestamp_seconds // 60
+            seconds = timestamp_seconds % 60
+            formatted_time = f"{minutes}:{seconds:02d}"
+            
+            # Create a formatted event object
+            formatted_event = {
+                'timestamp': formatted_time,
+                'type': event.get('type', 'UNKNOWN'),
+                'team': event.get('team', 0),
+                'description': event.get('description', 'Unknown event')
+            }
+            events.append(formatted_event)
+            
+        return events
 
     def __str__(self):
         return self.match_id
