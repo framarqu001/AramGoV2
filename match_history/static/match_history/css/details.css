@@ -144,8 +144,17 @@ hr {
     /* height: 100px; */
     height: 100px;
     display: flex;
+    flex-direction: column;
     font-weight: 1000;
     border-radius: 5px;
+    transition: height 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.match-card.expanded {
+    height: auto;
+    margin-bottom: 20px;
 }
 
 .match-card .stat-section.stats-text{
@@ -224,17 +233,26 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    cursor: pointer;
+    transition: transform 0.3s ease;
 }
 
+.match-btn .drop {
+    transition: transform 0.3s ease;
+}
+
+.match-btn[aria-expanded="true"] .drop {
+    transform: rotate(180deg);
+}
 
 .match-card.match-win {
     background-color: #263358; 
-    transition: background-color 0.3s 
+    transition: background-color 0.3s, height 0.3s ease;
 }
 
 .match-card.match-lose {
     background-color: #64336a; 
-    transition: background-color 0.3s ease; 
+    transition: background-color 0.3s ease, height 0.3s ease; 
 }
 
 .match-card.match-win:hover {
@@ -243,6 +261,152 @@ hr {
 
 .match-card.match-lose:hover {
     background-color: #4e2855; 
+}
+
+/* Expanded content styles */
+.match-expanded-container {
+    width: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+.match-loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.match-error-message {
+    color: #ff6b6b;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.match-error-message a {
+    color: #4dabf7;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.match-expanded-content {
+    padding: 10px 0;
+}
+
+.match-expanded-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.match-expanded-header h3 {
+    margin: 0;
+    color: #fff;
+}
+
+.match-expanded-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.team-stats {
+    flex: 1;
+    min-width: 300px;
+}
+
+.team-stats h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.team-stats.blue-team h4 {
+    color: #5383e8;
+}
+
+.team-stats.red-team h4 {
+    color: #e84057;
+}
+
+.team-stats-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.team-participants {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.participant-expanded-stats {
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.participant-expanded-stats.highlight-participant {
+    border: 1px solid #ffd700;
+}
+
+.participant-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.champ-img-medium {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.participant-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.participant-kda .kills {
+    color: #5383e8;
+}
+
+.participant-kda .deaths {
+    color: #e84057;
+}
+
+.participant-kda .assists {
+    color: #9aa4af;
+}
+
+.match-expanded-footer {
+    margin-top: 15px;
+    text-align: right;
+    color: #9aa4af;
 }
 
 

@@ -1,9 +1,11 @@
-from django.test import TransactionTestCase, TestCase
+from django.test import TransactionTestCase, TestCase, Client
 from django.core.cache import cache
-from unittest.mock import patch
+from django.urls import reverse
+from unittest.mock import patch, MagicMock
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
+import json
 
 
 class MatchParticipantDBTest(TransactionTestCase):
@@ -23,6 +25,8 @@ class MatchParticipantTest(TestCase):
             puuid='some-unique-id',
             game_name='testSummoner',
             tag_line='NA1',
+            normalized_game_name='testsummoner',
+            normalized_tag_line='na1',
             summoner_name='testSummoner',
             summoner_level=30
         )
@@ -46,7 +50,9 @@ class MatchParticipantTest(TestCase):
             kills=10,
             deaths=2,
             assists=8,
-            creep_score=150
+            creep_score=150,
+            team=100,
+            gold_earned=10000
         )
 
     def test_participant_relationships(self):
@@ -98,3 +104,100 @@ class PatchVersionCacheTest(TestCase):
         
         # Verify that the mock was called
         mock_get_patch.assert_called_once()
+
+
+class MatchDetailsEndpointTest(TestCase):
+    def setUp(self):
+        # Create test data
+        self.summoner = Summoner.objects.create(
+            puuid='test-puuid',
+            game_name='testPlayer',
+            tag_line='NA1',
+            normalized_game_name='testplayer',
+            normalized_tag_line='na1',
+            summoner_name='testPlayer',
+            summoner_level=30
+        )
+        
+        self.champion = Champion.objects.create(
+            champion_id='Ahri',
+            name='Ahri',
+            title='The Nine-Tailed Fox',
+            image_path='Ahri.png'
+        )
+        
+        self.match = Match.objects.create(
+            id=1,
+            match_id='test_match_001',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='ARAM',
+            game_version='14.17.1'
+        )
+        
+        # Create a participant for the main summoner
+        self.participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=10,
+            deaths=5,
+            assists=15,
+            team=100,
+            win=True,
+            gold_earned=12000,
+            creep_score=50
+        )
+        
+        # Create additional participants to simulate a full match
+        for i in range(9):
+            team = 100 if i < 4 else 200  # 5 players on each team including main participant
+            Participant.objects.create(
+                match=self.match,
+                summoner=Summoner.objects.create(
+                    puuid=f'other-puuid-{i}',
+                    game_name=f'player{i}',
+                    tag_line='NA1',
+                    normalized_game_name=f'player{i}',
+                    normalized_tag_line='na1',
+                    summoner_name=f'player{i}',
+                    summoner_level=30
+                ),
+                champion=self.champion,
+                kills=5,
+                deaths=5,
+                assists=5,
+                team=team,
+                win=team == 100,
+                gold_earned=10000,
+                creep_score=40
+            )
+        
+        self.client = Client()
+        
+    def test_match_details_endpoint(self):
+        # Set up the request with the required headers
+        url = reverse('match_history:match_details', kwargs={
+            'game_name': self.summoner.normalized_game_name,
+            'tag': self.summoner.normalized_tag_line,
+            'match_id': self.match.id
+        })
+        
+        headers = {'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'}
+        response = self.client.get(url, **headers)
+        
+        # Check that the response is successful
+        self.assertEqual(response.status_code, 200)
+        
+        # Parse the JSON response
+        data = json.loads(response.content)
+        
+        # Check that the response contains the expected fields
+        self.assertIn('html', data)
+        self.assertIn('match_id', data)
+        self.assertEqual(data['match_id'], str(self.match.id))
+        
+        # Check that the HTML content contains expected elements
+        self.assertIn('match-expanded-content', data['html'])
+        self.assertIn('Blue Team', data['html'])
+        self.assertIn('Red Team', data['html'])
