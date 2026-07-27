@@ -1,3 +1,7 @@
+:root {
+    --expandedHeight: 300px;
+}
+
 .content {
    flex-direction: column;
 
@@ -22,6 +26,11 @@ hr {
 .drop {
     width: 30px;
     margin-bottom: 5px;
+    transition: transform 300ms ease;
+}
+
+.drop.expanded {
+    transform: rotate(180deg);
 }
 .profile-icon-container {
     display: flex;
@@ -146,6 +155,12 @@ hr {
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
+    overflow: hidden;
+    transition: height 300ms ease;
+}
+
+.match-card.expanded {
+    height: var(--expandedHeight);
 }
 
 .match-card .stat-section.stats-text{
@@ -224,6 +239,7 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    cursor: pointer;
 }
 
 
