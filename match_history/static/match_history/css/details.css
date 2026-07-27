@@ -146,6 +146,9 @@ hr {
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
+    overflow: hidden;
+    flex-direction: column;
+    transition: height 0.3s ease;
 }
 
 .match-card .stat-section.stats-text{
@@ -164,6 +167,7 @@ hr {
     grid-template-columns: .6fr 1fr 1fr 1fr;
     padding: 0 .5rem;
     place-items: center;
+    min-height: 100px;
 }
 .result-section {
     justify-self: start;
@@ -486,4 +490,176 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Detailed Participant Statistics Styles */
+.detailed-stats-container {
+    width: 100%;
+    background-color: rgba(16, 19, 26, 0.9);
+    border-radius: 0 0 5px 5px;
+    padding: 15px;
+    margin-top: -5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.detailed-stats-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-family: "Mulish", sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.team-header {
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.blue-team-header {
+    color: #4b6bc3;
+}
+
+.red-team-header {
+    color: #f46bf4;
+}
+
+.detailed-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.team-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.participant-stats-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 2fr;
+    align-items: center;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.participant-stats-row:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.highlight-row {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 3px solid #4b6bc3;
+}
+
+.blue-team-stats .highlight-row {
+    border-left-color: #4b6bc3;
+}
+
+.red-team-stats .highlight-row {
+    border-left-color: #f46bf4;
+}
+
+.participant-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.participant-champion {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.champion-icon-med {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.participant-name {
+    font-family: "Mulish", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.participant-spells {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.spell-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+}
+
+.participant-kda {
+    font-family: "Space Mono", monospace;
+    font-size: 13px;
+    text-align: center;
+}
+
+.kda-ratio {
+    font-size: 11px;
+    color: #87888a;
+    margin-top: 2px;
+}
+
+.participant-cs {
+    font-family: "Space Mono", monospace;
+    font-size: 13px;
+    text-align: center;
+}
+
+.cs-per-min {
+    display: block;
+    font-size: 11px;
+    color: #87888a;
+}
+
+.participant-items {
+    display: flex;
+    justify-content: center;
+}
+
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 2px;
+}
+
+.item-icon {
+    width: 22px;
+    height: 22px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.item-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-icon.empty {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Rotate the chevron when expanded */
+.match-btn.expanded .drop {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
 }
