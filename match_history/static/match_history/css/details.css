@@ -142,7 +142,7 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: 130px;
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
@@ -214,6 +214,20 @@ hr {
     display: flex;
     align-items: center;
     flex-direction: column;
+    justify-content: center;
+}
+
+.damage-stats, .additional-stats {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    width: 100%;
+    margin-top: 2px;
+}
+
+.damage-dealt, .damage-taken, .gold-earned, .vision-score {
+    white-space: nowrap;
+    font-size: 11px;
 }
 
 .match-btn {
@@ -486,4 +500,40 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Media queries for responsive layout */
+@media screen and (max-width: 768px) {
+    .match-section-container {
+        grid-template-columns: .5fr 1fr 1fr .5fr;
+    }
+    
+    .damage-stats, .additional-stats {
+        gap: 5px;
+    }
+    
+    .damage-dealt, .damage-taken, .gold-earned, .vision-score {
+        font-size: 10px;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .match-card {
+        height: 150px;
+    }
+    
+    .match-section-container {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+    }
+    
+    .participant-section {
+        display: none;
+    }
+    
+    .damage-stats, .additional-stats {
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+    }
 }
