@@ -193,6 +193,11 @@ class Participant(models.Model):
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
     game_name = models.CharField(max_length=50)
+    damage_dealt = models.IntegerField(default=0)
+    gold_earned = models.IntegerField(default=0)
+    vision_score = models.IntegerField(default=0)
+    damage_taken = models.IntegerField(default=0)
+    healing_done = models.IntegerField(default=0)
 
     def match_result(self):
         if self.win:

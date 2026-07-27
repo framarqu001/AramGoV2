@@ -46,7 +46,12 @@ class MatchParticipantTest(TestCase):
             kills=10,
             deaths=2,
             assists=8,
-            creep_score=150
+            creep_score=150,
+            damage_dealt=15000,
+            gold_earned=12000,
+            vision_score=20,
+            damage_taken=10000,
+            healing_done=5000
         )
 
     def test_participant_relationships(self):
@@ -57,6 +62,13 @@ class MatchParticipantTest(TestCase):
 
     def test_participant_string_representation(self):
         self.assertEqual(str(self.participant), 'testSummoner#NA1 playing Aatrox in match match_001')
+
+    def test_participant_performance_fields(self):
+        self.assertEqual(self.participant.damage_dealt, 15000)
+        self.assertEqual(self.participant.gold_earned, 12000)
+        self.assertEqual(self.participant.vision_score, 20)
+        self.assertEqual(self.participant.damage_taken, 10000)
+        self.assertEqual(self.participant.healing_done, 5000)
 
     def test_cascade_delete_with_match(self):
         self.match.delete()
