@@ -292,6 +292,15 @@
     
 </script>
 
+<!-- Match Details Toggle Script -->
+<script src="{% static 'match_history/js/match_details.js' %}"></script>
+<script>
+    // Initialize new match cards when they are loaded via AJAX
+    $(document).ajaxComplete(function() {
+        initializeNewMatchCards();
+    });
+</script>
+
 
 
 {% endblock %}
