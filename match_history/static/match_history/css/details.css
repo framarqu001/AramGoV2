@@ -487,3 +487,284 @@ hr {
 .death-color {
     color: #ff4e50
 }
+
+/* Expanded Match Details Styles */
+.expanded-details {
+    margin-bottom: 10px;
+    border-radius: 0 0 5px 5px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.expanded-details.match-win {
+    background-color: #1e2a48;
+    border-top: 1px solid #4b6bc37e;
+}
+
+.expanded-details.match-lose {
+    background-color: #4e2855;
+    border-top: 1px solid #f46bf447;
+}
+
+.expanded-details-container {
+    padding: 15px;
+    color: #e6e6e6;
+}
+
+.expanded-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.expanded-details-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.expanded-details-section {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    padding: 12px;
+}
+
+.section-title {
+    font-family: "Space Mono", monospace;
+    font-size: 16px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Damage Stats Styles */
+.damage-stats, .gold-objectives {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat-row {
+    display: grid;
+    grid-template-columns: 100px 70px 1fr;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #e6e6e6;
+}
+
+.stat-value {
+    font-size: 14px;
+    font-weight: 600;
+    text-align: right;
+}
+
+.stat-bar {
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+}
+
+.damage-dealt {
+    background-color: #ff4e50;
+}
+
+.damage-taken {
+    background-color: #4b6bc3;
+}
+
+.healing-done {
+    background-color: #2ecc71;
+}
+
+.gold-earned {
+    background-color: #f1c40f;
+}
+
+/* Objectives Styles */
+.objectives-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.objective {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.objective-icon {
+    width: 24px;
+    height: 24px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.objective-value {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.objective-label {
+    font-size: 12px;
+    color: #87888a;
+}
+
+/* Item Timeline Styles */
+.item-timeline {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.timeline-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.timeline-item {
+    display: grid;
+    grid-template-columns: 60px 30px 1fr;
+    align-items: center;
+    gap: 10px;
+}
+
+.timeline-time {
+    font-size: 12px;
+    color: #87888a;
+}
+
+.timeline-icon {
+    width: 24px;
+    height: 24px;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.item-img {
+    width: 24px;
+    height: 24px;
+}
+
+.timeline-name {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Rune Details Styles */
+.rune-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rune-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rune-icon {
+    width: 32px;
+    height: 32px;
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+.rune-img {
+    width: 32px;
+    height: 32px;
+}
+
+.rune-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.rune-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.rune-description {
+    font-size: 12px;
+    color: #87888a;
+}
+
+/* Gold Difference Graph Styles */
+.gold-difference-graph {
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+}
+
+.graph-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.graph-placeholder {
+    flex-grow: 1;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    padding: 0 20px;
+}
+
+.team-gold-bar {
+    width: 40%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 5px;
+    border-radius: 5px 5px 0 0;
+}
+
+.team-gold-bar.blue-team {
+    background-color: #4b6bc3;
+}
+
+.team-gold-bar.red-team {
+    background-color: #ff4e50;
+}
+
+.team-gold-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+}
+
+.graph-labels {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 5px;
+}
+
+.graph-label {
+    font-size: 12px;
+}
+
+.graph-label.blue {
+    color: #4b6bc3;
+}
+
+.graph-label.red {
+    color: #ff4e50;
+}
