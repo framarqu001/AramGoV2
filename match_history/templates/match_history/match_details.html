@@ -1,0 +1,100 @@
+{% comment %}
+This template contains the expanded match details that will be shown when a match card is expanded.
+It receives the same context variables as match_list.html:
+- match: The match object
+- main_participant: The main participant (summoner) in the match
+- blue_team: List of participants in the blue team
+- red_team: List of participants in the red team
+- main_stats: Stats for the main participant
+{% endcomment %}
+
+<div class="match-details-inner">
+    <div class="match-details-section">
+        <div class="match-details-header">
+            <h3>Match Details</h3>
+            <div class="match-id">ID: {{ match.match_id }}</div>
+        </div>
+        
+        <div class="match-details-stats">
+            <div class="stats-group">
+                <div class="stat-item">
+                    <div class="stat-label">Damage Dealt</div>
+                    <div class="stat-value">{{ main_participant.total_damage_dealt_to_champions }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Damage Taken</div>
+                    <div class="stat-value">{{ main_participant.total_damage_taken }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Gold Earned</div>
+                    <div class="stat-value">{{ main_participant.gold_earned }}</div>
+                </div>
+            </div>
+            
+            <div class="stats-group">
+                <div class="stat-item">
+                    <div class="stat-label">Vision Score</div>
+                    <div class="stat-value">{{ main_participant.vision_score }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">CC Time</div>
+                    <div class="stat-value">{{ main_participant.time_ccing_others }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Healing</div>
+                    <div class="stat-value">{{ main_participant.total_heal }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="match-details-section">
+        <div class="match-details-teams">
+            <div class="team-details blue-team-details">
+                <h4>Blue Team</h4>
+                <div class="team-stats-header">
+                    <div class="team-player-header">Player</div>
+                    <div class="team-kda-header">KDA</div>
+                    <div class="team-damage-header">Damage</div>
+                    <div class="team-gold-header">Gold</div>
+                </div>
+                {% for participant in blue_team %}
+                <div class="team-player-row {% if participant == main_participant %}highlight-row{% endif %}">
+                    <div class="team-player-info">
+                        <div class="team-player-champion">
+                            <img class="team-champ-img" src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}">
+                        </div>
+                        <div class="team-player-name">{{ participant.game_name }}</div>
+                    </div>
+                    <div class="team-player-kda">{{ participant.kills }}/{{ participant.deaths }}/{{ participant.assists }}</div>
+                    <div class="team-player-damage">{{ participant.total_damage_dealt_to_champions }}</div>
+                    <div class="team-player-gold">{{ participant.gold_earned }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="team-details red-team-details">
+                <h4>Red Team</h4>
+                <div class="team-stats-header">
+                    <div class="team-player-header">Player</div>
+                    <div class="team-kda-header">KDA</div>
+                    <div class="team-damage-header">Damage</div>
+                    <div class="team-gold-header">Gold</div>
+                </div>
+                {% for participant in red_team %}
+                <div class="team-player-row {% if participant == main_participant %}highlight-row{% endif %}">
+                    <div class="team-player-info">
+                        <div class="team-player-champion">
+                            <img class="team-champ-img" src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}">
+                        </div>
+                        <div class="team-player-name">{{ participant.game_name }}</div>
+                    </div>
+                    <div class="team-player-kda">{{ participant.kills }}/{{ participant.deaths }}/{{ participant.assists }}</div>
+                    <div class="team-player-damage">{{ participant.total_damage_dealt_to_champions }}</div>
+                    <div class="team-player-gold">{{ participant.gold_earned }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
