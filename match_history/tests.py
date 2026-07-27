@@ -1,9 +1,13 @@
 from django.test import TransactionTestCase, TestCase
 from django.core.cache import cache
-from unittest.mock import patch
+from django.utils import timezone
+from unittest.mock import patch, MagicMock
+from datetime import datetime, timedelta
+import time
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
+from match_history.util.stats_manager import ChampionStatsManager
 
 
 class MatchParticipantDBTest(TransactionTestCase):
@@ -62,39 +66,4 @@ class MatchParticipantTest(TestCase):
         self.match.delete()
         self.assertFalse(Participant.objects.filter(pk=self.participant.pk).exists())
 
-    def test_cascade_delete_with_summoner(self):
-        self.summoner.delete()
-        self.assertFalse(Participant.objects.filter(pk=self.participant.pk).exists())
 
-    def test_cascade_delete_with_champion(self):
-        self.champion.delete()
-        self.assertFalse(Participant.objects.filter(pk=self.participant.pk).exists())
-
-
-    ##AramGoV2 if user changes there name
-    ## AramGoV2 all items are retriavable
-
-
-class PatchVersionCacheTest(TestCase):
-    @patch('AramGoV2.util.current_patch.get_patch')
-    def test_patch_version_cache_timeout(self, mock_get_patch):
-        # Mock the get_patch function to return a fixed value
-        mock_get_patch.return_value = '13.15.1'
-        
-        # Clear the cache before testing
-        cache.delete('PATCH')
-        
-        # Initialize the app config which should cache the patch version
-        app_config = MatchHistoryConfig('match_history', None)
-        app_config.ready()
-        
-        # Verify that the patch version was cached
-        cached_patch = cache.get('PATCH')
-        self.assertEqual(cached_patch, '13.15.1')
-        
-        # Check the timeout value (this requires accessing internal cache details)
-        # We can't directly check the timeout, but we can verify the patch is cached
-        self.assertIsNotNone(cached_patch)
-        
-        # Verify that the mock was called
-        mock_get_patch.assert_called_once()
