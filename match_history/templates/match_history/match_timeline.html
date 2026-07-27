@@ -1,0 +1,16 @@
+{% comment %}
+    Match Timeline Template
+    This template displays a timeline visualization for a match, showing key events and gold/exp differences.
+    
+    Context variables:
+    - timeline_data: JSON-serialized timeline data including events, gold differences, and exp differences
+{% endcomment %}
+
+<div class="match-timeline-container" data-timeline-data="{{ timeline_data|safe }}">
+    {% if not timeline_data %}
+        <div class="timeline-placeholder">
+            <p>Timeline data not available for this match.</p>
+        </div>
+    {% endif %}
+    <!-- Timeline will be rendered here by JavaScript -->
+</div>
