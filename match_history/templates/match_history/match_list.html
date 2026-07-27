@@ -109,8 +109,56 @@
         </div>
     </div>
     <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
-        <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
+        <svg class="drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
+    <!-- New expandable match details panel -->
+    <div class="match-details-panel {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+        <div class="match-details-container">
+            <div class="match-details-header">
+                <h3>Match Details</h3>
+                <div class="match-timestamp">{{match.game_creation|date:"F j, Y, g:i a"}}</div>
+            </div>
+            
+            <div class="match-details-content">
+                <div class="match-details-stats">
+                    <div class="stats-group">
+                        <div class="stats-title">Combat</div>
+                        <div class="stats-row">
+                            <div class="stats-label">Damage Dealt</div>
+                            <div class="stats-value" data-stat="damage" data-participant-id="{{main_participant.id}}">Loading...</div>
+                        </div>
+                        <div class="stats-row">
+                            <div class="stats-label">Damage Taken</div>
+                            <div class="stats-value" data-stat="damage_taken" data-participant-id="{{main_participant.id}}">Loading...</div>
+                        </div>
+                        <div class="stats-row">
+                            <div class="stats-label">Healing</div>
+                            <div class="stats-value" data-stat="healing" data-participant-id="{{main_participant.id}}">Loading...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-group">
+                        <div class="stats-title">Objectives</div>
+                        <div class="stats-row">
+                            <div class="stats-label">Turret Damage</div>
+                            <div class="stats-value" data-stat="turret_damage" data-participant-id="{{main_participant.id}}">Loading...</div>
+                        </div>
+                        <div class="stats-row">
+                            <div class="stats-label">Vision Score</div>
+                            <div class="stats-value" data-stat="vision_score" data-participant-id="{{main_participant.id}}">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="match-details-timeline">
+                    <div class="timeline-title">Match Timeline</div>
+                    <div class="timeline-content" data-match-id="{{match.id}}">
+                        <div class="timeline-loading">Loading timeline data...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endfor %}
