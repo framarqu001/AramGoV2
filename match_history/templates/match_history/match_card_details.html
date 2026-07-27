@@ -1,0 +1,394 @@
+<div class="match-card-details {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+    <div class="details-container">
+        <!-- Detailed Stats Section -->
+        <div class="details-section">
+            <div class="details-header">
+                <h3>Detailed Stats</h3>
+            </div>
+            <div class="details-content">
+                <div class="damage-stats">
+                    <div class="stat-group">
+                        <div class="stat-label">Damage Dealt</div>
+                        <div class="stat-value">{{ main_participant.totalDamageDealtToChampions|default:"N/A" }}</div>
+                    </div>
+                    <div class="stat-group">
+                        <div class="stat-label">Damage Taken</div>
+                        <div class="stat-value">{{ main_participant.totalDamageTaken|default:"N/A" }}</div>
+                    </div>
+                </div>
+                <div class="vision-stats">
+                    <div class="stat-group">
+                        <div class="stat-label">Vision Score</div>
+                        <div class="stat-value">{{ main_participant.visionScore|default:"N/A" }}</div>
+                    </div>
+                    <div class="stat-group">
+                        <div class="stat-label">Objective Participation</div>
+                        <div class="stat-value">{{ main_participant.objectivesStolen|default:"0" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item Build Timeline Section -->
+        <div class="details-section">
+            <div class="details-header">
+                <h3>Item Build Timeline</h3>
+            </div>
+            <div class="build-timeline">
+                {% if main_participant.item0 %}
+                <div class="timeline-item">
+                    <div class="item-icon {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                        <img class="small-img" src="{{ main_participant.item0.get_url }}" alt="">
+                    </div>
+                </div>
+                {% endif %}
+                {% if main_participant.item1 %}
+                <div class="timeline-item">
+                    <div class="item-icon {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                        <img class="small-img" src="{{ main_participant.item1.get_url }}" alt="">
+                    </div>
+                </div>
+                {% endif %}
+                {% if main_participant.item2 %}
+                <div class="timeline-item">
+                    <div class="item-icon {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                        <img class="small-img" src="{{ main_participant.item2.get_url }}" alt="">
+                    </div>
+                </div>
+                {% endif %}
+                {% if main_participant.item3 %}
+                <div class="timeline-item">
+                    <div class="item-icon {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                        <img class="small-img" src="{{ main_participant.item3.get_url }}" alt="">
+                    </div>
+                </div>
+                {% endif %}
+                {% if main_participant.item4 %}
+                <div class="timeline-item">
+                    <div class="item-icon {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                        <img class="small-img" src="{{ main_participant.item4.get_url }}" alt="">
+                    </div>
+                </div>
+                {% endif %}
+                {% if main_participant.item5 %}
+                <div class="timeline-item">
+                    <div class="item-icon {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                        <img class="small-img" src="{{ main_participant.item5.get_url }}" alt="">
+                    </div>
+                </div>
+                {% endif %}
+                {% if main_participant.item6 %}
+                <div class="timeline-item">
+                    <div class="item-icon {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                        <img class="small-img" src="{{ main_participant.item6.get_url }}" alt="">
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Runes and Summoner Spells Section -->
+        <div class="details-section">
+            <div class="details-header">
+                <h3>Runes & Summoner Spells</h3>
+            </div>
+            <div class="runes-spells-container">
+                <div class="runes-container">
+                    <div class="rune-details">
+                        <div class="rune-icon {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                            <img class="medium-img" src="{{ main_participant.rune1.get_url }}" alt="">
+                        </div>
+                        <div class="rune-name">{{ main_participant.rune1.name|default:"Primary Rune" }}</div>
+                    </div>
+                    <div class="rune-details">
+                        <div class="rune-icon sub-rune {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+                            <img class="medium-img" src="{{ main_participant.rune2.get_url }}" alt="">
+                        </div>
+                        <div class="rune-name">{{ main_participant.rune2.name|default:"Secondary Rune" }}</div>
+                    </div>
+                </div>
+                <div class="spells-container">
+                    <div class="spell-details">
+                        <div class="spell-icon">
+                            <img class="medium-img" src="{{ main_participant.spell1.get_url }}" alt="">
+                        </div>
+                        <div class="spell-name">{{ main_participant.spell1.name }}</div>
+                        <div class="spell-cooldown">CD: {{ main_participant.spell1.cooldown|default:"N/A" }}s</div>
+                    </div>
+                    <div class="spell-details">
+                        <div class="spell-icon">
+                            <img class="medium-img" src="{{ main_participant.spell2.get_url }}" alt="">
+                        </div>
+                        <div class="spell-name">{{ main_participant.spell2.name }}</div>
+                        <div class="spell-cooldown">CD: {{ main_participant.spell2.cooldown|default:"N/A" }}s</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- All Players Stats Section -->
+        <div class="details-section">
+            <div class="details-header">
+                <h3>All Players Stats</h3>
+            </div>
+            <div class="all-players-container">
+                <div class="team-stats blue-team">
+                    <div class="team-header">Blue Team</div>
+                    <div class="players-table">
+                        <div class="table-header">
+                            <div class="header-cell">Player</div>
+                            <div class="header-cell">KDA</div>
+                            <div class="header-cell">Damage</div>
+                            <div class="header-cell">Vision</div>
+                        </div>
+                        {% for participant in blue_team %}
+                        <div class="player-row {% if participant == main_participant %}highlight{% endif %}">
+                            <div class="player-cell">
+                                <div class="player-icon">
+                                    <img class="champ-img" src="{{ participant.champion.get_url }}" alt="">
+                                </div>
+                                <div class="player-name">{{ participant.game_name }}</div>
+                            </div>
+                            <div class="player-cell">{{ participant.kills|default:"0" }}/{{ participant.deaths|default:"0" }}/{{ participant.assists|default:"0" }}</div>
+                            <div class="player-cell">{{ participant.totalDamageDealtToChampions|default:"N/A" }}</div>
+                            <div class="player-cell">{{ participant.visionScore|default:"N/A" }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="team-stats red-team">
+                    <div class="team-header">Red Team</div>
+                    <div class="players-table">
+                        <div class="table-header">
+                            <div class="header-cell">Player</div>
+                            <div class="header-cell">KDA</div>
+                            <div class="header-cell">Damage</div>
+                            <div class="header-cell">Vision</div>
+                        </div>
+                        {% for participant in red_team %}
+                        <div class="player-row {% if participant == main_participant %}highlight{% endif %}">
+                            <div class="player-cell">
+                                <div class="player-icon">
+                                    <img class="champ-img" src="{{ participant.champion.get_url }}" alt="">
+                                </div>
+                                <div class="player-name">{{ participant.game_name }}</div>
+                            </div>
+                            <div class="player-cell">{{ participant.kills|default:"0" }}/{{ participant.deaths|default:"0" }}/{{ participant.assists|default:"0" }}</div>
+                            <div class="player-cell">{{ participant.totalDamageDealtToChampions|default:"N/A" }}</div>
+                            <div class="player-cell">{{ participant.visionScore|default:"N/A" }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Expanded Match Card Details Styles */
+.match-card-details {
+    display: none;
+    padding: 15px;
+    border-radius: 0 0 5px 5px;
+    margin-top: -5px;
+    margin-bottom: 10px;
+}
+
+.match-card-details.match-win {
+    background-color: #1e2a48;
+}
+
+.match-card-details.match-lose {
+    background-color: #4e2855;
+}
+
+.details-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.details-section {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.details-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.details-header h3 {
+    font-family: "Mulish", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #e6e6e6;
+    margin: 0;
+}
+
+.details-content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.damage-stats, .vision-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #87888a;
+}
+
+.stat-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e6e6e6;
+}
+
+.build-timeline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.timeline-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.item-icon {
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.item-icon.match-win {
+    background-color: rgba(145, 166, 179, 0.2);
+}
+
+.item-icon.match-lose {
+    background-color: rgba(213, 123, 101, 0.2);
+}
+
+.runes-spells-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.runes-container, .spells-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rune-details, .spell-details {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rune-icon, .spell-icon {
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.medium-img {
+    width: 28px;
+}
+
+.rune-name, .spell-name {
+    font-size: 12px;
+    color: #e6e6e6;
+}
+
+.spell-cooldown {
+    font-size: 11px;
+    color: #87888a;
+    margin-left: 5px;
+}
+
+.all-players-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.team-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.team-header {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e6e6e6;
+    padding-bottom: 5px;
+}
+
+.players-table {
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #87888a;
+}
+
+.player-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    color: #e6e6e6;
+}
+
+.player-row.highlight {
+    background-color: rgba(255, 255, 255, 0.05);
+    font-weight: 700;
+}
+
+.player-cell {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.player-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.player-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .details-container {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
