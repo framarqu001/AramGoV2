@@ -288,6 +288,24 @@ class ChampionStatsPatch(models.Model):
     def __str__(self):
         return f"Stats {self.champion}:{self.patch}"
 
+    def win_rate(self):
+        """Calculate the win rate as a percentage."""
+        return (self.total_wins / self.total_played) * 100 if self.total_played > 0 else 0
+    
+    def pick_rate(self):
+        """Calculate the pick rate as a percentage of all matches in the patch."""
+        from django.db.models import Count
+        from .models import Match
+        
+        # Get total number of matches for this patch
+        total_matches = cache.get(f"total_matches_{self.patch}")
+        if total_matches is None:
+            total_matches = Match.objects.filter(game_version__startswith=self.patch).count()
+            cache.set(f"total_matches_{self.patch}", total_matches, timeout=3600)  # Cache for 1 hour
+        
+        # Calculate pick rate
+        return (self.total_played / total_matches) * 100 if total_matches > 0 else 0
+
     def update_stats(self, participant: Participant):
         self.total_played += 1
         if participant.win:
@@ -295,3 +313,8 @@ class ChampionStatsPatch(models.Model):
         else:
             self.total_losses += 1
         self.save()
+        
+    @classmethod
+    def get_stats_for_patch(cls, patch):
+        """Get all champion statistics for a specific patch with eager loading."""
+        return cls.objects.filter(patch=patch).select_related('champion')
