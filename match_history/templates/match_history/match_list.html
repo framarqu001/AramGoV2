@@ -108,8 +108,79 @@
             </div>
         </div>
     </div>
+    
+    <div class="expanded-section">
+        <div class="expanded-content">
+            <div class="expanded-stats-container">
+                <div class="expanded-stats-header">Detailed Stats</div>
+                <div class="expanded-stats-grid">
+                    <div class="expanded-stats-column">
+                        <div class="expanded-stat-item">
+                            <div class="stat-label">Damage Dealt</div>
+                            <div class="stat-value">{{main_participant.total_damage_dealt_to_champions}}</div>
+                        </div>
+                        <div class="expanded-stat-item">
+                            <div class="stat-label">Damage Taken</div>
+                            <div class="stat-value">{{main_participant.total_damage_taken}}</div>
+                        </div>
+                    </div>
+                    <div class="expanded-stats-column">
+                        <div class="expanded-stat-item">
+                            <div class="stat-label">Gold Earned</div>
+                            <div class="stat-value">{{main_participant.gold_earned}}</div>
+                        </div>
+                        <div class="expanded-stat-item">
+                            <div class="stat-label">Vision Score</div>
+                            <div class="stat-value">{{main_participant.vision_score}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="expanded-participants-container">
+                <div class="expanded-participants-header">All Participants</div>
+                <div class="expanded-participants-grid">
+                    <div class="expanded-team blue-team">
+                        <div class="team-header">Blue Team</div>
+                        {% for participant in blue_team %}
+                            <div class="expanded-participant-entry {% if participant == main_participant %}highlight-participant{% endif %}">
+                                <div class="participant-champion">
+                                    <img class="participant-champion-img" src="{{participant.champion.get_url}}" alt="">
+                                </div>
+                                <div class="participant-details">
+                                    <div class="participant-name">{{participant.game_name}}</div>
+                                    <div class="participant-stats">
+                                        <span class="participant-kda">{{participant.kills}}/{{participant.deaths}}/{{participant.assists}}</span>
+                                        <span class="participant-damage">{{participant.total_damage_dealt_to_champions}} dmg</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="expanded-team red-team">
+                        <div class="team-header">Red Team</div>
+                        {% for participant in red_team %}
+                            <div class="expanded-participant-entry {% if participant == main_participant %}highlight-participant{% endif %}">
+                                <div class="participant-champion">
+                                    <img class="participant-champion-img" src="{{participant.champion.get_url}}" alt="">
+                                </div>
+                                <div class="participant-details">
+                                    <div class="participant-name">{{participant.game_name}}</div>
+                                    <div class="participant-stats">
+                                        <span class="participant-kda">{{participant.kills}}/{{participant.deaths}}/{{participant.assists}}</span>
+                                        <span class="participant-damage">{{participant.total_damage_dealt_to_champions}} dmg</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
-        <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
+        <svg class="drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
 </div>
