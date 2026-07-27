@@ -1,0 +1,85 @@
+<div class="match-details-panel">
+    <div class="panel-content">
+        <div class="panel-section performance-stats">
+            <h4 class="panel-section-title">Performance</h4>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">KDA</div>
+                    <div class="stat-value">{{ main_stats.kda }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">CS</div>
+                    <div class="stat-value">{{ main_participant.creep_score }} ({{ main_stats.cs_min }})</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Vision</div>
+                    <div class="stat-value">{{ main_stats.vision_score|default:"N/A" }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Kill Participation</div>
+                    <div class="stat-value">{{ main_stats.kill_participation|default:"N/A" }}%</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel-section damage-stats">
+            <h4 class="panel-section-title">Damage</h4>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Damage Dealt</div>
+                    <div class="stat-value">{{ main_stats.damage_dealt|default:"N/A" }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Damage Taken</div>
+                    <div class="stat-value">{{ main_stats.damage_taken|default:"N/A" }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Healing</div>
+                    <div class="stat-value">{{ main_stats.healing|default:"N/A" }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Self Mitigated</div>
+                    <div class="stat-value">{{ main_stats.damage_mitigated|default:"N/A" }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel-section game-stats">
+            <h4 class="panel-section-title">Game Details</h4>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Game Duration</div>
+                    <div class="stat-value">{{ match.get_duration }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Game Date</div>
+                    <div class="stat-value">{{ match.game_start|date:"M d, Y" }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Game Version</div>
+                    <div class="stat-value">{{ match.get_patch }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Match ID</div>
+                    <div class="stat-value match-id">{{ match.match_id }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel-section team-comparison">
+            <h4 class="panel-section-title">Team Comparison</h4>
+            <div class="team-stats-container">
+                <div class="team-stats blue-team">
+                    <h5>Blue Team</h5>
+                    <div class="team-total-kills">Total Kills: {{ main_stats.blue_team_kills|default:"N/A" }}</div>
+                    <div class="team-total-deaths">Total Deaths: {{ main_stats.blue_team_deaths|default:"N/A" }}</div>
+                </div>
+                <div class="team-stats red-team">
+                    <h5>Red Team</h5>
+                    <div class="team-total-kills">Total Kills: {{ main_stats.red_team_kills|default:"N/A" }}</div>
+                    <div class="team-total-deaths">Total Deaths: {{ main_stats.red_team_deaths|default:"N/A" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
