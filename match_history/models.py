@@ -120,6 +120,11 @@ class Match(models.Model):
     game_version = models.CharField(max_length=50)
     winner = models.IntegerField(choices=WINNER_CHOICES)
     new_match = models.BooleanField(default=False)
+    # Team objectives for expanded match details
+    blue_team_towers = models.IntegerField(blank=True, null=True, default=0)
+    red_team_towers = models.IntegerField(blank=True, null=True, default=0)
+    blue_team_dragons = models.IntegerField(blank=True, null=True, default=0)
+    red_team_dragons = models.IntegerField(blank=True, null=True, default=0)
 
     def get_patch(self):
         return '.'.join(self.game_version.split('.')[:2])
@@ -193,6 +198,10 @@ class Participant(models.Model):
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
     game_name = models.CharField(max_length=50)
+    # Extended stats for expanded match details
+    damage_dealt = models.IntegerField(blank=True, null=True, default=0)
+    damage_taken = models.IntegerField(blank=True, null=True, default=0)
+    gold_earned = models.IntegerField(blank=True, null=True, default=0)
 
     def match_result(self):
         if self.win:

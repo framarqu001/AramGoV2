@@ -1,9 +1,11 @@
-from django.test import TransactionTestCase, TestCase
+from django.test import TransactionTestCase, TestCase, Client
 from django.core.cache import cache
+from django.urls import reverse
 from unittest.mock import patch
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
+import datetime
 
 
 class MatchParticipantDBTest(TransactionTestCase):
@@ -32,12 +34,23 @@ class MatchParticipantTest(TestCase):
             title='The Darkin Blade',
             image_path='Aatrox.png'
         )
+        self.spell1 = SummonerSpell.objects.create(
+            spell_id=4,
+            name='Flash',
+            image_path='SummonerFlash.png'
+        )
+        self.spell2 = SummonerSpell.objects.create(
+            spell_id=14,
+            name='Ignite',
+            image_path='SummonerDot.png'
+        )
         self.match = Match.objects.create(
             match_id='match_001',
             game_start=datetime.datetime.now(),
             game_duration=1800,
             game_mode='Classic',
-            game_version='13.15.1'
+            game_version='13.15.1',
+            winner=Match.BLUE_TEAM
         )
         self.participant = Participant.objects.create(
             match=self.match,
@@ -46,7 +59,12 @@ class MatchParticipantTest(TestCase):
             kills=10,
             deaths=2,
             assists=8,
-            creep_score=150
+            creep_score=150,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            team=Match.BLUE_TEAM,
+            win=True,
+            game_name='testSummoner'
         )
 
     def test_participant_relationships(self):
@@ -56,7 +74,7 @@ class MatchParticipantTest(TestCase):
         self.assertIn(self.participant, self.match.participants.all())
 
     def test_participant_string_representation(self):
-        self.assertEqual(str(self.participant), 'testSummoner#NA1 playing Aatrox in match match_001')
+        self.assertEqual(str(self.participant), 'testSummoner playing Aatrox in match match_001')
 
     def test_cascade_delete_with_match(self):
         self.match.delete()
@@ -98,3 +116,284 @@ class PatchVersionCacheTest(TestCase):
         
         # Verify that the mock was called
         mock_get_patch.assert_called_once()
+
+
+class MatchDetailsViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        
+        # Create test data
+        self.summoner1 = Summoner.objects.create(
+            puuid='summoner1-uuid',
+            game_name='TestPlayer1',
+            tag_line='NA1',
+            summoner_name='TestPlayer1',
+            summoner_level=30
+        )
+        
+        self.summoner2 = Summoner.objects.create(
+            puuid='summoner2-uuid',
+            game_name='TestPlayer2',
+            tag_line='NA1',
+            summoner_name='TestPlayer2',
+            summoner_level=25
+        )
+        
+        self.champion1 = Champion.objects.create(
+            champion_id='Aatrox',
+            name='Aatrox',
+            title='The Darkin Blade',
+            image_path='Aatrox.png',
+            splash_image_path='Aatrox_0.jpg'
+        )
+        
+        self.champion2 = Champion.objects.create(
+            champion_id='Ahri',
+            name='Ahri',
+            title='The Nine-Tailed Fox',
+            image_path='Ahri.png',
+            splash_image_path='Ahri_0.jpg'
+        )
+        
+        self.spell1 = SummonerSpell.objects.create(
+            spell_id=4,
+            name='Flash',
+            image_path='SummonerFlash.png'
+        )
+        
+        self.spell2 = SummonerSpell.objects.create(
+            spell_id=14,
+            name='Ignite',
+            image_path='SummonerDot.png'
+        )
+        
+        self.match = Match.objects.create(
+            match_id='TEST_MATCH_001',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='ARAM',
+            game_version='13.15.1',
+            winner=Match.BLUE_TEAM,
+            blue_team_towers=2,
+            red_team_towers=1,
+            blue_team_dragons=1,
+            red_team_dragons=0
+        )
+        
+        # Create participants with extended stats
+        self.participant1 = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner1,
+            champion=self.champion1,
+            kills=10,
+            deaths=2,
+            assists=8,
+            creep_score=150,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            team=Match.BLUE_TEAM,
+            win=True,
+            game_name='TestPlayer1',
+            damage_dealt=25000,
+            damage_taken=18000,
+            gold_earned=12000
+        )
+        
+        self.participant2 = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner2,
+            champion=self.champion2,
+            kills=3,
+            deaths=8,
+            assists=5,
+            creep_score=120,
+            spell1=self.spell1,
+            spell2=self.spell2,
+            team=Match.RED_TEAM,
+            win=False,
+            game_name='TestPlayer2',
+            damage_dealt=18000,
+            damage_taken=22000,
+            gold_earned=9500
+        )
+
+    def test_match_details_view_exists(self):
+        """Test that the match details view is accessible"""
+        url = reverse('match_history:match_details', args=[self.match.match_id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_match_details_view_with_summoner_param(self):
+        """Test match details view with specific summoner parameter"""
+        url = reverse('match_history:match_details', args=[self.match.match_id])
+        response = self.client.get(url, {'summoner': self.summoner1.puuid})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['main_participant'], self.participant1)
+
+    def test_match_details_ajax_request(self):
+        """Test AJAX request to match details view"""
+        url = reverse('match_history:match_details', args=[self.match.match_id])
+        response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'match-details-expanded')
+
+    def test_match_details_context_data(self):
+        """Test that match details view provides correct context data"""
+        url = reverse('match_history:match_details', args=[self.match.match_id])
+        response = self.client.get(url)
+        
+        self.assertIn('match', response.context)
+        self.assertIn('blue_team', response.context)
+        self.assertIn('red_team', response.context)
+        self.assertIn('blue_team_kills', response.context)
+        self.assertIn('red_team_kills', response.context)
+        self.assertIn('main_participant', response.context)
+        
+        # Check team separation
+        self.assertEqual(len(response.context['blue_team']), 1)
+        self.assertEqual(len(response.context['red_team']), 1)
+        self.assertEqual(response.context['blue_team_kills'], 10)
+        self.assertEqual(response.context['red_team_kills'], 3)
+
+    def test_match_details_nonexistent_match(self):
+        """Test 404 response for non-existent match"""
+        url = reverse('match_history:match_details', args=['NONEXISTENT_MATCH'])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_match_details_template_rendering(self):
+        """Test that the template renders with correct data"""
+        url = reverse('match_history:match_details', args=[self.match.match_id])
+        response = self.client.get(url)
+        
+        # Check that extended stats are displayed
+        self.assertContains(response, '25000')  # damage_dealt
+        self.assertContains(response, '18000')  # damage_taken
+        self.assertContains(response, '12000')  # gold_earned
+        
+        # Check team objectives
+        self.assertContains(response, '2')  # blue_team_towers
+        self.assertContains(response, '1')  # red_team_towers
+
+
+class ParticipantExtendedStatsTest(TestCase):
+    def setUp(self):
+        self.summoner = Summoner.objects.create(
+            puuid='test-uuid',
+            game_name='TestPlayer',
+            tag_line='NA1',
+            summoner_name='TestPlayer',
+            summoner_level=30
+        )
+        
+        self.champion = Champion.objects.create(
+            champion_id='Aatrox',
+            name='Aatrox',
+            title='The Darkin Blade',
+            image_path='Aatrox.png',
+            splash_image_path='Aatrox_0.jpg'
+        )
+        
+        self.spell = SummonerSpell.objects.create(
+            spell_id=4,
+            name='Flash',
+            image_path='SummonerFlash.png'
+        )
+        
+        self.match = Match.objects.create(
+            match_id='TEST_MATCH_002',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='ARAM',
+            game_version='13.15.1',
+            winner=Match.BLUE_TEAM,
+            blue_team_towers=3,
+            red_team_towers=0,
+            blue_team_dragons=2,
+            red_team_dragons=1
+        )
+
+    def test_participant_extended_stats_creation(self):
+        """Test creating participant with extended stats"""
+        participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=5,
+            deaths=3,
+            assists=7,
+            creep_score=100,
+            spell1=self.spell,
+            spell2=self.spell,
+            team=Match.BLUE_TEAM,
+            win=True,
+            game_name='TestPlayer',
+            damage_dealt=20000,
+            damage_taken=15000,
+            gold_earned=10000
+        )
+        
+        self.assertEqual(participant.damage_dealt, 20000)
+        self.assertEqual(participant.damage_taken, 15000)
+        self.assertEqual(participant.gold_earned, 10000)
+
+    def test_participant_extended_stats_null_values(self):
+        """Test participant creation with null extended stats"""
+        participant = Participant.objects.create(
+            match=self.match,
+            summoner=self.summoner,
+            champion=self.champion,
+            kills=5,
+            deaths=3,
+            assists=7,
+            creep_score=100,
+            spell1=self.spell,
+            spell2=self.spell,
+            team=Match.BLUE_TEAM,
+            win=True,
+            game_name='TestPlayer'
+            # Extended stats not provided - should default to 0
+        )
+        
+        self.assertEqual(participant.damage_dealt, 0)
+        self.assertEqual(participant.damage_taken, 0)
+        self.assertEqual(participant.gold_earned, 0)
+
+
+class MatchExtendedStatsTest(TestCase):
+    def test_match_team_objectives_creation(self):
+        """Test creating match with team objectives"""
+        match = Match.objects.create(
+            match_id='TEST_MATCH_003',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='ARAM',
+            game_version='13.15.1',
+            winner=Match.BLUE_TEAM,
+            blue_team_towers=5,
+            red_team_towers=2,
+            blue_team_dragons=3,
+            red_team_dragons=1
+        )
+        
+        self.assertEqual(match.blue_team_towers, 5)
+        self.assertEqual(match.red_team_towers, 2)
+        self.assertEqual(match.blue_team_dragons, 3)
+        self.assertEqual(match.red_team_dragons, 1)
+
+    def test_match_team_objectives_null_values(self):
+        """Test match creation with null team objectives"""
+        match = Match.objects.create(
+            match_id='TEST_MATCH_004',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='ARAM',
+            game_version='13.15.1',
+            winner=Match.BLUE_TEAM
+            # Team objectives not provided - should default to 0
+        )
+        
+        self.assertEqual(match.blue_team_towers, 0)
+        self.assertEqual(match.red_team_towers, 0)
+        self.assertEqual(match.blue_team_dragons, 0)
+        self.assertEqual(match.red_team_dragons, 0)

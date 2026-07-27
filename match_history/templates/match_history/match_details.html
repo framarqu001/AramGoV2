@@ -1,0 +1,132 @@
+{% load custom_filters %}
+
+<div class="match-details-expanded {% if main_participant.win %}match-win{% else %}match-lose{% endif %}">
+    <!-- Team Objectives Summary -->
+    <div class="team-objectives-section">
+        <div class="objectives-header">
+            <h3>Team Objectives</h3>
+        </div>
+        <div class="objectives-comparison">
+            <div class="blue-objectives">
+                <div class="team-label blue-team-label">Blue Team</div>
+                <div class="objective-stat">
+                    <span class="objective-icon">🏰</span>
+                    <span class="objective-value">{{ match.blue_team_towers|default:0 }}</span>
+                    <span class="objective-label">Towers</span>
+                </div>
+                <div class="objective-stat">
+                    <span class="objective-icon">🐉</span>
+                    <span class="objective-value">{{ match.blue_team_dragons|default:0 }}</span>
+                    <span class="objective-label">Dragons</span>
+                </div>
+                <div class="objective-stat">
+                    <span class="objective-icon">⚔️</span>
+                    <span class="objective-value">{{ blue_team_kills }}</span>
+                    <span class="objective-label">Kills</span>
+                </div>
+            </div>
+            <div class="vs-divider">VS</div>
+            <div class="red-objectives">
+                <div class="team-label red-team-label">Red Team</div>
+                <div class="objective-stat">
+                    <span class="objective-icon">🏰</span>
+                    <span class="objective-value">{{ match.red_team_towers|default:0 }}</span>
+                    <span class="objective-label">Towers</span>
+                </div>
+                <div class="objective-stat">
+                    <span class="objective-icon">🐉</span>
+                    <span class="objective-value">{{ match.red_team_dragons|default:0 }}</span>
+                    <span class="objective-label">Dragons</span>
+                </div>
+                <div class="objective-stat">
+                    <span class="objective-icon">⚔️</span>
+                    <span class="objective-value">{{ red_team_kills }}</span>
+                    <span class="objective-label">Kills</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Player Stats -->
+    <div class="detailed-stats-section">
+        <!-- Blue Team -->
+        <div class="team-section blue-team-section">
+            <div class="team-header blue-team-header">
+                <h4>Blue Team {% if match.winner == 100 %}(Victory){% else %}(Defeat){% endif %}</h4>
+            </div>
+            <div class="stats-grid">
+                <div class="stats-header">
+                    <div class="header-champion">Champion</div>
+                    <div class="header-player">Player</div>
+                    <div class="header-kda">K/D/A</div>
+                    <div class="header-cs">CS</div>
+                    <div class="header-gold">Gold</div>
+                    <div class="header-damage-dealt">Damage Dealt</div>
+                    <div class="header-damage-taken">Damage Taken</div>
+                </div>
+                {% for participant in blue_team %}
+                <div class="player-row {% if participant == main_participant %}highlighted-player{% endif %}">
+                    <div class="player-champion">
+                        <img class="champion-img-small" src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}">
+                        <span class="champion-name">{{ participant.champion.name }}</span>
+                    </div>
+                    <div class="player-name">
+                        <a href="{{ participant.summoner.get_url }}">{{ participant.game_name }}</a>
+                    </div>
+                    <div class="player-kda">
+                        <span class="kills">{{ participant.kills }}</span>
+                        <span class="separator">/</span>
+                        <span class="deaths">{{ participant.deaths }}</span>
+                        <span class="separator">/</span>
+                        <span class="assists">{{ participant.assists }}</span>
+                    </div>
+                    <div class="player-cs">{{ participant.creep_score }}</div>
+                    <div class="player-gold">{{ participant.gold_earned|default:0|floatformat:0 }}</div>
+                    <div class="player-damage-dealt">{{ participant.damage_dealt|default:0|floatformat:0 }}</div>
+                    <div class="player-damage-taken">{{ participant.damage_taken|default:0|floatformat:0 }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Red Team -->
+        <div class="team-section red-team-section">
+            <div class="team-header red-team-header">
+                <h4>Red Team {% if match.winner == 200 %}(Victory){% else %}(Defeat){% endif %}</h4>
+            </div>
+            <div class="stats-grid">
+                <div class="stats-header">
+                    <div class="header-champion">Champion</div>
+                    <div class="header-player">Player</div>
+                    <div class="header-kda">K/D/A</div>
+                    <div class="header-cs">CS</div>
+                    <div class="header-gold">Gold</div>
+                    <div class="header-damage-dealt">Damage Dealt</div>
+                    <div class="header-damage-taken">Damage Taken</div>
+                </div>
+                {% for participant in red_team %}
+                <div class="player-row {% if participant == main_participant %}highlighted-player{% endif %}">
+                    <div class="player-champion">
+                        <img class="champion-img-small" src="{{ participant.champion.get_url }}" alt="{{ participant.champion.name }}">
+                        <span class="champion-name">{{ participant.champion.name }}</span>
+                    </div>
+                    <div class="player-name">
+                        <a href="{{ participant.summoner.get_url }}">{{ participant.game_name }}</a>
+                    </div>
+                    <div class="player-kda">
+                        <span class="kills">{{ participant.kills }}</span>
+                        <span class="separator">/</span>
+                        <span class="deaths">{{ participant.deaths }}</span>
+                        <span class="separator">/</span>
+                        <span class="assists">{{ participant.assists }}</span>
+                    </div>
+                    <div class="player-cs">{{ participant.creep_score }}</div>
+                    <div class="player-gold">{{ participant.gold_earned|default:0|floatformat:0 }}</div>
+                    <div class="player-damage-dealt">{{ participant.damage_dealt|default:0|floatformat:0 }}</div>
+                    <div class="player-damage-taken">{{ participant.damage_taken|default:0|floatformat:0 }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>

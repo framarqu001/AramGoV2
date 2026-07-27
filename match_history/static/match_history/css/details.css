@@ -142,10 +142,22 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: auto;
+    min-height: 100px;
     display: flex;
+    flex-direction: column;
     font-weight: 1000;
     border-radius: 5px;
+}
+
+.match-details-container {
+    width: 100%;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.drop {
+    transition: transform 0.3s ease;
 }
 
 .match-card .stat-section.stats-text{
@@ -164,6 +176,7 @@ hr {
     grid-template-columns: .6fr 1fr 1fr 1fr;
     padding: 0 .5rem;
     place-items: center;
+    min-height: 100px;
 }
 .result-section {
     justify-self: start;
@@ -486,4 +499,284 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Expanded Match Details Styles */
+.match-details-expanded {
+    margin-top: 10px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: var(--secondary-color);
+    border-left: 4px solid;
+}
+
+.match-details-expanded.match-win {
+    border-left-color: #4b6bc3;
+    background-color: rgba(75, 107, 195, 0.1);
+}
+
+.match-details-expanded.match-lose {
+    border-left-color: #f46bf4;
+    background-color: rgba(244, 107, 244, 0.1);
+}
+
+/* Team Objectives Section */
+.team-objectives-section {
+    margin-bottom: 20px;
+}
+
+.objectives-header h3 {
+    font-family: "Mulish", sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #e6e6e6;
+    text-align: center;
+}
+
+.objectives-comparison {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 20px;
+    align-items: center;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.blue-objectives, .red-objectives {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.team-label {
+    font-family: "Mulish", sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.blue-team-label {
+    color: #4b6bc3;
+}
+
+.red-team-label {
+    color: #f46bf4;
+}
+
+.objective-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+
+.objective-icon {
+    font-size: 16px;
+}
+
+.objective-value {
+    font-weight: 700;
+    font-size: 16px;
+    color: #e6e6e6;
+    min-width: 20px;
+    text-align: center;
+}
+
+.objective-label {
+    font-size: 12px;
+    color: #87888a;
+}
+
+.vs-divider {
+    font-family: "Space Mono", monospace;
+    font-weight: 700;
+    font-size: 18px;
+    color: #87888a;
+    text-align: center;
+}
+
+/* Detailed Stats Section */
+.detailed-stats-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.team-section {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.team-header {
+    padding: 12px 15px;
+    font-family: "Mulish", sans-serif;
+    font-weight: 700;
+}
+
+.blue-team-header {
+    background-color: rgba(75, 107, 195, 0.3);
+    color: #4b6bc3;
+}
+
+.red-team-header {
+    background-color: rgba(244, 107, 244, 0.3);
+    color: #f46bf4;
+}
+
+.team-header h4 {
+    margin: 0;
+    font-size: 16px;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 150px 120px 80px 60px 80px 100px 100px;
+    gap: 10px;
+    padding: 0 15px 15px 15px;
+}
+
+.stats-header {
+    display: contents;
+    font-family: "Mulish", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    color: #87888a;
+}
+
+.stats-header > div {
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--primary-color);
+    text-align: center;
+}
+
+.header-champion {
+    text-align: left !important;
+}
+
+.header-player {
+    text-align: left !important;
+}
+
+/* Player Rows */
+.player-row {
+    display: contents;
+    font-family: "Mulish", sans-serif;
+    font-size: 13px;
+}
+
+.player-row.highlighted-player > div {
+    background-color: rgba(255, 255, 255, 0.1);
+    font-weight: 700;
+}
+
+.player-row > div {
+    padding: 8px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    color: #e6e6e6;
+}
+
+.player-champion {
+    gap: 8px;
+    justify-content: flex-start !important;
+}
+
+.champion-img-small {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.champion-name {
+    font-size: 12px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.player-name {
+    justify-content: flex-start !important;
+}
+
+.player-name a {
+    color: #e6e6e6;
+    text-decoration: none;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.player-name a:hover {
+    color: #4b6bc3;
+}
+
+.player-kda {
+    justify-content: center !important;
+    gap: 2px;
+}
+
+.player-kda .deaths {
+    color: #ff4e50;
+}
+
+.player-kda .separator {
+    color: #87888a;
+}
+
+.player-cs, .player-gold, .player-damage-dealt, .player-damage-taken {
+    justify-content: center !important;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 120px 100px 70px 50px 70px 80px 80px;
+        gap: 5px;
+        font-size: 11px;
+    }
+    
+    .champion-name {
+        display: none;
+    }
+    
+    .objectives-comparison {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .vs-divider {
+        order: 2;
+    }
+    
+    .red-objectives {
+        order: 3;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 100px 80px 60px 40px 60px 70px 70px;
+        gap: 3px;
+        font-size: 10px;
+    }
+    
+    .stats-header > div,
+    .player-row > div {
+        padding: 6px 2px;
+    }
+    
+    .champion-img-small {
+        width: 20px;
+        height: 20px;
+    }
 }
