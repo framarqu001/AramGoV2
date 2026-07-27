@@ -292,6 +292,12 @@
     
 </script>
 
+<!-- Include the match card expansion script -->
+<script src="{% static 'match_history/js/details.js' %}"></script>
 
+{% if debug %}
+<!-- Include test script in debug mode only -->
+<script src="{% static 'match_history/js/details.test.js' %}"></script>
+{% endif %}
 
 {% endblock %}
