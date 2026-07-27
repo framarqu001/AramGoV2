@@ -142,10 +142,12 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: auto;
     display: flex;
+    flex-direction: column;
     font-weight: 1000;
     border-radius: 5px;
+    overflow: hidden;
 }
 
 .match-card .stat-section.stats-text{
@@ -159,6 +161,7 @@ hr {
     font-weight: 800;
 }
 .match-section-container {
+    min-height: 100px;
     width: 100%;
     display: grid;
     grid-template-columns: .6fr 1fr 1fr 1fr;
@@ -486,4 +489,193 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Expandable Match Details Panel Styles */
+.match-details-panel {
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease, opacity 0.3s ease;
+    opacity: 0;
+    background-color: var(--secondary-color);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.match-details-panel.expanded {
+    max-height: 800px; /* Large enough to accommodate content */
+    opacity: 1;
+}
+
+.match-details-panel.panel-win {
+    background-color: rgba(38, 51, 88, 0.7);
+}
+
+.match-details-panel.panel-lose {
+    background-color: rgba(100, 51, 106, 0.7);
+}
+
+.match-details-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.details-section {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 15px;
+}
+
+.details-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.details-title {
+    font-family: "Space Mono", monospace;
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #e6e6e6;
+}
+
+.details-info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.details-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.details-label {
+    font-size: 12px;
+    color: #87888a;
+}
+
+.details-value {
+    font-family: "Mulish", sans-serif;
+    font-size: 14px;
+    color: #e6e6e6;
+}
+
+.details-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.stats-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stats-label {
+    font-size: 12px;
+    color: #87888a;
+}
+
+.stats-value {
+    font-family: "Mulish", sans-serif;
+    font-size: 14px;
+    color: #e6e6e6;
+}
+
+.team-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.team-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.team-title {
+    font-family: "Space Mono", monospace;
+    font-size: 16px;
+    color: #e6e6e6;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.blue-team .team-title {
+    color: #4b6bc3;
+}
+
+.red-team .team-title {
+    color: #f46bf4;
+}
+
+.team-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.team-player {
+    display: grid;
+    grid-template-columns: 30px 1fr 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.team-player.highlight-player {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.player-champion {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.player-champion-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.15);
+}
+
+.player-name {
+    font-family: "Mulish", sans-serif;
+    font-size: 13px;
+    color: #e6e6e6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-kda {
+    font-family: "Mulish", sans-serif;
+    font-size: 13px;
+    color: #e6e6e6;
+    text-align: right;
+}
+
+/* Chevron animation */
+.chevron-icon {
+    transition: transform 0.3s ease;
+}
+
+.chevron-icon.rotated {
+    transform: rotate(180deg);
+}
+
+/* Match button hover effects */
+.match-btn {
+    cursor: pointer;
 }

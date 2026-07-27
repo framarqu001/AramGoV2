@@ -292,6 +292,39 @@
     
 </script>
 
+<script>
+    $(document).ready(function() {
+        // Event delegation for match-btn click to handle dynamically loaded matches
+        $('#match-list').on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            const detailsPanel = matchCard.find('.match-details-panel');
+            const chevronIcon = $(this).find('.chevron-icon');
+            
+            // Toggle expanded class on the panel
+            detailsPanel.toggleClass('expanded');
+            
+            // Toggle rotated class on the chevron icon
+            chevronIcon.toggleClass('rotated');
+            
+            // Scroll to the match card if it's not fully visible (for better UX)
+            if (detailsPanel.hasClass('expanded')) {
+                // Small delay to allow the panel to start expanding
+                setTimeout(() => {
+                    const cardPosition = matchCard.offset().top;
+                    const scrollPosition = $(window).scrollTop();
+                    const windowHeight = $(window).height();
+                    
+                    // If the card is not fully visible in the viewport
+                    if (cardPosition < scrollPosition || cardPosition > scrollPosition + windowHeight - 200) {
+                        $('html, body').animate({
+                            scrollTop: cardPosition - 100
+                        }, 300);
+                    }
+                }, 100);
+            }
+        });
+    });
+</script>
 
 
 {% endblock %}
