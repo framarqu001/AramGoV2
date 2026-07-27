@@ -193,11 +193,67 @@ class Participant(models.Model):
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
     game_name = models.CharField(max_length=50)
+    
+    # Damage Statistics
+    total_damage_dealt_to_champions = models.IntegerField(default=0)
+    total_damage_taken = models.IntegerField(default=0)
+    magic_damage_dealt_to_champions = models.IntegerField(default=0)
+    physical_damage_dealt_to_champions = models.IntegerField(default=0)
+    true_damage_dealt_to_champions = models.IntegerField(default=0)
+    damage_self_mitigated = models.IntegerField(default=0)
+    
+    # Vision Statistics
+    vision_score = models.IntegerField(default=0)
+    wards_placed = models.IntegerField(default=0)
+    wards_killed = models.IntegerField(default=0)
+    vision_wards_bought_in_game = models.IntegerField(default=0)
+    
+    # Objective Statistics
+    turret_kills = models.IntegerField(default=0)
+    inhibitor_kills = models.IntegerField(default=0)
+    dragon_kills = models.IntegerField(default=0)
+    baron_kills = models.IntegerField(default=0)
+    
+    # Economy Statistics
+    gold_earned = models.IntegerField(default=0)
+    gold_spent = models.IntegerField(default=0)
+    
+    # Healing Statistics
+    total_heal = models.IntegerField(default=0)
+    total_units_healed = models.IntegerField(default=0)
 
     def match_result(self):
         if self.win:
             return "Victory"
         return "Defeat"
+    
+    def get_damage_share_percentage(self, team_participants=None):
+        """Calculate damage share percentage within the team"""
+        if team_participants is None:
+            team_participants = self.match.participants.filter(team=self.team)
+        team_total_damage = sum(p.total_damage_dealt_to_champions for p in team_participants)
+        if team_total_damage == 0:
+            return 0
+        return (self.total_damage_dealt_to_champions / team_total_damage) * 100
+    
+    def get_kill_participation_percentage(self, team_participants=None):
+        """Calculate kill participation percentage within the team"""
+        if team_participants is None:
+            team_participants = self.match.participants.filter(team=self.team)
+        team_total_kills = sum(p.kills for p in team_participants)
+        if team_total_kills == 0:
+            return 0
+        return ((self.kills + self.assists) / team_total_kills) * 100
+    
+    def get_kda_ratio(self):
+        """Calculate KDA ratio"""
+        return (self.kills + self.assists) / self.deaths if self.deaths else float('inf')
+    
+    def get_gold_efficiency(self):
+        """Calculate gold efficiency (gold earned vs gold spent)"""
+        if self.gold_earned == 0:
+            return 0
+        return (self.gold_spent / self.gold_earned) * 100
 
     def __str__(self):
         return f"{self.game_name} playing {self.champion} in match {self.match}"
