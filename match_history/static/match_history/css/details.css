@@ -142,10 +142,12 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: auto;
     display: flex;
+    flex-direction: column;
     font-weight: 1000;
     border-radius: 5px;
+    overflow: hidden;
 }
 
 .match-card .stat-section.stats-text{
@@ -164,6 +166,7 @@ hr {
     grid-template-columns: .6fr 1fr 1fr 1fr;
     padding: 0 .5rem;
     place-items: center;
+    min-height: 100px;
 }
 .result-section {
     justify-self: start;
@@ -223,7 +226,9 @@ hr {
     align-items: center;
     width: 40px;
     border: 0;
-    justify-self: flex-end;
+    align-self: flex-end;
+    cursor: pointer;
+    transition: transform 0.3s ease;
 }
 
 
@@ -486,4 +491,79 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Match Details Panel Styles */
+.match-details-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease;
+    width: 100%;
+    padding: 0 1rem;
+}
+
+.match-details-panel.expanded {
+    max-height: 300px;
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.match-details-panel.match-win {
+    background-color: #263358;
+}
+
+.match-details-panel.match-lose {
+    background-color: #64336a;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.details-section h4 {
+    font-family: "Mulish", sans-serif;
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #e6e6e6;
+}
+
+.details-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    font-family: "Mulish", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.stat-label {
+    color: #87888a;
+}
+
+.stat-value {
+    color: white;
+    font-weight: 600;
+}
+
+/* Rotate the chevron when expanded */
+.match-btn.expanded .drop {
+    transform: rotate(180deg);
+}
+
+.drop {
+    transition: transform 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
 }

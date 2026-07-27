@@ -181,6 +181,8 @@
                         } else {
                             $('#match-list').append(data);
                             page += 1;
+                            // Initialize match buttons for newly loaded content
+                            initMatchButtons();
                         }
                         loading = false;
                     },
@@ -191,6 +193,33 @@
                 });
             }
         });
+        
+        // Initialize match buttons for the initial content
+        initMatchButtons();
+        
+        // Function to initialize match button click handlers
+        function initMatchButtons() {
+            $('.match-btn').off('click').on('click', function() {
+                const matchCard = $(this).closest('.match-card');
+                const detailsPanel = matchCard.find('.match-details-panel');
+                
+                // Toggle expanded class on the button and panel
+                $(this).toggleClass('expanded');
+                detailsPanel.toggleClass('expanded');
+                
+                // Smooth scroll to show the expanded card if it's not fully visible
+                if ($(this).hasClass('expanded')) {
+                    const cardBottom = matchCard.offset().top + matchCard.outerHeight();
+                    const viewportBottom = $(window).scrollTop() + $(window).height();
+                    
+                    if (cardBottom > viewportBottom) {
+                        $('html, body').animate({
+                            scrollTop: $(window).scrollTop() + (cardBottom - viewportBottom) + 20
+                        }, 300);
+                    }
+                }
+            });
+        }
     });
 </script>
 <script>
