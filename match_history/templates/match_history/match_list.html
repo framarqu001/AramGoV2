@@ -83,26 +83,44 @@
             <div class="team-blue">
                 {% for participant in blue_team %}
                     <div class="participant-entry">
-                        <div class="champ-icon-small">
-                            <img class = "champ-img" src="{{participant.champion.get_url}}" alt="">
+                        <div class="user-info-container">
+                            {% if participant.summoner.profile_icon %}
+                                <div class="profile-icon-small">
+                                    <img class="profile-img" src="{{participant.summoner.profile_icon.get_url}}" alt="">
+                                    {% if participant.summoner.summoner_level %}
+                                        <div class="level-small">{{participant.summoner.summoner_level}}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            <div class="champ-icon-small">
+                                <img class="champ-img" src="{{participant.champion.get_url}}" alt="">
+                            </div>
                         </div>
                         <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
                             <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
                         </div>
-
                     </div>
                 {% endfor %}
             </div>
             <div class="team-red">
                 {% for participant in red_team %}
                     <div class="participant-entry">
-                        <div class="champ-icon-small">
-                            <img class = "champ-img" src="{{participant.champion.get_url}}" alt="">
+                        <div class="user-info-container">
+                            {% if participant.summoner.profile_icon %}
+                                <div class="profile-icon-small">
+                                    <img class="profile-img" src="{{participant.summoner.profile_icon.get_url}}" alt="">
+                                    {% if participant.summoner.summoner_level %}
+                                        <div class="level-small">{{participant.summoner.summoner_level}}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            <div class="champ-icon-small">
+                                <img class="champ-img" src="{{participant.champion.get_url}}" alt="">
+                            </div>
                         </div>
                         <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
                             <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
                         </div>
-
                     </div>
                 {% endfor %}
             </div>
