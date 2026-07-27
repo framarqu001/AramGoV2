@@ -292,6 +292,47 @@
     
 </script>
 
-
+<script>
+    $(document).ready(function() {
+        // Handle match card expansion
+        $(document).on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            const isExpanded = matchCard.hasClass('match-card--expanded');
+            
+            // Toggle expanded class
+            matchCard.toggleClass('match-card--expanded');
+            
+            // Update ARIA attributes
+            $(this).attr('aria-expanded', !isExpanded);
+            $(this).attr('aria-label', isExpanded ? 'Expand match details' : 'Collapse match details');
+            
+            // Animate timeline progress when expanded
+            if (!isExpanded) {
+                setTimeout(function() {
+                    matchCard.find('.expanded-timeline-progress').css('width', '100%');
+                }, 300);
+            } else {
+                matchCard.find('.expanded-timeline-progress').css('width', '0');
+            }
+        });
+        
+        // Initialize any match cards that might be loaded via AJAX
+        function initMatchCards() {
+            $('.match-card').each(function() {
+                const card = $(this);
+                // Reset timeline progress for all cards
+                card.find('.expanded-timeline-progress').css('width', '0');
+            });
+        }
+        
+        // Initialize cards on page load
+        initMatchCards();
+        
+        // Re-initialize after AJAX content is loaded
+        $(document).ajaxComplete(function() {
+            initMatchCards();
+        });
+    });
+</script>
 
 {% endblock %}
