@@ -487,3 +487,147 @@ hr {
 .death-color {
     color: #ff4e50
 }
+
+/* Item Build Timeline Styles */
+.match-expansion-panel {
+    display: none;
+    width: 100%;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.match-expansion-panel.match-win {
+    background-color: #1e2a48;
+}
+
+.match-expansion-panel.match-lose {
+    background-color: #4e2855;
+}
+
+.match-expansion-panel.expanded {
+    display: block;
+}
+
+.expansion-content {
+    padding: 15px 20px;
+}
+
+.expansion-title {
+    font-family: "Mulish", sans-serif;
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #e6e6e6;
+}
+
+.item-build-timeline {
+    width: 100%;
+    padding: 10px 0;
+}
+
+.timeline-container {
+    position: relative;
+    height: 80px;
+    margin: 0 40px;
+}
+
+.timeline-track {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.timeline-track.match-win {
+    background-color: rgba(75, 107, 195, 0.3);
+}
+
+.timeline-track.match-lose {
+    background-color: rgba(244, 107, 244, 0.3);
+}
+
+.timeline-marker {
+    position: absolute;
+    top: 30px;
+}
+
+.marker-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: white;
+    margin: 0 auto;
+}
+
+.marker-time {
+    font-size: 11px;
+    color: #87888a;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.timeline-item {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+}
+
+.item-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.item-icon.match-win {
+    background-color: rgba(75, 107, 195, 0.3);
+}
+
+.item-icon.match-lose {
+    background-color: rgba(244, 107, 244, 0.3);
+}
+
+.item-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 10;
+    pointer-events: none;
+    margin-bottom: 5px;
+}
+
+.item-icon:hover .item-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-name {
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.tooltip-time {
+    font-size: 11px;
+    color: #ccc;
+}
+
+/* Adjust match card height when expanded */
+.match-card {
+    transition: height 0.3s ease;
+}
