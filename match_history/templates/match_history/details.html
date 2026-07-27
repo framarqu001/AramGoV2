@@ -181,6 +181,8 @@
                         } else {
                             $('#match-list').append(data);
                             page += 1;
+                            // Initialize timeline interactivity for newly loaded match cards
+                            initializeMatchCardInteractivity();
                         }
                         loading = false;
                     },
@@ -191,9 +193,53 @@
                 });
             }
         });
+        
+        // Initialize timeline interactivity for initial match cards
+        initializeMatchCardInteractivity();
+        
+        // Function to initialize match card interactivity
+        function initializeMatchCardInteractivity() {
+            // Match card expansion
+            $('.match-btn').off('click').on('click', function() {
+                const matchCard = $(this).closest('.match-card');
+                const timelineWrapper = matchCard.find('.match-timeline-wrapper');
+                
+                if (matchCard.hasClass('expanded')) {
+                    // Collapse
+                    timelineWrapper.slideUp(300);
+                    matchCard.removeClass('expanded');
+                } else {
+                    // Expand
+                    timelineWrapper.slideDown(300);
+                    matchCard.addClass('expanded');
+                }
+            });
+            
+            // Timeline event hover interactions
+            $('.timeline-event').hover(
+                function() {
+                    $(this).find('.event-tooltip').css('opacity', 1);
+                },
+                function() {
+                    $(this).find('.event-tooltip').css('opacity', 0);
+                }
+            );
+            
+            // Timeline event click interactions
+            $('.timeline-event').click(function() {
+                const eventType = $(this).data('event-type');
+                const eventTime = $(this).data('event-time');
+                
+                // Highlight the event
+                $(this).closest('.timeline-track').find('.timeline-event').removeClass('active');
+                $(this).addClass('active');
+                
+                // You could add more interactive features here, like scrolling to specific parts of the match details
+                console.log(`Event clicked: ${eventType} at ${eventTime} seconds`);
+            });
+        }
     });
-</script>
-<script>
+    
     $(document).ready(function() {
         function updateSections() {
             $.ajax({
