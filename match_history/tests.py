@@ -1,9 +1,11 @@
-from django.test import TransactionTestCase, TestCase
+from django.test import TransactionTestCase, TestCase, Client
 from django.core.cache import cache
+from django.urls import reverse
 from unittest.mock import patch
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
+import datetime
 
 
 class MatchParticipantDBTest(TransactionTestCase):
@@ -98,3 +100,174 @@ class PatchVersionCacheTest(TestCase):
         
         # Verify that the mock was called
         mock_get_patch.assert_called_once()
+
+
+class MatchCardStylingTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        
+        # Create test data
+        self.summoner = Summoner.objects.create(
+            puuid='test-puuid-123',
+            game_name='TestPlayer',
+            tag_line='NA1',
+            summoner_name='TestPlayer',
+            summoner_level=45
+        )
+        
+        self.champion = Champion.objects.create(
+            champion_id='Aatrox',
+            name='Aatrox',
+            title='The Darkin Blade',
+            image_path='Aatrox.png',
+            splash_image_path='Aatrox_0.jpg'
+        )
+        
+        self.match = Match.objects.create(
+            match_id='test_match_001',
+            game_start=datetime.datetime.now(),
+            game_duration=1800,
+            game_mode='ARAM',
+            game_version='14.17.1',
+            winner=100
+        )
+        
+        # Create participants for both teams
+        for i in range(10):
+            team = 100 if i < 5 else 200
+            win = team == 100
+            Participant.objects.create(
+                match=self.match,
+                summoner=self.summoner,
+                champion=self.champion,
+                kills=5 + i,
+                deaths=2,
+                assists=8 + i,
+                creep_score=120 + i * 10,
+                team=team,
+                win=win,
+                game_name=f'Player{i}'
+            )
+
+    def test_match_card_css_classes_present(self):
+        """Test that the CSS file contains the new styling classes"""
+        with open('/workspace/match_history/static/match_history/css/details.css', 'r') as f:
+            css_content = f.read()
+        
+        # Check for new CSS classes
+        self.assertIn('.rank-indicator', css_content)
+        self.assertIn('.level-indicator', css_content)
+        self.assertIn('.participant-stats', css_content)
+        self.assertIn('.participant-expanded-info', css_content)
+        self.assertIn('.participant-main-info', css_content)
+        
+        # Check for responsive breakpoints
+        self.assertIn('@media (max-width: 1200px)', css_content)
+        self.assertIn('@media (max-width: 992px)', css_content)
+        self.assertIn('@media (max-width: 768px)', css_content)
+        self.assertIn('@media (max-width: 480px)', css_content)
+        
+        # Check for rank tier classes
+        self.assertIn('.rank-indicator.gold', css_content)
+        self.assertIn('.rank-indicator.silver', css_content)
+        self.assertIn('.rank-indicator.diamond', css_content)
+
+    def test_match_card_height_updated(self):
+        """Test that match card height has been increased"""
+        with open('/workspace/match_history/static/match_history/css/details.css', 'r') as f:
+            css_content = f.read()
+        
+        # Check that height has been updated from 100px to 120px
+        self.assertIn('height: 120px', css_content)
+        self.assertIn('.match-card.expanded', css_content)
+
+    def test_participant_section_template_structure(self):
+        """Test that the template includes new participant information structure"""
+        with open('/workspace/match_history/templates/match_history/match_list.html', 'r') as f:
+            template_content = f.read()
+        
+        # Check for new template structure
+        self.assertIn('participant-main-info', template_content)
+        self.assertIn('participant-expanded-info', template_content)
+        self.assertIn('participant-stats', template_content)
+        self.assertIn('level-indicator', template_content)
+        self.assertIn('rank-indicator', template_content)
+        self.assertIn('participant-kda', template_content)
+        self.assertIn('participant-cs', template_content)
+
+    def test_color_scheme_consistency(self):
+        """Test that new styles maintain existing color scheme"""
+        with open('/workspace/match_history/static/match_history/css/details.css', 'r') as f:
+            css_content = f.read()
+        
+        # Check that existing color variables are used
+        self.assertIn('var(--blue-color)', css_content)
+        self.assertIn('var(--red-color)', css_content)
+        self.assertIn('var(--secondary-color)', css_content)
+        self.assertIn('var(--yellow-color)', css_content)
+        
+        # Check that win/loss colors are maintained
+        self.assertIn('.match-card.match-win', css_content)
+        self.assertIn('.match-card.match-lose', css_content)
+
+    def test_responsive_grid_layout_updated(self):
+        """Test that grid layout has been updated for expanded information"""
+        with open('/workspace/match_history/static/match_history/css/details.css', 'r') as f:
+            css_content = f.read()
+        
+        # Check that grid template columns have been updated
+        self.assertIn('grid-template-columns: .6fr 1fr 1fr 1.2fr', css_content)
+        self.assertIn('gap: 0.5rem', css_content)
+
+
+class ParticipantInformationTest(TestCase):
+    def setUp(self):
+        self.summoner = Summoner.objects.create(
+            puuid='test-puuid-456',
+            game_name='TestSummoner',
+            tag_line='NA1',
+            summoner_level=67
+        )
+
+    def test_summoner_level_display(self):
+        """Test that summoner level is properly accessible for display"""
+        self.assertEqual(self.summoner.summoner_level, 67)
+        self.assertIsNotNone(self.summoner.summoner_level)
+
+    def test_participant_stats_calculation(self):
+        """Test that participant stats are properly calculated for display"""
+        champion = Champion.objects.create(
+            champion_id='TestChamp',
+            name='Test Champion',
+            title='Test Title',
+            image_path='test.png',
+            splash_image_path='test_splash.jpg'
+        )
+        
+        match = Match.objects.create(
+            match_id='test_match_stats',
+            game_start=datetime.datetime.now(),
+            game_duration=1500,
+            game_mode='ARAM',
+            game_version='14.17.1',
+            winner=100
+        )
+        
+        participant = Participant.objects.create(
+            match=match,
+            summoner=self.summoner,
+            champion=champion,
+            kills=12,
+            deaths=3,
+            assists=15,
+            creep_score=180,
+            team=100,
+            win=True,
+            game_name='TestSummoner'
+        )
+        
+        # Test that stats are accessible
+        self.assertEqual(participant.kills, 12)
+        self.assertEqual(participant.deaths, 3)
+        self.assertEqual(participant.assists, 15)
+        self.assertEqual(participant.creep_score, 180)
