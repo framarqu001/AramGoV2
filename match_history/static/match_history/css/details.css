@@ -142,7 +142,7 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: 130px;
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
@@ -161,7 +161,7 @@ hr {
 .match-section-container {
     width: 100%;
     display: grid;
-    grid-template-columns: .6fr 1fr 1fr 1fr;
+    grid-template-columns: .6fr 1fr 1.5fr 1fr;
     padding: 0 .5rem;
     place-items: center;
 }
@@ -214,6 +214,20 @@ hr {
     display: flex;
     align-items: center;
     flex-direction: column;
+    min-width: 180px;
+}
+
+.detailed-stats {
+    display: flex;
+    flex-direction: column;
+    margin-top: 5px;
+    font-size: 11px;
+    width: 100%;
+}
+
+.vision-score, .damage-dealt, .gold-earned {
+    margin-top: 2px;
+    white-space: nowrap;
 }
 
 .match-btn {
