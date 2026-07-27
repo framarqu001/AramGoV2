@@ -142,7 +142,7 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: 130px;
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
@@ -161,7 +161,7 @@ hr {
 .match-section-container {
     width: 100%;
     display: grid;
-    grid-template-columns: .6fr 1fr 1fr 1fr;
+    grid-template-columns: .6fr 1fr 1.2fr 1fr;
     padding: 0 .5rem;
     place-items: center;
 }
@@ -212,8 +212,25 @@ hr {
     letter-spacing: -2px;
     margin-left: 5px;
     display: flex;
-    align-items: center;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.stat-icon {
+    display: inline-block;
+    margin-right: 4px;
+    font-size: 12px;
+}
+
+.damage, .gold, .vision {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .match-btn {
@@ -469,6 +486,39 @@ hr {
 }
 /* -------------------
  */
+
+/* Media queries for responsive layout */
+@media (max-width: 768px) {
+    .match-section-container {
+        grid-template-columns: .8fr 1fr 1.2fr .8fr;
+    }
+    
+    .stat-section {
+        font-size: 90%;
+    }
+    
+    .damage, .gold, .vision {
+        font-size: 90%;
+    }
+    
+    .stat-icon {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .match-section-container {
+        grid-template-columns: .6fr 1fr 1fr .6fr;
+    }
+    
+    .stat-section {
+        font-size: 80%;
+    }
+    
+    .damage, .gold, .vision {
+        font-size: 80%;
+    }
+}
  .icon {
     width: 25px;
  }
