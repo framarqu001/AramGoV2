@@ -19,9 +19,10 @@ hr {
     height: 120px;
     border-radius: 50%;
 }
-.drop {
+.chevron-icon {
     width: 30px;
     margin-bottom: 5px;
+    transition: transform 0.3s ease;
 }
 .profile-icon-container {
     display: flex;
@@ -141,11 +142,18 @@ hr {
 }
 
 .match-card {
-    /* height: 100px; */
     height: 100px;
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+    transition: height 0.3s ease;
+}
+
+.match-card.expanded {
+    height: auto;
+    min-height: 100px;
 }
 
 .match-card .stat-section.stats-text{
@@ -224,8 +232,17 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    cursor: pointer;
 }
 
+.match-btn .chevron-icon {
+    transform: rotate(0deg);
+    transition: transform 0.3s ease;
+}
+
+.match-card.expanded .match-btn .chevron-icon {
+    transform: rotate(180deg);
+}
 
 .match-card.match-win {
     background-color: #263358; 
@@ -310,6 +327,24 @@ hr {
 
 }
 
+.match-details-content {
+    width: 100%;
+    padding: 15px;
+    display: none;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 10px;
+}
+
+.match-card.expanded .match-details-content {
+    display: block;
+}
+
+.match-details-placeholder {
+    text-align: center;
+    padding: 20px 0;
+    color: rgba(255, 255, 255, 0.7);
+}
 
 
 /* ----------------------------------------------- */
