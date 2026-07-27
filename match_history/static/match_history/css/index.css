@@ -1,3 +1,9 @@
+/* Cool black homepage styling */
+body {
+    background-color: #000000 !important;
+    color: white;
+}
+
 .search-container {
     display: flex;
     flex-direction: column;
@@ -24,13 +30,15 @@ h1 {
     width: 600px;
     padding: .5rem 1.5rem;
     border-radius: 12px;
-    border: 1px solid lightgray;;
+    border: 1px solid #333333;
+    background-color: #1a1a1a;
+    color: white;
 }
 
 input[type="search"]:focus {
     outline: none; 
-    background-color: white;
-    border: 1px solid #ccc;
+    background-color: #2a2a2a;
+    border: 1px solid #4b6bc3;
     box-shadow: none;
 }
 
@@ -54,7 +62,7 @@ button {
     height: 30px;
     position: relative;
     right: 45px;
-    background-color: white;
+    background-color: #1a1a1a;
     border: none
 }
 
@@ -93,7 +101,7 @@ button {
 }
 
 #walking-gif {
-    width: 100%; 
+    width: 100%;
     height: auto; 
 }
 
