@@ -1,0 +1,31 @@
+{% extends 'todo_list/base.html' %}
+
+{% block title %}Todo List Home{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body text-center">
+                <h1 class="card-title mb-4">Welcome to the Todo List App</h1>
+                <p class="lead">A simple and effective way to manage your tasks</p>
+                
+                <div class="mt-5">
+                    <a href="{% url 'todo_list:list' %}" class="btn btn-primary btn-lg me-3">View My Todos</a>
+                    <a href="{% url 'todo_list:create' %}" class="btn btn-success btn-lg">Add New Todo</a>
+                </div>
+                
+                <div class="mt-5">
+                    <h3>Features</h3>
+                    <ul class="list-group list-group-flush mt-3">
+                        <li class="list-group-item">Create and manage your todo items</li>
+                        <li class="list-group-item">Set due dates for your tasks</li>
+                        <li class="list-group-item">Mark tasks as completed</li>
+                        <li class="list-group-item">Organize and prioritize your work</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

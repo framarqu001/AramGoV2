@@ -1,0 +1,75 @@
+{% extends 'todo_list/base.html' %}
+
+{% block title %}Todo Detail: {{ todo.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Todo Details</h3>
+                <span class="badge {% if todo.completed %}bg-success{% else %}bg-warning{% endif %}">
+                    {% if todo.completed %}Completed{% else %}Pending{% endif %}
+                </span>
+            </div>
+            <div class="card-body">
+                <h2 class="card-title mb-3">{{ todo.title }}</h2>
+                
+                <div class="mb-4">
+                    <h5>Description:</h5>
+                    <p class="card-text">{{ todo.description|linebreaks|default:"No description provided." }}</p>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5>Created:</h5>
+                        <p>{{ todo.created_date|date:"F j, Y, g:i a" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Due Date:</h5>
+                        <p>
+                            {% if todo.due_date %}
+                                <span class="{% if todo.due_date < now and not todo.completed %}text-danger{% endif %}">
+                                    {{ todo.due_date|date:"F j, Y, g:i a" }}
+                                    {% if todo.due_date < now and not todo.completed %}
+                                        <span class="badge bg-danger ms-2">Overdue</span>
+                                    {% endif %}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">No due date set</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                {% if todo.user %}
+                <div class="mb-4">
+                    <h5>Assigned to:</h5>
+                    <p>{{ todo.user.username }}</p>
+                </div>
+                {% endif %}
+                
+                <form method="post" action="{% url 'todo_list:toggle' todo.id %}" class="mb-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn {% if todo.completed %}btn-outline-success{% else %}btn-success{% endif %}">
+                        {% if todo.completed %}
+                            Mark as Incomplete
+                        {% else %}
+                            Mark as Complete
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+            <div class="card-footer bg-light">
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'todo_list:list' %}" class="btn btn-secondary">Back to List</a>
+                    <div>
+                        <a href="{% url 'todo_list:update' todo.id %}" class="btn btn-warning me-2">Edit</a>
+                        <a href="{% url 'todo_list:delete' todo.id %}" class="btn btn-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
