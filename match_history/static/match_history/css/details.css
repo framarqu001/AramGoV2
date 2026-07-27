@@ -141,11 +141,20 @@ hr {
 }
 
 .match-card {
-    /* height: 100px; */
-    height: 100px;
     display: flex;
+    flex-wrap: wrap;
     font-weight: 1000;
     border-radius: 5px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.match-card:not(.expanded) {
+    height: 100px;
+}
+
+.match-card.expanded {
+    height: auto;
 }
 
 .match-card .stat-section.stats-text{
@@ -224,6 +233,12 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.match-card.expanded .match-btn .drop {
+    transform: rotate(180deg);
 }
 
 
@@ -486,4 +501,229 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Match Detail Styles */
+.match-detail-container {
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.match-card.expanded .match-detail-container {
+    max-height: 1000px; /* Large enough to contain all content */
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.match-detail {
+    color: #e6e6e6;
+    font-family: "Mulish", sans-serif;
+}
+
+.match-detail-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.match-detail-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.match-detail-date, .match-detail-duration, .match-detail-patch {
+    font-size: 12px;
+    color: #87888a;
+    margin-bottom: 3px;
+}
+
+.match-detail-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.match-detail-section {
+    flex: 1;
+    min-width: 250px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.match-detail-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 5px;
+}
+
+.match-detail-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.match-detail-stat {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #87888a;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.stat-ratio {
+    font-size: 12px;
+    color: #87888a;
+}
+
+.match-detail-build {
+    display: flex;
+    gap: 15px;
+}
+
+.match-detail-items {
+    flex: 2;
+}
+
+.match-detail-item-row {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.match-detail-item {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.match-detail-item.empty {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.item-img, .spell-img, .rune-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-tooltip, .spell-tooltip {
+    position: absolute;
+    bottom: -30px;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 10px;
+    padding: 3px;
+    text-align: center;
+    transition: bottom 0.3s ease;
+    opacity: 0;
+}
+
+.match-detail-item:hover .item-tooltip,
+.match-detail-spell:hover .spell-tooltip {
+    bottom: 0;
+    opacity: 1;
+}
+
+.match-detail-spells, .match-detail-runes {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.match-detail-spell, .match-detail-rune {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.match-detail-teams {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.match-detail-team {
+    flex: 1;
+    min-width: 200px;
+}
+
+.team-header {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.match-detail-team.blue .team-header {
+    color: #4b6bc3;
+}
+
+.match-detail-team.red .team-header {
+    color: #f46bf4;
+}
+
+.team-players {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.team-player {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.team-player.highlight {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.player-champion {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.champion-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.player-name {
+    flex: 1;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-kda {
+    font-size: 12px;
+    color: #87888a;
 }
