@@ -1,4 +1,5 @@
 import pytz
+import json
 from django.db import models
 from django.utils import timezone
 from django.db import connection
@@ -120,6 +121,7 @@ class Match(models.Model):
     game_version = models.CharField(max_length=50)
     winner = models.IntegerField(choices=WINNER_CHOICES)
     new_match = models.BooleanField(default=False)
+    expanded_match_data = models.JSONField(null=True, blank=True)
 
     def get_patch(self):
         return '.'.join(self.game_version.split('.')[:2])
@@ -155,6 +157,105 @@ class Match(models.Model):
             return f"{int(days)} days ago"
         else:
             return self.game_start.strftime('%m-%d-%Y')
+            
+    def get_expanded_match_data(self):
+        """
+        Get or generate expanded match data for detailed view.
+        Returns cached data if available, otherwise computes and caches it.
+        """
+        if self.expanded_match_data:
+            return self.expanded_match_data
+            
+        # Get all participants with related data
+        participants = self.get_participants()
+        
+        # Calculate team statistics
+        blue_team_stats = {
+            'total_kills': 0,
+            'total_deaths': 0,
+            'total_assists': 0,
+            'total_cs': 0,
+        }
+        
+        red_team_stats = {
+            'total_kills': 0,
+            'total_deaths': 0,
+            'total_assists': 0,
+            'total_cs': 0,
+        }
+        
+        blue_team_participants = []
+        red_team_participants = []
+        
+        for participant in participants:
+            participant_data = {
+                'id': participant.id,
+                'summoner_name': participant.game_name,
+                'champion_name': participant.champion.name,
+                'champion_image': participant.champion.get_url(),
+                'kills': participant.kills,
+                'deaths': participant.deaths,
+                'assists': participant.assists,
+                'creep_score': participant.creep_score,
+                'kda': f"{((participant.kills + participant.assists) / participant.deaths if participant.deaths else participant.kills + participant.assists):.2f}",
+                'items': [
+                    getattr(participant.item1, 'get_url', lambda: None)() if participant.item1 else None,
+                    getattr(participant.item2, 'get_url', lambda: None)() if participant.item2 else None,
+                    getattr(participant.item3, 'get_url', lambda: None)() if participant.item3 else None,
+                    getattr(participant.item4, 'get_url', lambda: None)() if participant.item4 else None,
+                    getattr(participant.item5, 'get_url', lambda: None)() if participant.item5 else None,
+                    getattr(participant.item6, 'get_url', lambda: None)() if participant.item6 else None,
+                ],
+                'spells': [
+                    participant.spell1.get_url(),
+                    participant.spell2.get_url(),
+                ],
+                'runes': [
+                    getattr(participant.rune1, 'get_url', lambda: None)() if participant.rune1 else None,
+                    getattr(participant.rune2, 'get_url', lambda: None)() if participant.rune2 else None,
+                ],
+                'win': participant.win,
+            }
+            
+            if participant.team == self.BLUE_TEAM:
+                blue_team_stats['total_kills'] += participant.kills
+                blue_team_stats['total_deaths'] += participant.deaths
+                blue_team_stats['total_assists'] += participant.assists
+                blue_team_stats['total_cs'] += participant.creep_score
+                blue_team_participants.append(participant_data)
+            else:
+                red_team_stats['total_kills'] += participant.kills
+                red_team_stats['total_deaths'] += participant.deaths
+                red_team_stats['total_assists'] += participant.assists
+                red_team_stats['total_cs'] += participant.creep_score
+                red_team_participants.append(participant_data)
+        
+        # Create expanded match data
+        expanded_data = {
+            'match_id': self.match_id,
+            'game_duration': self.get_duration(),
+            'game_minutes': self.get_minutes(),
+            'game_mode': self.game_mode,
+            'game_version': self.game_version,
+            'patch': self.get_patch(),
+            'winner': self.winner,
+            'blue_team': {
+                'stats': blue_team_stats,
+                'participants': blue_team_participants,
+                'win': self.winner == self.BLUE_TEAM,
+            },
+            'red_team': {
+                'stats': red_team_stats,
+                'participants': red_team_participants,
+                'win': self.winner == self.RED_TEAM,
+            },
+        }
+        
+        # Cache the expanded data
+        self.expanded_match_data = expanded_data
+        self.save(update_fields=['expanded_match_data'])
+        
+        return expanded_data
 
     def __str__(self):
         return self.match_id
