@@ -193,14 +193,42 @@ class Participant(models.Model):
     team = models.IntegerField(choices=TEAM_CHOICES)
     win = models.BooleanField()
     game_name = models.CharField(max_length=50)
+    # New fields for additional statistics
+    damage_dealt = models.IntegerField(default=0)
+    damage_taken = models.IntegerField(default=0)
+    vision_score = models.IntegerField(default=0)
+    objectives_stolen = models.IntegerField(default=0)
+    objectives_killed = models.IntegerField(default=0)
 
     def match_result(self):
         if self.win:
             return "Victory"
         return "Defeat"
+        
+    def damage_per_minute(self):
+        if self.match.game_duration > 0:
+            return self.damage_dealt / (self.match.game_duration / 60)
+        return 0
+        
+    def damage_taken_per_minute(self):
+        if self.match.game_duration > 0:
+            return self.damage_taken / (self.match.game_duration / 60)
+        return 0
 
     def __str__(self):
         return f"{self.game_name} playing {self.champion} in match {self.match}"
+
+
+class ItemPurchase(models.Model):
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE, related_name='item_purchases')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='purchases')
+    timestamp = models.IntegerField()  # Store as seconds from game start
+    
+    class Meta:
+        ordering = ['timestamp']
+        
+    def __str__(self):
+        return f"{self.participant.game_name} purchased {self.item.name} at {self.timestamp} seconds"
 
 
 class SummonerChampionStats(models.Model):
