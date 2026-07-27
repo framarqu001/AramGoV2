@@ -1,6 +1,6 @@
 {% for match, main_participant, blue_team, red_team, main_stats in matches%}
 
-<div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+<div class="match-card {% if main_participant.win%}match-win{% else %}match-lose{% endif %}" data-match-id="{{match.id}}">
 
     <div class="match-section-container">
         <div class="result-section">
@@ -108,9 +108,46 @@
             </div>
         </div>
     </div>
-    <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
-        <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
+    <button class="match-btn toggle-stats {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+        <svg class="drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
-
+    
+    <!-- Detailed Statistics Section (Hidden by Default) -->
+    <div class="detailed-stats-container" style="display: none;">
+        <div class="detailed-stats-wrapper {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+            <div class="detailed-stats-grid">
+                <div class="detailed-stats-column">
+                    <div class="detailed-stat-item">
+                        <div class="stat-label">Damage Dealt</div>
+                        <div class="stat-value">{{main_participant.total_damage_dealt_to_champions}}</div>
+                    </div>
+                    <div class="detailed-stat-item">
+                        <div class="stat-label">Damage Taken</div>
+                        <div class="stat-value">{{main_participant.total_damage_taken}}</div>
+                    </div>
+                </div>
+                <div class="detailed-stats-column">
+                    <div class="detailed-stat-item">
+                        <div class="stat-label">Healing</div>
+                        <div class="stat-value">{{main_participant.total_heal}}</div>
+                    </div>
+                    <div class="detailed-stat-item">
+                        <div class="stat-label">Gold Earned</div>
+                        <div class="stat-value">{{main_participant.gold_earned}}</div>
+                    </div>
+                </div>
+                <div class="detailed-stats-column">
+                    <div class="detailed-stat-item">
+                        <div class="stat-label">Vision Score</div>
+                        <div class="stat-value">{{main_participant.vision_score}}</div>
+                    </div>
+                    <div class="detailed-stat-item">
+                        <div class="stat-label">CC Time</div>
+                        <div class="stat-value">{{main_participant.time_CCing_others}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endfor %}
