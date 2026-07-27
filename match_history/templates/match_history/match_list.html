@@ -86,10 +86,19 @@
                         <div class="champ-icon-small">
                             <img class = "champ-img" src="{{participant.champion.get_url}}" alt="">
                         </div>
+                        <div class="participant-info">
+                            <div class="tooltip role-icon">
+                                {% include "match_history/icons/role_"|add:participant.role|lower|add:".svg" %}
+                                <span class="tooltiptext">Role: {{ participant.get_role_display }}</span>
+                            </div>
+                            <div class="tooltip rank-icon">
+                                {% include "match_history/icons/rank_"|add:participant.rank|lower|add:".svg" %}
+                                <span class="tooltiptext">Rank: {{ participant.get_full_rank }}</span>
+                            </div>
+                        </div>
                         <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
                             <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
                         </div>
-
                     </div>
                 {% endfor %}
             </div>
@@ -99,10 +108,19 @@
                         <div class="champ-icon-small">
                             <img class = "champ-img" src="{{participant.champion.get_url}}" alt="">
                         </div>
+                        <div class="participant-info">
+                            <div class="tooltip role-icon">
+                                {% include "match_history/icons/role_"|add:participant.role|lower|add:".svg" %}
+                                <span class="tooltiptext">Role: {{ participant.get_role_display }}</span>
+                            </div>
+                            <div class="tooltip rank-icon">
+                                {% include "match_history/icons/rank_"|add:participant.rank|lower|add:".svg" %}
+                                <span class="tooltiptext">Rank: {{ participant.get_full_rank }}</span>
+                            </div>
+                        </div>
                         <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
                             <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
                         </div>
-
                     </div>
                 {% endfor %}
             </div>
