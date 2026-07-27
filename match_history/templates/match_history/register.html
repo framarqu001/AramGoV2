@@ -1,0 +1,130 @@
+{% extends "match_history/base.html" %}
+{% load static %}
+
+{% block title %}Register - AramGo{% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'match_history/css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<style>
+    .register {
+        color: white;
+        background-color: #222433;
+    }
+</style>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Join AramGo</h2>
+            <p>Create an account to track your Riot Games accounts and customize your experience</p>
+        </div>
+        
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Username:</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="form-errors">
+                        {% for error in form.username.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% if form.username.help_text %}
+                    <small class="form-help">{{ form.username.help_text }}</small>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email:</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="form-errors">
+                        {% for error in form.email.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% if form.email.help_text %}
+                    <small class="form-help">{{ form.email.help_text }}</small>
+                {% endif %}
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">First Name:</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="form-errors">
+                            {% for error in form.first_name.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">Last Name:</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="form-errors">
+                            {% for error in form.last_name.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.password1.id_for_label }}">Password:</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                    <div class="form-errors">
+                        {% for error in form.password1.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% if form.password1.help_text %}
+                    <small class="form-help">{{ form.password1.help_text }}</small>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.password2.id_for_label }}">Confirm Password:</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <div class="form-errors">
+                        {% for error in form.password2.errors %}
+                            <span class="error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% if form.password2.help_text %}
+                    <small class="form-help">{{ form.password2.help_text }}</small>
+                {% endif %}
+            </div>
+            
+            {% if form.non_field_errors %}
+                <div class="form-errors">
+                    {% for error in form.non_field_errors %}
+                        <span class="error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <button type="submit" class="auth-button">Create Account</button>
+        </form>
+        
+        <div class="auth-links">
+            <p>Already have an account? <a href="{% url 'match_history:login' %}">Login here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

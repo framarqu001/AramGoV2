@@ -5,6 +5,7 @@ from django.db import connection
 from django.urls import reverse
 from django import template
 from django.core.cache import cache
+from django.contrib.auth.models import User
 
 
 class Champion(models.Model):
@@ -295,3 +296,62 @@ class ChampionStatsPatch(models.Model):
         else:
             self.total_losses += 1
         self.save()
+
+
+class UserProfile(models.Model):
+    """
+    User profile model that extends Django's User model with additional fields
+    and establishes relationships with Riot Games accounts.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    connected_summoners = models.ManyToManyField(Summoner, blank=True, related_name='connected_users')
+    primary_summoner = models.ForeignKey(Summoner, on_delete=models.SET_NULL, null=True, blank=True, related_name='primary_users')
+    
+    # Profile settings
+    display_name = models.CharField(max_length=100, blank=True, help_text="Display name for your profile")
+    bio = models.TextField(max_length=500, blank=True, help_text="Tell others about yourself")
+    
+    # Privacy settings
+    profile_public = models.BooleanField(default=True, help_text="Make your profile visible to other users")
+    show_match_history = models.BooleanField(default=True, help_text="Show your match history on your profile")
+    show_champion_stats = models.BooleanField(default=True, help_text="Show your champion statistics")
+    
+    # Display preferences
+    matches_per_page = models.IntegerField(default=10, help_text="Number of matches to display per page")
+    theme_preference = models.CharField(
+        max_length=20,
+        choices=[
+            ('light', 'Light'),
+            ('dark', 'Dark'),
+            ('auto', 'Auto'),
+        ],
+        default='dark',
+        help_text="Preferred theme for the interface"
+    )
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Profile for {self.user.username}"
+    
+    def get_display_name(self):
+        """Return display name or username if display name is not set"""
+        return self.display_name or self.user.username
+    
+    def get_primary_summoner_name(self):
+        """Return the primary summoner's full name if set"""
+        if self.primary_summoner:
+            return self.primary_summoner.get_full_name()
+        return None
+    
+    def has_connected_summoners(self):
+        """Check if user has any connected summoners"""
+        return self.connected_summoners.exists()
+    
+    def can_view_profile(self, requesting_user=None):
+        """Check if a user can view this profile based on privacy settings"""
+        if not self.profile_public:
+            return requesting_user == self.user
+        return True

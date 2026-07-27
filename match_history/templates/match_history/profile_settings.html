@@ -1,0 +1,173 @@
+{% extends "match_history/base.html" %}
+{% load static %}
+
+{% block title %}Profile Settings - AramGo{% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{% static 'match_history/css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-info">
+            <h1>Profile Settings</h1>
+            <p>Manage your account information and preferences</p>
+        </div>
+        <div class="profile-actions">
+            <a href="{% url 'match_history:profile' %}" class="btn btn-outline">Back to Profile</a>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <form method="post" class="settings-form">
+            {% csrf_token %}
+            
+            <div class="settings-section">
+                <h2>Account Information</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ user_form.first_name.id_for_label }}">First Name:</label>
+                        {{ user_form.first_name }}
+                        {% if user_form.first_name.errors %}
+                            <div class="form-errors">
+                                {% for error in user_form.first_name.errors %}
+                                    <span class="error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ user_form.last_name.id_for_label }}">Last Name:</label>
+                        {{ user_form.last_name }}
+                        {% if user_form.last_name.errors %}
+                            <div class="form-errors">
+                                {% for error in user_form.last_name.errors %}
+                                    <span class="error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ user_form.email.id_for_label }}">Email:</label>
+                    {{ user_form.email }}
+                    {% if user_form.email.errors %}
+                        <div class="form-errors">
+                            {% for error in user_form.email.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h2>Profile Information</h2>
+                
+                <div class="form-group">
+                    <label for="{{ profile_form.display_name.id_for_label }}">Display Name:</label>
+                    {{ profile_form.display_name }}
+                    {% if profile_form.display_name.errors %}
+                        <div class="form-errors">
+                            {% for error in profile_form.display_name.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if profile_form.display_name.help_text %}
+                        <small class="form-help">{{ profile_form.display_name.help_text }}</small>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ profile_form.bio.id_for_label }}">Bio:</label>
+                    {{ profile_form.bio }}
+                    {% if profile_form.bio.errors %}
+                        <div class="form-errors">
+                            {% for error in profile_form.bio.errors %}
+                                <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if profile_form.bio.help_text %}
+                        <small class="form-help">{{ profile_form.bio.help_text }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h2>Privacy Settings</h2>
+                
+                <div class="form-group checkbox-group">
+                    {{ profile_form.profile_public }}
+                    <label for="{{ profile_form.profile_public.id_for_label }}">Make profile public</label>
+                    {% if profile_form.profile_public.help_text %}
+                        <small class="form-help">{{ profile_form.profile_public.help_text }}</small>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    {{ profile_form.show_match_history }}
+                    <label for="{{ profile_form.show_match_history.id_for_label }}">Show match history on profile</label>
+                    {% if profile_form.show_match_history.help_text %}
+                        <small class="form-help">{{ profile_form.show_match_history.help_text }}</small>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    {{ profile_form.show_champion_stats }}
+                    <label for="{{ profile_form.show_champion_stats.id_for_label }}">Show champion statistics</label>
+                    {% if profile_form.show_champion_stats.help_text %}
+                        <small class="form-help">{{ profile_form.show_champion_stats.help_text }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h2>Display Preferences</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ profile_form.matches_per_page.id_for_label }}">Matches per page:</label>
+                        {{ profile_form.matches_per_page }}
+                        {% if profile_form.matches_per_page.errors %}
+                            <div class="form-errors">
+                                {% for error in profile_form.matches_per_page.errors %}
+                                    <span class="error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% if profile_form.matches_per_page.help_text %}
+                            <small class="form-help">{{ profile_form.matches_per_page.help_text }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ profile_form.theme_preference.id_for_label }}">Theme:</label>
+                        {{ profile_form.theme_preference }}
+                        {% if profile_form.theme_preference.errors %}
+                            <div class="form-errors">
+                                {% for error in profile_form.theme_preference.errors %}
+                                    <span class="error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% if profile_form.theme_preference.help_text %}
+                            <small class="form-help">{{ profile_form.theme_preference.help_text }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{% url 'match_history:profile' %}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
