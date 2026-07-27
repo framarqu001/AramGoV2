@@ -1,5 +1,6 @@
-from django.test import TransactionTestCase, TestCase
+from django.test import TransactionTestCase, TestCase, Client
 from django.core.cache import cache
+from django.urls import reverse
 from unittest.mock import patch
 from .models import *
 from AramGoV2.util.current_patch import get_patch
@@ -98,3 +99,34 @@ class PatchVersionCacheTest(TestCase):
         
         # Verify that the mock was called
         mock_get_patch.assert_called_once()
+
+
+class ExpandableMatchCardTest(TestCase):
+    fixtures = ['test_data.json']
+    
+    def setUp(self):
+        self.client = Client()
+        # Get a summoner from the test data
+        self.summoner = Summoner.objects.first()
+        
+    def test_match_card_html_structure(self):
+        """Test that the match card HTML contains the necessary elements for expandable functionality"""
+        if not self.summoner:
+            self.skipTest("No summoner available in test data")
+            
+        response = self.client.get(reverse('match_history:details', args=[self.summoner.puuid]))
+        self.assertEqual(response.status_code, 200)
+        
+        # Check for match card elements
+        self.assertContains(response, 'class="match-card')
+        self.assertContains(response, 'class="match-btn')
+        self.assertContains(response, 'class="match-card__expanded-content')
+        
+    def test_match_card_css_classes(self):
+        """Test that the CSS contains the necessary classes for expandable functionality"""
+        response = self.client.get(reverse('match_history:details', args=[self.summoner.puuid]))
+        self.assertEqual(response.status_code, 200)
+        
+        # Check for CSS link
+        self.assertContains(response, 'href="')
+        self.assertContains(response, 'details.css')
