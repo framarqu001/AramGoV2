@@ -142,7 +142,7 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    height: 120px;
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
@@ -212,8 +212,10 @@ hr {
     letter-spacing: -2px;
     margin-left: 5px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     flex-direction: column;
+    justify-content: center;
+    gap: 2px;
 }
 
 .match-btn {
@@ -333,6 +335,10 @@ hr {
 }
 
 .kda {
+    white-space: nowrap;
+}
+
+.damage.sub-text, .damage-taken.sub-text, .vision-score.sub-text {
     white-space: nowrap;
 }
 
