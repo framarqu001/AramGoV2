@@ -109,8 +109,102 @@
         </div>
     </div>
     <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
-        <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
+        <svg class="drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
+    <!-- Expanded Panel with Team Composition Analysis -->
+    <div class="match-expanded-panel" style="display: none;">
+        <div class="team-composition-section">
+            <div class="section-header">
+                <div class="title">Team Composition Analysis</div>
+            </div>
+            
+            <div class="team-composition-container">
+                <!-- Blue Team Composition -->
+                <div class="team-comp-panel blue-team-comp">
+                    <div class="team-comp-header">Blue Team</div>
+                    
+                    <!-- Role Distribution -->
+                    <div class="role-distribution">
+                        <div class="comp-subtitle">Role Distribution</div>
+                        <div class="role-bars">
+                            {% for role, percentage in main_stats.team_comp.blue_team.roles.items %}
+                            <div class="role-bar-container">
+                                <div class="role-name">{{ role }}</div>
+                                <div class="role-bar-wrapper">
+                                    <div class="role-bar blue" style="width: {{ percentage }}%"></div>
+                                </div>
+                                <div class="role-percentage">{{ percentage }}%</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Damage Composition -->
+                    <div class="damage-composition">
+                        <div class="comp-subtitle">Damage Type</div>
+                        <div class="damage-pie-chart">
+                            <div class="damage-ap" style="width: {{ main_stats.team_comp.blue_team.damage.ap }}%">AP: {{ main_stats.team_comp.blue_team.damage.ap }}%</div>
+                            <div class="damage-ad" style="width: {{ main_stats.team_comp.blue_team.damage.ad }}%">AD: {{ main_stats.team_comp.blue_team.damage.ad }}%</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Team Synergies -->
+                    {% if main_stats.team_comp.blue_team.synergies %}
+                    <div class="team-synergies">
+                        <div class="comp-subtitle">Team Synergies</div>
+                        <ul class="synergy-list">
+                            {% for synergy in main_stats.team_comp.blue_team.synergies %}
+                            <li class="synergy-item">{{ synergy }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Red Team Composition -->
+                <div class="team-comp-panel red-team-comp">
+                    <div class="team-comp-header">Red Team</div>
+                    
+                    <!-- Role Distribution -->
+                    <div class="role-distribution">
+                        <div class="comp-subtitle">Role Distribution</div>
+                        <div class="role-bars">
+                            {% for role, percentage in main_stats.team_comp.red_team.roles.items %}
+                            <div class="role-bar-container">
+                                <div class="role-name">{{ role }}</div>
+                                <div class="role-bar-wrapper">
+                                    <div class="role-bar red" style="width: {{ percentage }}%"></div>
+                                </div>
+                                <div class="role-percentage">{{ percentage }}%</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Damage Composition -->
+                    <div class="damage-composition">
+                        <div class="comp-subtitle">Damage Type</div>
+                        <div class="damage-pie-chart">
+                            <div class="damage-ap" style="width: {{ main_stats.team_comp.red_team.damage.ap }}%">AP: {{ main_stats.team_comp.red_team.damage.ap }}%</div>
+                            <div class="damage-ad" style="width: {{ main_stats.team_comp.red_team.damage.ad }}%">AD: {{ main_stats.team_comp.red_team.damage.ad }}%</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Team Synergies -->
+                    {% if main_stats.team_comp.red_team.synergies %}
+                    <div class="team-synergies">
+                        <div class="comp-subtitle">Team Synergies</div>
+                        <ul class="synergy-list">
+                            {% for synergy in main_stats.team_comp.red_team.synergies %}
+                            <li class="synergy-item">{{ synergy }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endfor %}
