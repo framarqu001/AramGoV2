@@ -1,6 +1,7 @@
 from django.test import TransactionTestCase, TestCase
 from django.core.cache import cache
 from unittest.mock import patch
+import datetime
 from .models import *
 from AramGoV2.util.current_patch import get_patch
 from match_history.apps import MatchHistoryConfig
@@ -95,6 +96,22 @@ class PatchVersionCacheTest(TestCase):
         # Check the timeout value (this requires accessing internal cache details)
         # We can't directly check the timeout, but we can verify the patch is cached
         self.assertIsNotNone(cached_patch)
+        
+        # Verify that the mock was called
+        mock_get_patch.assert_called_once()
+
+    @patch('django.core.cache.cache.set')
+    @patch('AramGoV2.util.current_patch.get_patch')
+    def test_patch_cache_timeout_is_three_weeks(self, mock_get_patch, mock_cache_set):
+        # Mock the get_patch function to return a fixed value
+        mock_get_patch.return_value = '13.15.1'
+        
+        # Initialize the app config which should cache the patch version
+        app_config = MatchHistoryConfig('match_history', None)
+        app_config.ready()
+        
+        # Verify that cache.set was called with the correct timeout (3 weeks = 1814400 seconds)
+        mock_cache_set.assert_called_once_with('PATCH', '13.15.1', timeout=1814400)
         
         # Verify that the mock was called
         mock_get_patch.assert_called_once()
