@@ -112,5 +112,80 @@
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
+    <!-- Expanded Statistics Section -->
+    <div class="expanded-stats {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+        <div class="stats-header">
+            <h3>Match Statistics</h3>
+        </div>
+        <div class="stats-grid">
+            <!-- Combat Stats -->
+            <div class="stats-section">
+                <h4>Combat</h4>
+                <div class="stats-row">
+                    <div class="stat-label">Damage Dealt:</div>
+                    <div class="stat-value">12,345</div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-label">Damage Taken:</div>
+                    <div class="stat-value">10,987</div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-label">Healing:</div>
+                    <div class="stat-value">5,432</div>
+                </div>
+            </div>
+            
+            <!-- Economy Stats -->
+            <div class="stats-section">
+                <h4>Economy</h4>
+                <div class="stats-row">
+                    <div class="stat-label">Gold Earned:</div>
+                    <div class="stat-value">15,678</div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-label">Gold Spent:</div>
+                    <div class="stat-value">14,500</div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-label">CS per Min:</div>
+                    <div class="stat-value">{{main_stats.cs_min}}</div>
+                </div>
+            </div>
+            
+            <!-- Vision Stats -->
+            <div class="stats-section">
+                <h4>Vision</h4>
+                <div class="stats-row">
+                    <div class="stat-label">Vision Score:</div>
+                    <div class="stat-value">24</div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-label">Wards Placed:</div>
+                    <div class="stat-value">5</div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-label">Wards Destroyed:</div>
+                    <div class="stat-value">3</div>
+                </div>
+            </div>
+            
+            <!-- Objective Stats -->
+            <div class="stats-section">
+                <h4>Objectives</h4>
+                <div class="stats-row">
+                    <div class="stat-label">Objective Damage:</div>
+                    <div class="stat-value">3,456</div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-label">Turret Damage:</div>
+                    <div class="stat-value">2,345</div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-label">Objective Participation:</div>
+                    <div class="stat-value">75%</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endfor %}

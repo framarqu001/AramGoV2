@@ -292,6 +292,22 @@
     
 </script>
 
-
+<script>
+    $(document).ready(function() {
+        // Add click event listener for match card expansion
+        $(document).on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            matchCard.toggleClass('expanded');
+            
+            // Rotate the chevron icon when expanded
+            const chevron = $(this).find('.drop');
+            if (matchCard.hasClass('expanded')) {
+                chevron.css('transform', 'rotate(180deg)');
+            } else {
+                chevron.css('transform', 'rotate(0deg)');
+            }
+        });
+    });
+</script>
 
 {% endblock %}
