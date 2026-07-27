@@ -1,6 +1,18 @@
 .content {
    flex-direction: column;
+}
 
+/* Match card expansion variables */
+:root {
+   --card-collapsed-height: 100px;
+   --card-expanded-height: 300px;
+   --card-transition-duration: 0.3s;
+   --card-transition-timing: ease-in-out;
+   --card-win-color: #263358;
+   --card-win-hover-color: #1e2a48;
+   --card-lose-color: #64336a;
+   --card-lose-hover-color: #4e2855;
+   --card-expanded-padding: 15px;
 }
 .loading-wrapper {
     width: 800px;
@@ -141,11 +153,18 @@ hr {
 }
 
 .match-card {
-    /* height: 100px; */
-    height: 100px;
+    height: var(--card-collapsed-height);
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+    transition: height var(--card-transition-duration) var(--card-transition-timing),
+                background-color var(--card-transition-duration) var(--card-transition-timing);
+}
+
+.match-card.expanded {
+    height: var(--card-expanded-height);
 }
 
 .match-card .stat-section.stats-text{
@@ -224,39 +243,63 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    cursor: pointer;
+    transition: background-color var(--card-transition-duration) var(--card-transition-timing);
+}
+
+.match-btn .drop {
+    width: 30px;
+    margin-bottom: 5px;
+    transition: transform var(--card-transition-duration) var(--card-transition-timing);
+}
+
+.match-btn.expanded .drop {
+    transform: rotate(180deg);
 }
 
 
 .match-card.match-win {
-    background-color: #263358; 
-    transition: background-color 0.3s 
+    background-color: var(--card-win-color); 
+    transition: background-color var(--card-transition-duration) var(--card-transition-timing);
 }
 
 .match-card.match-lose {
-    background-color: #64336a; 
-    transition: background-color 0.3s ease; 
+    background-color: var(--card-lose-color); 
+    transition: background-color var(--card-transition-duration) var(--card-transition-timing);
 }
 
 .match-card.match-win:hover {
-    background-color: #1e2a48; 
+    background-color: var(--card-win-hover-color); 
 }
 
 .match-card.match-lose:hover {
-    background-color: #4e2855; 
+    background-color: var(--card-lose-hover-color); 
 }
 
 
 
 .match-btn.match-win {
-    background-color: #4b6bc37e; 
-    transition: background-color 0.3s ease;
+    background-color: rgba(75, 107, 195, 0.5); 
+    transition: background-color var(--card-transition-duration) var(--card-transition-timing);
 }
+
 .match-btn.match-lose {
-    background-color: #f46bf447; 
-    transition: background-color 0.3s ease;
+    background-color: rgba(244, 107, 244, 0.28); 
+    transition: background-color var(--card-transition-duration) var(--card-transition-timing);
 }
 
+.match-btn:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: -2px;
+}
 
+.match-btn.match-win:hover {
+    background-color: rgba(75, 107, 195, 0.7);
+}
+
+.match-btn.match-lose:hover {
+    background-color: rgba(244, 107, 244, 0.4);
+}
 
 .queue.match-lose{
     color:  #f46bf483;
@@ -265,6 +308,60 @@ hr {
 .queue.match-win{
     color:  #4b6bc3;
     font-weight: 800;
+}
+
+
+
+.match-expanded-content {
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    width: 100%;
+    padding: 0 var(--card-expanded-padding);
+    transition: height var(--card-transition-duration) var(--card-transition-timing),
+                opacity var(--card-transition-duration) var(--card-transition-timing);
+}
+
+.match-card.expanded .match-expanded-content {
+    height: calc(var(--card-expanded-height) - var(--card-collapsed-height) - var(--card-expanded-padding));
+    opacity: 1;
+    padding-top: var(--card-expanded-padding);
+    padding-bottom: var(--card-expanded-padding);
+}
+
+/* Match details section styling */
+.match-details-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    height: 100%;
+}
+
+.match-details-section {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.match-details-title {
+    font-family: "Space Mono", monospace;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #e6e6e6;
+}
+
+.match-details-content {
+    font-family: "Mulish", sans-serif;
+    font-size: 12px;
+}
+
+/* Hover effects for interactive elements */
+.match-section-container {
+    transition: opacity var(--card-transition-duration) var(--card-transition-timing);
+}
+
+.match-card.expanded .match-section-container {
+    opacity: 0.9;
 }
 
 .participant-section {
