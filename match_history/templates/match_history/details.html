@@ -160,6 +160,9 @@
             console.log('No matches to load.');
             return;
         }
+        
+        // Initialize expand/collapse functionality for initial cards
+        initMatchCardExpansion();
 
         $(window).scroll(function() {
             if (!loading && !noMorePages && $(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
@@ -181,6 +184,8 @@
                         } else {
                             $('#match-list').append(data);
                             page += 1;
+                            // Initialize expand/collapse functionality for newly loaded cards
+                            initMatchCardExpansion();
                         }
                         loading = false;
                     },
@@ -191,6 +196,15 @@
                 });
             }
         });
+        
+        // Function to initialize match card expansion functionality
+        function initMatchCardExpansion() {
+            $('.match-btn').off('click').on('click', function() {
+                const matchCard = $(this).closest('.match-card');
+                matchCard.toggleClass('expanded');
+                $(this).toggleClass('expanded');
+            });
+        }
     });
 </script>
 <script>
