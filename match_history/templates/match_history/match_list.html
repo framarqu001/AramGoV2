@@ -108,8 +108,29 @@
             </div>
         </div>
     </div>
+    <div class="match-details {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
+        <div class="details-content">
+            <div class="details-section">
+                <h3>Match Details</h3>
+                <div class="details-stats">
+                    <div class="detail-item">
+                        <span class="detail-label">Gold Earned:</span>
+                        <span class="detail-value">{{main_participant.gold_earned}}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Damage Dealt:</span>
+                        <span class="detail-value">{{main_participant.damage_dealt}}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Damage Taken:</span>
+                        <span class="detail-value">{{main_participant.damage_taken}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
-        <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
+        <svg class="drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
 
 </div>
