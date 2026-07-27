@@ -146,6 +146,9 @@ hr {
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
+    flex-wrap: wrap;
+    overflow: hidden;
+    transition: height 0.3s ease;
 }
 
 .match-card .stat-section.stats-text{
@@ -224,6 +227,15 @@ hr {
     width: 40px;
     border: 0;
     justify-self: flex-end;
+    cursor: pointer;
+}
+
+.match-btn .drop {
+    transition: transform 0.3s ease;
+}
+
+.match-btn.expanded .drop {
+    transform: rotate(180deg);
 }
 
 
@@ -486,4 +498,92 @@ hr {
 }
 .death-color {
     color: #ff4e50
+}
+
+/* Expanded match card styles */
+.match-details-expanded {
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.match-card.expanded {
+    height: auto;
+}
+
+.match-card.expanded .match-details-expanded {
+    max-height: 300px;
+    padding: 15px 10px;
+}
+
+.match-details-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-around;
+}
+
+.match-details-section {
+    flex: 1;
+    min-width: 250px;
+}
+
+.match-details-section h4 {
+    font-family: "Mulish", sans-serif;
+    font-size: 16px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #e6e6e6;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 5px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #87888a;
+    margin-bottom: 2px;
+}
+
+.stat-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e6e6e6;
+}
+
+/* Responsive styles for match cards */
+@media screen and (max-width: 768px) {
+    .match-details-container {
+        flex-direction: column;
+    }
+    
+    .match-details-section {
+        min-width: 100%;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .match-card.expanded .match-details-expanded {
+        padding: 10px 5px;
+    }
 }
