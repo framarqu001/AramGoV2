@@ -111,6 +111,193 @@
     <button class="match-btn {% if main_participant.win%}match-win{% else %}match-lose{% endif %}">
         <svg class = "drop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-down</title><path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="white" /></svg>
     </button>
+    
+    <!-- Expanded Match Statistics Section -->
+    <div class="expanded-stats" style="display: none;">
+        <div class="expanded-stats-container">
+            <div class="stats-section">
+                <h3>Damage Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Damage Dealt:</span>
+                        <span class="stat-value">{{ main_stats.damage.total_dealt|default:"0" }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Physical Damage:</span>
+                        <span class="stat-value">{{ main_stats.damage.physical_dealt|default:"0" }} ({{ main_stats.damage.physical_percent|default:"0%" }})</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Magic Damage:</span>
+                        <span class="stat-value">{{ main_stats.damage.magic_dealt|default:"0" }} ({{ main_stats.damage.magic_percent|default:"0%" }})</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">True Damage:</span>
+                        <span class="stat-value">{{ main_stats.damage.true_dealt|default:"0" }} ({{ main_stats.damage.true_percent|default:"0%" }})</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Damage Taken:</span>
+                        <span class="stat-value">{{ main_stats.damage.total_taken|default:"0" }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-section">
+                <h3>Gold Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Gold Earned:</span>
+                        <span class="stat-value">{{ main_stats.gold.earned|default:"0" }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Gold Spent:</span>
+                        <span class="stat-value">{{ main_stats.gold.spent|default:"0" }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Gold Efficiency:</span>
+                        <span class="stat-value">{{ main_stats.gold.efficiency|default:"0%" }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-section">
+                <h3>Vision Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Vision Score:</span>
+                        <span class="stat-value">{{ main_stats.vision.score|default:"0" }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Wards Placed:</span>
+                        <span class="stat-value">{{ main_stats.vision.wards_placed|default:"0" }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Wards Killed:</span>
+                        <span class="stat-value">{{ main_stats.vision.wards_killed|default:"0" }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-section">
+                <h3>Team Objectives</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Towers:</span>
+                        <span class="stat-value">{{ main_stats.objectives.towers|default:"0" }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Dragons:</span>
+                        <span class="stat-value">{{ main_stats.objectives.dragons|default:"0" }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Barons:</span>
+                        <span class="stat-value">{{ main_stats.objectives.barons|default:"0" }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Heralds:</span>
+                        <span class="stat-value">{{ main_stats.objectives.heralds|default:"0" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 {% endfor %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add click event listeners to all match buttons
+        const matchButtons = document.querySelectorAll('.match-btn');
+        matchButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Find the expanded stats section for this match
+                const matchCard = this.closest('.match-card');
+                const expandedStats = matchCard.querySelector('.expanded-stats');
+                
+                // Toggle the expanded stats section
+                if (expandedStats.style.display === 'none' || !expandedStats.style.display) {
+                    expandedStats.style.display = 'block';
+                    // Rotate the chevron icon
+                    this.querySelector('.drop').style.transform = 'rotate(180deg)';
+                } else {
+                    expandedStats.style.display = 'none';
+                    // Reset the chevron icon
+                    this.querySelector('.drop').style.transform = 'rotate(0deg)';
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .expanded-stats {
+        padding: 15px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        margin-top: 10px;
+    }
+    
+    .expanded-stats-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    
+    .stats-section {
+        flex: 1 1 45%;
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: rgba(255, 255, 255, 0.7);
+        border-radius: 5px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stats-section h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 16px;
+        color: #333;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+    }
+    
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+    }
+    
+    .stat-label {
+        font-weight: 500;
+        color: #555;
+    }
+    
+    .stat-value {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .match-btn .drop {
+        transition: transform 0.3s ease;
+    }
+    
+    @media (max-width: 768px) {
+        .expanded-stats-container {
+            flex-direction: column;
+        }
+        
+        .stats-section {
+            flex: 1 1 100%;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
