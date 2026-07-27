@@ -292,6 +292,22 @@
     
 </script>
 
+<script>
+    $(document).ready(function() {
+        // Match card expand/collapse functionality
+        $(document).on('click', '.match-btn', function() {
+            const matchCard = $(this).closest('.match-card');
+            matchCard.toggleClass('expanded');
+            
+            // Smooth scroll to center the expanded card if it's expanded
+            if (matchCard.hasClass('expanded')) {
+                $('html, body').animate({
+                    scrollTop: matchCard.offset().top - ($(window).height() / 3)
+                }, 300);
+            }
+        });
+    });
+</script>
 
 
 {% endblock %}

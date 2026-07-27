@@ -142,10 +142,132 @@ hr {
 
 .match-card {
     /* height: 100px; */
-    height: 100px;
+    min-height: 100px;
     display: flex;
     font-weight: 1000;
     border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+/* Expanded match section styles */
+.match-expanded-section {
+    display: none;
+    width: 100%;
+    padding: 15px;
+    overflow: hidden;
+}
+
+.match-card.expanded .match-expanded-section {
+    display: block;
+}
+
+.match-card.expanded {
+    height: auto;
+}
+
+.match-card.expanded .match-btn .drop {
+    transform: rotate(180deg);
+}
+
+.expanded-teams-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.expanded-team {
+    flex: 1;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.blue-team-details {
+    background-color: rgba(75, 107, 195, 0.1);
+}
+
+.red-team-details {
+    background-color: rgba(244, 107, 244, 0.1);
+}
+
+.expanded-team-header h3 {
+    font-size: 16px;
+    margin: 0 0 10px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.expanded-participants {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.expanded-participant {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr 1fr;
+    align-items: center;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.expanded-participant.highlight-row {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.participant-champion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.participant-champ-img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.participant-name {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+
+.participant-stats {
+    font-size: 13px;
+}
+
+.participant-item-list {
+    display: flex;
+    gap: 2px;
+}
+
+.participant-item {
+    width: 20px;
+    height: 20px;
+    overflow: hidden;
+}
+
+.item-img {
+    width: 20px;
+    height: 20px;
+}
+
+.participant-spells {
+    display: flex;
+    gap: 2px;
+}
+
+.participant-spell {
+    width: 20px;
+    height: 20px;
+    overflow: hidden;
+}
+
+.spell-img {
+    width: 20px;
+    height: 20px;
 }
 
 .match-card .stat-section.stats-text{
