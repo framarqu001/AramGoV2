@@ -290,6 +290,76 @@
         }
     });
     
+<script>
+    $(document).ready(function() {
+        // Match card expansion functionality
+        $(document).on('click', '.match-btn', function(e) {
+            e.preventDefault();
+            const matchCard = $(this).closest('.match-card');
+            const isExpanded = matchCard.hasClass('match-card--expanded');
+            
+            // Toggle expanded class
+            matchCard.toggleClass('match-card--expanded');
+            
+            // Update aria-label based on state
+            $(this).attr('aria-label', isExpanded ? 'Expand match details' : 'Collapse match details');
+            
+            // If this is the first time expanding this card, add the expanded stats container
+            if (matchCard.hasClass('match-card--expanded') && !matchCard.find('.expanded-stats-container').length) {
+                const participant = matchCard.data('participant');
+                const matchSection = matchCard.find('.match-section-container');
+                
+                // Create expanded stats container with placeholder data
+                // In a real implementation, this data would come from the server or be stored in data attributes
+                const expandedStats = `
+                    <div class="expanded-stats-container">
+                        <div class="expanded-stats">
+                            <div class="expanded-stat-group">
+                                <div class="expanded-stat-title">Damage Dealt</div>
+                                <div class="expanded-stat-value">24,567</div>
+                            </div>
+                            <div class="expanded-stat-group">
+                                <div class="expanded-stat-title">Damage Taken</div>
+                                <div class="expanded-stat-value">18,932</div>
+                            </div>
+                            <div class="expanded-stat-group">
+                                <div class="expanded-stat-title">Healing</div>
+                                <div class="expanded-stat-value">5,421</div>
+                            </div>
+                            <div class="expanded-stat-group">
+                                <div class="expanded-stat-title">Gold Earned</div>
+                                <div class="expanded-stat-value">12,450</div>
+                            </div>
+                            <div class="expanded-stat-group">
+                                <div class="expanded-stat-title">Vision Score</div>
+                                <div class="expanded-stat-value">14</div>
+                            </div>
+                            <div class="expanded-stat-group">
+                                <div class="expanded-stat-title">CC Score</div>
+                                <div class="expanded-stat-value">8</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                matchSection.append(expandedStats);
+            }
+        });
+        
+        // Add keyboard support for match buttons
+        $(document).on('keydown', '.match-btn', function(e) {
+            // Handle Enter or Space key
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                $(this).click();
+            }
+        });
+        
+        // Ensure dynamically loaded match cards also have the expansion functionality
+        $(document).ajaxComplete(function() {
+            // The event handlers are already delegated to the document, so no need to rebind them
+        });
+    });
 </script>
 
 
