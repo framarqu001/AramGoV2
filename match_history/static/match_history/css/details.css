@@ -216,6 +216,17 @@ hr {
     flex-direction: column;
 }
 
+.detailed-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.damage, .gold, .vision {
+    margin-bottom: 2px;
+}
+
 .match-btn {
     display: flex;
     flex-direction: column;
