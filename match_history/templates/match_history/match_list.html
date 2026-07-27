@@ -87,7 +87,11 @@
                             <img class = "champ-img" src="{{participant.champion.get_url}}" alt="">
                         </div>
                         <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
-                            <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
+                            {% if participant.summoner.get_url %}
+                                <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
+                            {% else %}
+                                {{participant.game_name}}
+                            {% endif %}
                         </div>
 
                     </div>
@@ -100,7 +104,11 @@
                             <img class = "champ-img" src="{{participant.champion.get_url}}" alt="">
                         </div>
                         <div class="game-name {% if participant == main_participant %}highlight{% endif %}">
-                            <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
+                            {% if participant.summoner.get_url %}
+                                <a href="{{participant.summoner.get_url}}"> {{participant.game_name}}</a>
+                            {% else %}
+                                {{participant.game_name}}
+                            {% endif %}
                         </div>
 
                     </div>

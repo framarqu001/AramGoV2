@@ -75,6 +75,45 @@ class MatchParticipantTest(TestCase):
     ## AramGoV2 all items are retriavable
 
 
+class SummonerTest(TestCase):
+    def setUp(self):
+        self.summoner_complete = Summoner.objects.create(
+            puuid='complete-summoner-id',
+            game_name='CompleteSummoner',
+            tag_line='NA1',
+            summoner_name='CompleteSummoner',
+            summoner_level=30
+        )
+        self.summoner_no_game_name = Summoner.objects.create(
+            puuid='no-game-name-id',
+            tag_line='NA1',
+            summoner_name='NoGameName',
+            summoner_level=30
+        )
+        self.summoner_no_tag_line = Summoner.objects.create(
+            puuid='no-tag-line-id',
+            game_name='NoTagLine',
+            summoner_name='NoTagLine',
+            summoner_level=30
+        )
+
+    def test_get_url_with_complete_data(self):
+        """Test that get_url returns a valid URL when both game_name and tag_line are present"""
+        url = self.summoner_complete.get_url()
+        self.assertIsNotNone(url)
+        self.assertTrue(isinstance(url, str))
+
+    def test_get_url_with_missing_game_name(self):
+        """Test that get_url returns None when game_name is missing"""
+        url = self.summoner_no_game_name.get_url()
+        self.assertIsNone(url)
+
+    def test_get_url_with_missing_tag_line(self):
+        """Test that get_url returns None when tag_line is missing"""
+        url = self.summoner_no_tag_line.get_url()
+        self.assertIsNone(url)
+
+
 class PatchVersionCacheTest(TestCase):
     @patch('AramGoV2.util.current_patch.get_patch')
     def test_patch_version_cache_timeout(self, mock_get_patch):
